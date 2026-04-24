@@ -229,22 +229,9 @@ function OperatorReport({ report, setReport }) {
 
     <section className="card">
       <h2>8. Distinta verbali</h2>
-      <p className="muted">Modulo separato collegato all'attività sanzionatoria. Puoi inserire tanti verbali quanti ne servono e generare un PDF dedicato.</p>
-      {(report.distintaVerbali || []).length === 0 && <p className="muted">Nessun verbale inserito in distinta.</p>}
-      {(report.distintaVerbali || []).map((verbale, idx) => <div className="rowCard" key={idx}>
-        <div className="grid three">
-          <Field label="Numero verbale"><Input value={verbale.numero} onChange={v => updateArray('distintaVerbali', idx, { numero: v })} /></Field>
-          <Field label="Tipo violazione"><Input value={verbale.tipo} onChange={v => updateArray('distintaVerbali', idx, { tipo: v })} placeholder="es. CdS, regolamento, annonaria..." /></Field>
-          <Field label="Norma violata"><Input value={verbale.norma} onChange={v => updateArray('distintaVerbali', idx, { norma: v })} placeholder="es. art. 158 C.d.S." /></Field>
-        </div>
-        <div className="grid three">
-          <Field label="Importo"><Input value={verbale.importo} onChange={v => updateArray('distintaVerbali', idx, { importo: v })} placeholder="es. 42,00 €" /></Field>
-          <Field label="Operatore verbalizzante"><Input value={verbale.operatore} onChange={v => updateArray('distintaVerbali', idx, { operatore: v })} /></Field>
-          <Field label="Note"><Input value={verbale.note} onChange={v => updateArray('distintaVerbali', idx, { note: v })} /></Field>
-        </div>
-        <button className="ghost" onClick={() => removeArray('distintaVerbali', idx)}>Rimuovi verbale</button>
-      </div>)}
-      <div className="actions"><button onClick={() => addArray('distintaVerbali', emptyVerbaleDistinta())}>+ Aggiungi verbale</button><button onClick={() => buildVerbaliPdf(report).save(`distinta-verbali-${sanitizeFileName(report.data)}-${sanitizeFileName(turnoLabel(report))}.pdf`)}>Scarica PDF distinta verbali</button></div>
+      <p className="muted">La distinta viene generata automaticamente dai numeri inseriti nella sezione “Violazioni e provvedimenti”. Non serve compilare i singoli verbali uno per uno.</p>
+      <div className="totalBox">Totale distinta: <strong>{totaleViolazioni}</strong></div>
+      <div className="actions"><button onClick={() => buildVerbaliPdf(report).save(`distinta-verbali-${sanitizeFileName(report.data)}-${sanitizeFileName(turnoLabel(report))}.pdf`)}>Scarica PDF distinta verbali</button></div>
     </section>
 
     <section className="card">
@@ -255,10 +242,6 @@ function OperatorReport({ report, setReport }) {
       <div className="actions"><button onClick={generatePdf}>Scarica PDF</button><button onClick={exportJson}>Scarica file dati JSON</button><button className="primary" onClick={sendMail}>Invia email precompilata</button></div>
     </section>
 
-    <section className="card preview">
-      <h2>Anteprima report</h2>
-      <pre>{text}</pre>
-    </section>
   </>;
 }
 
@@ -351,10 +334,6 @@ function Dashboard({ reports, setReports }) {
       <div className="actions"><button onClick={generateCommanderPdf}>Genera PDF aggregato</button><button onClick={() => exportExcelAvanzato(reports, aggregate, commanderNotes)}>Esporta Excel avanzato</button><button onClick={exportCsv}>Esporta tabella CSV</button></div>
     </section>
 
-    <section className="card preview">
-      <h2>Anteprima report aggregato</h2>
-      <pre>{text}</pre>
-    </section>
   </>;
 }
 
@@ -362,7 +341,6 @@ function OfficialReport({ reports, setReports, official, setOfficial }) {
   const aggregate = useMemo(() => aggregateReports(reports), [reports]);
   const autoSintesi = useMemo(() => officialSynthesis(aggregate, reports), [aggregate, reports]);
   const autoEventi = useMemo(() => officialEventsText(reports), [reports]);
-  const preview = useMemo(() => officialReportText(aggregate, reports, official, autoSintesi, autoEventi), [aggregate, reports, official, autoSintesi, autoEventi]);
   const update = (patch) => setOfficial(prev => ({ ...prev, ...patch }));
   const updateAttivita = (idx, patch) => setOfficial(prev => ({ ...prev, attivitaIspettive: prev.attivitaIspettive.map((x, i) => i === idx ? { ...x, ...patch } : x) }));
   const addAttivita = () => setOfficial(prev => ({ ...prev, attivitaIspettive: [...prev.attivitaIspettive, emptyAttivitaIspettiva()] }));
@@ -402,7 +380,6 @@ function OfficialReport({ reports, setReports, official, setOfficial }) {
     <section className="card"><h2>4. Eventi degni di rilievo</h2><p className="muted">Eventi rilevanti individuati automaticamente: sinistri con feriti, TSO/ASO, interventi con parole chiave critiche o lunga durata.</p><pre className="miniPreview">{autoEventi || 'Nessun evento rilevante automatico rilevato.'}</pre></section>
     <section className="card"><h2>5. Anomalie e attività ispettive</h2><Field label="Anomalie riscontrate durante il turno"><Textarea value={official.anomalie} onChange={v => update({ anomalie: v })} /></Field><h3>Attività ispettive</h3>{official.attivitaIspettive.map((a, idx) => <div className="rowCard" key={idx}><div className="grid four"><Field label="Tipo attività"><Input value={a.tipo} onChange={v => updateAttivita(idx, { tipo: v })} placeholder="es. annonaria, ambiente..." /></Field><Field label="Reparto / pattuglia"><Input value={a.reparto} onChange={v => updateAttivita(idx, { reparto: v })} /></Field><Field label="Luogo"><Input value={a.luogo} onChange={v => updateAttivita(idx, { luogo: v })} /></Field><Field label="Orario"><Input value={a.orario} onChange={v => updateAttivita(idx, { orario: v })} /></Field></div><div className="grid three"><Field label="Esito"><Input value={a.esito} onChange={v => updateAttivita(idx, { esito: v })} /></Field><Field label="Violazioni collegate"><Input value={a.violazioni} onChange={v => updateAttivita(idx, { violazioni: v })} /></Field><Field label="Note"><Input value={a.note} onChange={v => updateAttivita(idx, { note: v })} /></Field></div><button className="ghost" onClick={() => removeAttivita(idx)}>Rimuovi attività</button></div>)}<button onClick={addAttivita}>+ Aggiungi attività ispettiva</button></section>
     <section className="card"><h2>6. Esiti e comunicazioni</h2><Field label="Esiti"><Textarea value={official.esiti} onChange={v => update({ esiti: v })} /></Field><div className="grid two"><Field label="Comunicazione all'E.Q. di turno"><Textarea value={official.comunicazioneEq} onChange={v => update({ comunicazioneEq: v })} /></Field><Field label="Nota per il Comandante"><Textarea value={official.notaComandante} onChange={v => update({ notaComandante: v })} /></Field></div><div className="actions"><button className="primary" onClick={generateOfficialPdf}>Genera PDF Report Ufficiale</button></div></section>
-    <section className="card preview"><h2>Anteprima report ufficiale</h2><pre>{preview}</pre></section>
   </>;
 }
 
@@ -439,7 +416,7 @@ function addHeader(doc, title, subtitle = '') {
   doc.setFontSize(7.8);
   doc.setTextColor(40, 48, 60);
   doc.text('Via Marsala 13 | 20900 Monza', 145, 11);
-  doc.text('Tel. 039.2816313', 145, 17);
+  doc.text('Tel. 039 28161', 145, 17);
   doc.text('polizialocale@comune.monza.it', 145, 23);
   doc.setDrawColor(12, 47, 97);
   doc.setLineWidth(0.6);
@@ -450,11 +427,6 @@ function addHeader(doc, title, subtitle = '') {
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(12);
   doc.text(title, 75, 44.5, { align: 'center' });
-  doc.setDrawColor(180, 196, 224);
-  doc.setLineWidth(1.2);
-  doc.line(141, 39, 136, 47);
-  doc.line(145, 39, 140, 47);
-  doc.line(149, 39, 144, 47);
   if (subtitle) {
     doc.setTextColor(55, 65, 81);
     doc.setFont('helvetica', 'normal');
@@ -476,7 +448,7 @@ function addFooter(doc) {
     doc.setTextColor(12, 47, 97);
     doc.text('Settore Polizia Locale, Protezione Civile', 12, 289);
     doc.text('Via Marsala 13 | 20900 Monza', 12, 293);
-    doc.text('Tel. 039.2816313', 86, 291);
+    doc.text('Tel. 039 28161', 86, 291);
     doc.text('polizialocale@comune.monza.it', 127, 291);
     doc.setFillColor(12, 47, 97);
     doc.roundedRect(178, 287, 20, 7, 1.2, 1.2, 'F');
@@ -652,24 +624,34 @@ function buildVerbaliPdf(report) {
   const title = 'DISTINTA VERBALI DEL TURNO';
   const subtitle = `${report.data} | Turno ${turnoLabel(report)} | ${repartoLabel(report)}`;
   const doc = makePdf(title, subtitle);
+  const c = report.counters || emptyCounters();
   let y = 54;
+
   y = section(doc, 'Dati generali', y, title, subtitle);
   y = kvGrid(doc, [
     { label: 'Data servizio', value: report.data },
     { label: 'Turno', value: turnoLabel(report) },
+    { label: 'Tipologia orario', value: report.orarioTipo || '-' },
     { label: 'Reparto / servizio', value: repartoLabel(report) },
     { label: 'Operatori', value: operatorNames(report).join(', ') || '-' },
   ], y, 2, title, subtitle) + 2;
-  y = section(doc, 'Elenco verbali', y, title, subtitle);
-  const rows = (report.distintaVerbali || [])
-    .filter(v => v.numero || v.tipo || v.norma || v.importo || v.operatore || v.note)
-    .map((v, idx) => [idx + 1, v.numero || '-', v.tipo || '-', v.norma || '-', v.importo || '-', v.operatore || '-', v.note || '-']);
-  y = simpleTable(doc, ['#', 'N. verbale', 'Tipo', 'Norma violata', 'Importo', 'Operatore', 'Note'], rows.length ? rows : [['-', 'Nessun verbale inserito', '-', '-', '-', '-', '-']], y, [10, 30, 30, 38, 25, 32, 21], title, subtitle);
-  y = section(doc, 'Riepilogo attività sanzionatoria', y, title, subtitle);
-  const c = report.counters || emptyCounters();
-  y = simpleTable(doc, ['Voce', 'N.'], [
-    ['Preavvisi CdS', c.preavvisiCds], ['VdC CdS', c.vdcCds], ['Regolamento Polizia', c.regPolizia], ['Regolamento Edilizio', c.regEdilizio], ['Regolamento Benessere Animali', c.regBenessereAnimali], ['Annonaria / commercio', c.annonaria], [`Altre norme ${c.altreNormeDescrizione || ''}`, c.altreNorme], ['Fermi', c.fermi], ['Sequestri', c.sequestri], ['Totale', getTotaleViolazioni(report)]
+
+  y = section(doc, 'Riepilogo smart attività sanzionatoria', y, title, subtitle);
+  y = simpleTable(doc, ['Tipologia', 'N.'], [
+    ['Preavvisi CdS', c.preavvisiCds],
+    ['Verbali CdS', c.vdcCds],
+    ['Verbali Regolamento Polizia', c.regPolizia],
+    ['Verbali Regolamento Edilizio', c.regEdilizio],
+    ['Verbali Regolamento Benessere Animali', c.regBenessereAnimali],
+    ['Verbali Annonaria / commercio', c.annonaria],
+    [`Altre violazioni ${c.altreNormeDescrizione || ''}`, c.altreNorme],
+    ['Fermi', c.fermi],
+    ['Sequestri', c.sequestri],
+    ['TOTALE', getTotaleViolazioni(report)]
   ], y, [150, 36], title, subtitle);
+
+  y = section(doc, 'Note', y, title, subtitle);
+  y = paragraph(doc, 'La presente distinta è generata automaticamente dai dati inseriti nella sezione “Violazioni e provvedimenti” del report di servizio.', y, title, subtitle);
   addFooter(doc);
   return doc;
 }
@@ -721,10 +703,6 @@ function buildServicePdf(report) {
   y = section(doc, 'Documenti ritirati', y, title, subtitle);
   const docRows = (report.documentiRitirati || []).filter(d => d.tipo || d.quantita || d.note).map(d => [d.tipo || '-', d.quantita || '-', d.note || '-']);
   y = simpleTable(doc, ['Tipo documento', 'Quantità', 'Note'], docRows.length ? docRows : [['Nessun documento ritirato', '-', '-']], y, [70, 28, 88], title, subtitle);
-
-  y = section(doc, 'Distinta verbali', y, title, subtitle);
-  const verbRows = (report.distintaVerbali || []).filter(v => v.numero || v.tipo || v.norma || v.importo || v.operatore || v.note).map(v => [v.numero || '-', v.tipo || '-', v.norma || '-', v.importo || '-', v.operatore || '-', v.note || '-']);
-  y = simpleTable(doc, ['N. verbale', 'Tipo', 'Norma', 'Importo', 'Operatore', 'Note'], verbRows.length ? verbRows : [['Nessun verbale in distinta', '-', '-', '-', '-', '-']], y, [28, 35, 34, 25, 34, 30], title, subtitle);
 
   y = section(doc, 'Note per UDT / Ufficiale di coordinamento', y, title, subtitle);
   y = paragraph(doc, report.noteUdt || '-', y, title, subtitle);
@@ -913,7 +891,7 @@ function reportText(report) {
     return `${idx + 1}. ${i.tipo} | ${i.origine}${i.origine === 'Altro' ? ': ' + (i.origineAltro || '-') : ''}\n   Orario: ${i.oraInizio || '-'} - ${i.oraFine || '-'} | Luogo: ${i.luogo || '-'}\n   Descrizione: ${i.descrizione || '-'}\n   Esito: ${i.esito || '-'}\n${extraDetails(i)}${scuole ? '\n' + scuole : ''}\n   Note: ${i.note || '-'}`;
   }).join('\n\n') || '- Nessun intervento inserito';
   const c = report.counters || emptyCounters();
-  return `REPORT DI SERVIZIO - POLIZIA LOCALE\n\nDATA: ${report.data}\nTURNO: ${turnoLabel(report)} (${report.orarioTipo})\nREPARTO: ${repartoLabel(report)}\n\nOPERATORI\n${ops}\n\nVEICOLI\n${mezzi || '- Non indicati'}\nTotale km percorsi: ${getKmTotali(report)}\n\nINTERVENTI EFFETTUATI\n${interventi}\n\nATTI REDATTI\nRelazioni: ${c.relazioni}\nAnnotazioni: ${c.annotazioni}\nVerbali CdS: ${c.verbaliCds}\nVerbali regolamenti: ${c.verbaliRegolamenti}\nSequestri amministrativi: ${c.sequestriAmministrativi}\nFermi amministrativi: ${c.fermiAmministrativi}\nSequestri penali: ${c.sequestriPenali}\nCNR: ${c.cnr}\nAltri atti: ${c.altriAttiNumero} ${c.altriAttiDescrizione || ''}\n\nVIOLAZIONI / PROVVEDIMENTI\nPreavvisi CdS: ${c.preavvisiCds}\nVdC CdS: ${c.vdcCds}\nRegolamento Polizia: ${c.regPolizia}\nRegolamento Edilizio: ${c.regEdilizio}\nRegolamento Benessere Animali: ${c.regBenessereAnimali}\nAnnonaria / commercio: ${c.annonaria}\nAltre norme: ${c.altreNorme} ${c.altreNormeDescrizione || ''}\nFermi: ${c.fermi}\nSequestri: ${c.sequestri}\nTOTALE: ${getTotaleViolazioni(report)}\n\nNOTE PER UDT / UFFICIALE DI COORDINAMENTO\n${report.noteUdt || '-'}\n\nDICHIARAZIONE\nGli operatori dichiarano che quanto riportato corrisponde fedelmente alle attività effettivamente svolte e riscontrate durante il turno di servizio.\nConferma dichiarazione: ${report.dichiarazione ? 'SI' : 'NO'}\n`;
+  return `REPORT DI SERVIZIO - POLIZIA LOCALE\n\nDATA: ${report.data}\nTURNO: ${turnoLabel(report)} (${report.orarioTipo})\nREPARTO: ${repartoLabel(report)}\n\nOPERATORI\n${ops}\n\nVEICOLI\n${mezzi || '- Non indicati'}\nTotale km percorsi: ${getKmTotali(report)}\n\nINTERVENTI EFFETTUATI\n${interventi}\n\nATTI REDATTI\nRelazioni: ${c.relazioni}\nAnnotazioni: ${c.annotazioni}\nSequestri amministrativi: ${c.sequestriAmministrativi}\nFermi amministrativi: ${c.fermiAmministrativi}\nSequestri penali: ${c.sequestriPenali}\nCNR: ${c.cnr}\nAltri atti: ${c.altriAttiNumero} ${c.altriAttiDescrizione || ''}\n\nVIOLAZIONI / PROVVEDIMENTI\nPreavvisi CdS: ${c.preavvisiCds}\nVdC CdS: ${c.vdcCds}\nRegolamento Polizia: ${c.regPolizia}\nRegolamento Edilizio: ${c.regEdilizio}\nRegolamento Benessere Animali: ${c.regBenessereAnimali}\nAnnonaria / commercio: ${c.annonaria}\nAltre norme: ${c.altreNorme} ${c.altreNormeDescrizione || ''}\nFermi: ${c.fermi}\nSequestri: ${c.sequestri}\nTOTALE: ${getTotaleViolazioni(report)}\n\nNOTE PER UDT / UFFICIALE DI COORDINAMENTO\n${report.noteUdt || '-'}\n\nDICHIARAZIONE\nGli operatori dichiarano che quanto riportato corrisponde fedelmente alle attività effettivamente svolte e riscontrate durante il turno di servizio.\nConferma dichiarazione: ${report.dichiarazione ? 'SI' : 'NO'}\n`;
 }
 
 function aggregateReports(reports) {
