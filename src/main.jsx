@@ -26,8 +26,10 @@ const TIPI_INTERVENTO = [
 const ORIGINI = ['Centrale Operativa', 'UDT', 'Di iniziativa', 'Altro'];
 
 const emptyOperatore = () => ({ nome: '', matricola: '', qualifica: '' });
-const emptyVeicolo = () => ({ sigla: '', kmInizio: '', kmFine: '' });
+const emptyVeicolo = () => ({ sigla: '', kmInizio: '', kmFine: '', carburante: 'No', importoCarburante: '', oraPrelievoCard: '', oraRestituzioneCard: '', anomaliaVeicolo: '' });
 const emptyScuola = () => ({ nome: '', momento: '', orario: '', criticita: '' });
+const emptyDocumentoRitirato = () => ({ tipo: '', quantita: '', note: '' });
+const emptyVerbaleDistinta = () => ({ numero: '', tipo: '', norma: '', importo: '', operatore: '', note: '' });
 const emptyIntervento = () => ({
   tipo: 'Sinistro stradale', origine: 'Centrale Operativa', origineAltro: '', oraInizio: '', oraFine: '', luogo: '', descrizione: '', esito: '', note: '',
   conFeriti: 'Senza feriti', veicoliCoinvolti: '', rilievi: 'No', personeControllate: '', veicoliControllati: '', verbaliElevati: '', fermiSequestri: '',
@@ -71,7 +73,7 @@ function baseReport() {
     data: today(), turno: '06.00-13.00', altroTurnoInizio: '', altroTurnoFine: '', orarioTipo: 'Ordinario',
     reparto: 'Radiomobile', altroServizio: '', destinatario: '',
     operatori: [emptyOperatore(), emptyOperatore()], veicoli: [emptyVeicolo()], interventi: [emptyIntervento()],
-    counters: emptyCounters(), noteUdt: '', dichiarazione: false, createdAt: new Date().toISOString()
+    counters: emptyCounters(), documentiRitirati: [], distintaVerbali: [], noteUdt: '', dichiarazione: false, createdAt: new Date().toISOString()
   };
 }
 
@@ -168,7 +170,22 @@ function OperatorReport({ report, setReport }) {
 
     <section className="card">
       <h2>3. Veicoli e chilometraggio</h2>
-      {report.veicoli.map((v, idx) => <div className="rowCard" key={idx}><div className="grid four"><Field label="Veicolo / sigla"><Input value={v.sigla} onChange={x => updateArray('veicoli', idx, { sigla: x })} /></Field><Field label="Km inizio"><Input type="number" value={v.kmInizio} onChange={x => updateArray('veicoli', idx, { kmInizio: x })} /></Field><Field label="Km fine"><Input type="number" value={v.kmFine} onChange={x => updateArray('veicoli', idx, { kmFine: x })} /></Field><Field label="Km percorsi"><input readOnly value={km(v)} /></Field></div><button className="ghost" onClick={() => removeArray('veicoli', idx)}>Rimuovi</button></div>)}
+      {report.veicoli.map((v, idx) => <div className="rowCard" key={idx}>
+        <div className="grid four">
+          <Field label="Veicolo / sigla"><Input value={v.sigla} onChange={x => updateArray('veicoli', idx, { sigla: x })} /></Field>
+          <Field label="Km inizio"><Input type="number" value={v.kmInizio} onChange={x => updateArray('veicoli', idx, { kmInizio: x })} /></Field>
+          <Field label="Km fine"><Input type="number" value={v.kmFine} onChange={x => updateArray('veicoli', idx, { kmFine: x })} /></Field>
+          <Field label="Km percorsi"><input readOnly value={km(v)} /></Field>
+        </div>
+        <div className="grid four">
+          <Field label="Effettuato carburante"><Select value={v.carburante || 'No'} onChange={x => updateArray('veicoli', idx, { carburante: x })}><option>No</option><option>Sì</option></Select></Field>
+          <Field label="Importo carburante"><Input value={v.importoCarburante || ''} onChange={x => updateArray('veicoli', idx, { importoCarburante: x })} placeholder="es. 50,00 €" /></Field>
+          <Field label="Prelevata card C.O. alle ore"><Input value={v.oraPrelievoCard || ''} onChange={x => updateArray('veicoli', idx, { oraPrelievoCard: x })} placeholder="es. 08.10" /></Field>
+          <Field label="Restituzione card alle ore"><Input value={v.oraRestituzioneCard || ''} onChange={x => updateArray('veicoli', idx, { oraRestituzioneCard: x })} placeholder="es. 12.55" /></Field>
+        </div>
+        <Field label="Segnalazione anomalie o danni veicolo"><Textarea value={v.anomaliaVeicolo || ''} onChange={x => updateArray('veicoli', idx, { anomaliaVeicolo: x })} placeholder="Descrivere eventuali anomalie, danni, malfunzionamenti o necessità di manutenzione." /></Field>
+        <button className="ghost" onClick={() => removeArray('veicoli', idx)}>Rimuovi</button>
+      </div>)}
       <button onClick={() => addArray('veicoli', emptyVeicolo())}>+ Aggiungi veicolo</button>
     </section>
 
@@ -181,7 +198,7 @@ function OperatorReport({ report, setReport }) {
     <section className="card">
       <h2>5. Atti redatti</h2>
       <div className="counterGrid">
-        {['relazioni','annotazioni','verbaliCds','verbaliRegolamenti','sequestriAmministrativi','fermiAmministrativi','sequestriPenali','cnr'].map(key => <Counter key={key} label={LABELS[key]} value={report.counters[key]} onChange={v => update({ counters: { ...report.counters, [key]: v } })} />)}
+        {['relazioni','annotazioni','sequestriAmministrativi','fermiAmministrativi','sequestriPenali','cnr'].map(key => <Counter key={key} label={LABELS[key]} value={report.counters[key]} onChange={v => update({ counters: { ...report.counters, [key]: v } })} />)}
       </div>
       <div className="grid two"><Counter label="Altri atti" value={report.counters.altriAttiNumero} onChange={v => update({ counters: { ...report.counters, altriAttiNumero: v } })} /><Field label="Descrizione altri atti"><Input value={report.counters.altriAttiDescrizione} onChange={v => update({ counters: { ...report.counters, altriAttiDescrizione: v } })} /></Field></div>
     </section>
@@ -196,7 +213,42 @@ function OperatorReport({ report, setReport }) {
     </section>
 
     <section className="card">
-      <h2>7. Note e invio</h2>
+      <h2>7. Documenti ritirati</h2>
+      <p className="muted">Compila questa sezione solo se nel turno sono stati ritirati documenti.</p>
+      {(report.documentiRitirati || []).length === 0 && <p className="muted">Nessun documento ritirato inserito.</p>}
+      {(report.documentiRitirati || []).map((doc, idx) => <div className="rowCard" key={idx}>
+        <div className="grid three">
+          <Field label="Tipo documento"><Select value={doc.tipo} onChange={v => updateArray('documentiRitirati', idx, { tipo: v })}><option value="">Seleziona</option><option>Patente</option><option>Carta di circolazione</option><option>Documento assicurativo</option><option>Autorizzazione / licenza</option><option>Altro</option></Select></Field>
+          <Field label="Quantità"><Input type="number" value={doc.quantita} onChange={v => updateArray('documentiRitirati', idx, { quantita: v })} /></Field>
+          <Field label="Note"><Input value={doc.note} onChange={v => updateArray('documentiRitirati', idx, { note: v })} /></Field>
+        </div>
+        <button className="ghost" onClick={() => removeArray('documentiRitirati', idx)}>Rimuovi documento</button>
+      </div>)}
+      <button onClick={() => addArray('documentiRitirati', emptyDocumentoRitirato())}>+ Aggiungi documento ritirato</button>
+    </section>
+
+    <section className="card">
+      <h2>8. Distinta verbali</h2>
+      <p className="muted">Modulo separato collegato all'attività sanzionatoria. Puoi inserire tanti verbali quanti ne servono e generare un PDF dedicato.</p>
+      {(report.distintaVerbali || []).length === 0 && <p className="muted">Nessun verbale inserito in distinta.</p>}
+      {(report.distintaVerbali || []).map((verbale, idx) => <div className="rowCard" key={idx}>
+        <div className="grid three">
+          <Field label="Numero verbale"><Input value={verbale.numero} onChange={v => updateArray('distintaVerbali', idx, { numero: v })} /></Field>
+          <Field label="Tipo violazione"><Input value={verbale.tipo} onChange={v => updateArray('distintaVerbali', idx, { tipo: v })} placeholder="es. CdS, regolamento, annonaria..." /></Field>
+          <Field label="Norma violata"><Input value={verbale.norma} onChange={v => updateArray('distintaVerbali', idx, { norma: v })} placeholder="es. art. 158 C.d.S." /></Field>
+        </div>
+        <div className="grid three">
+          <Field label="Importo"><Input value={verbale.importo} onChange={v => updateArray('distintaVerbali', idx, { importo: v })} placeholder="es. 42,00 €" /></Field>
+          <Field label="Operatore verbalizzante"><Input value={verbale.operatore} onChange={v => updateArray('distintaVerbali', idx, { operatore: v })} /></Field>
+          <Field label="Note"><Input value={verbale.note} onChange={v => updateArray('distintaVerbali', idx, { note: v })} /></Field>
+        </div>
+        <button className="ghost" onClick={() => removeArray('distintaVerbali', idx)}>Rimuovi verbale</button>
+      </div>)}
+      <div className="actions"><button onClick={() => addArray('distintaVerbali', emptyVerbaleDistinta())}>+ Aggiungi verbale</button><button onClick={() => buildVerbaliPdf(report).save(`distinta-verbali-${sanitizeFileName(report.data)}-${sanitizeFileName(turnoLabel(report))}.pdf`)}>Scarica PDF distinta verbali</button></div>
+    </section>
+
+    <section className="card">
+      <h2>9. Note e invio</h2>
       <Field label="Note per UDT / Ufficiale di coordinamento"><Textarea value={report.noteUdt} onChange={v => update({ noteUdt: v })} /></Field>
       <Field label="Email ufficiale destinatario"><Input value={report.destinatario} onChange={v => update({ destinatario: v })} placeholder="es. ufficiale@comune.monza.it" /></Field>
       <label className="check"><input type="checkbox" checked={report.dichiarazione} onChange={e => update({ dichiarazione: e.target.checked })} /> Confermo la dichiarazione finale degli operatori.</label>
@@ -531,7 +583,7 @@ function serviceSummaryBox(doc, report, y, pdfTitle = '', subtitle = '') {
   y = ensureSpace(doc, y, 30, pdfTitle, subtitle);
   const interventi = (report.interventi || []).length;
   const violazioni = getTotaleViolazioni(report);
-  const atti = ['relazioni','annotazioni','verbaliCds','verbaliRegolamenti','sequestriAmministrativi','fermiAmministrativi','sequestriPenali','cnr','altriAttiNumero'].reduce((s, k) => s + n((report.counters || {})[k]), 0);
+  const atti = ['relazioni','annotazioni','sequestriAmministrativi','fermiAmministrativi','sequestriPenali','cnr','altriAttiNumero'].reduce((s, k) => s + n((report.counters || {})[k]), 0);
   const criticita = (report.interventi || []).filter(isInterventoCritico).length + (testoCritico(report.noteUdt) ? 1 : 0);
   doc.setFillColor(247, 250, 252);
   doc.setDrawColor(214, 222, 232);
@@ -596,6 +648,32 @@ function serviceInterventionCard(doc, i, idx, y, pdfTitle = '', subtitle = '') {
   return y + h + 4;
 }
 
+function buildVerbaliPdf(report) {
+  const title = 'DISTINTA VERBALI DEL TURNO';
+  const subtitle = `${report.data} | Turno ${turnoLabel(report)} | ${repartoLabel(report)}`;
+  const doc = makePdf(title, subtitle);
+  let y = 54;
+  y = section(doc, 'Dati generali', y, title, subtitle);
+  y = kvGrid(doc, [
+    { label: 'Data servizio', value: report.data },
+    { label: 'Turno', value: turnoLabel(report) },
+    { label: 'Reparto / servizio', value: repartoLabel(report) },
+    { label: 'Operatori', value: operatorNames(report).join(', ') || '-' },
+  ], y, 2, title, subtitle) + 2;
+  y = section(doc, 'Elenco verbali', y, title, subtitle);
+  const rows = (report.distintaVerbali || [])
+    .filter(v => v.numero || v.tipo || v.norma || v.importo || v.operatore || v.note)
+    .map((v, idx) => [idx + 1, v.numero || '-', v.tipo || '-', v.norma || '-', v.importo || '-', v.operatore || '-', v.note || '-']);
+  y = simpleTable(doc, ['#', 'N. verbale', 'Tipo', 'Norma violata', 'Importo', 'Operatore', 'Note'], rows.length ? rows : [['-', 'Nessun verbale inserito', '-', '-', '-', '-', '-']], y, [10, 30, 30, 38, 25, 32, 21], title, subtitle);
+  y = section(doc, 'Riepilogo attività sanzionatoria', y, title, subtitle);
+  const c = report.counters || emptyCounters();
+  y = simpleTable(doc, ['Voce', 'N.'], [
+    ['Preavvisi CdS', c.preavvisiCds], ['VdC CdS', c.vdcCds], ['Regolamento Polizia', c.regPolizia], ['Regolamento Edilizio', c.regEdilizio], ['Regolamento Benessere Animali', c.regBenessereAnimali], ['Annonaria / commercio', c.annonaria], [`Altre norme ${c.altreNormeDescrizione || ''}`, c.altreNorme], ['Fermi', c.fermi], ['Sequestri', c.sequestri], ['Totale', getTotaleViolazioni(report)]
+  ], y, [150, 36], title, subtitle);
+  addFooter(doc);
+  return doc;
+}
+
 function buildServicePdf(report) {
   const title = 'REPORT DI SERVIZIO';
   const subtitle = `${report.data} | Turno ${turnoLabel(report)} | ${report.orarioTipo}`;
@@ -616,10 +694,11 @@ function buildServicePdf(report) {
   const operatorRows = (report.operatori || []).filter(o => o.nome || o.matricola || o.qualifica).map(o => [o.nome, o.matricola, o.qualifica]);
   y = simpleTable(doc, ['Nominativo', 'Matricola', 'Qualifica'], operatorRows.length ? operatorRows : [['-', '-', '-']], y, [90, 40, 56], title, subtitle);
 
-  y = section(doc, 'Veicoli e chilometraggio', y, title, subtitle);
-  const vehicleRows = (report.veicoli || []).map(v => [v.sigla || '-', v.kmInizio || '-', v.kmFine || '-', km(v)]);
-  y = simpleTable(doc, ['Veicolo', 'Km inizio', 'Km fine', 'Km percorsi'], vehicleRows.length ? vehicleRows : [['-', '-', '-', '-']], y, [72, 38, 38, 38], title, subtitle);
-  y = kvGrid(doc, [{ label: 'Totale km percorsi', value: getKmTotali(report) }], y, 1, title, subtitle) + 2;
+  y = section(doc, 'Veicoli, chilometraggio e carburante', y, title, subtitle);
+  const vehicleRows = (report.veicoli || []).map(v => [v.sigla || '-', v.kmInizio || '-', v.kmFine || '-', km(v), v.carburante || 'No', v.importoCarburante || '-', v.oraPrelievoCard || '-', v.oraRestituzioneCard || '-']);
+  y = simpleTable(doc, ['Veicolo', 'Km inizio', 'Km fine', 'Km', 'Carburante', 'Importo', 'Card presa', 'Card resa'], vehicleRows.length ? vehicleRows : [['-', '-', '-', '-', '-', '-', '-', '-']], y, [34, 23, 23, 18, 24, 22, 21, 21], title, subtitle);
+  const anomalieVeicoli = (report.veicoli || []).filter(v => v.anomaliaVeicolo).map(v => `${v.sigla || 'Veicolo'}: ${v.anomaliaVeicolo}`).join('\n');
+  y = kvGrid(doc, [{ label: 'Totale km percorsi', value: getKmTotali(report) }, { label: 'Anomalie / danni veicolo', value: anomalieVeicoli || '-' }], y, 1, title, subtitle) + 2;
 
   y = section(doc, 'Interventi effettuati', y, title, subtitle);
   (report.interventi || []).forEach((i, idx) => {
@@ -629,7 +708,7 @@ function buildServicePdf(report) {
   y = section(doc, 'Atti redatti', y, title, subtitle);
   const c = report.counters || emptyCounters();
   y = simpleTable(doc, ['Tipologia', 'N.'], [
-    ['Relazioni di servizio', c.relazioni], ['Annotazioni di servizio', c.annotazioni], ['Verbali CdS', c.verbaliCds], ['Verbali regolamenti', c.verbaliRegolamenti],
+    ['Relazioni di servizio', c.relazioni], ['Annotazioni di servizio', c.annotazioni],
     ['Sequestri amministrativi', c.sequestriAmministrativi], ['Fermi amministrativi', c.fermiAmministrativi], ['Sequestri penali', c.sequestriPenali], ['C.N.R.', c.cnr], [`Altri atti ${c.altriAttiDescrizione || ''}`, c.altriAttiNumero]
   ], y, [150, 36], title, subtitle);
 
@@ -638,6 +717,14 @@ function buildServicePdf(report) {
     ['Preavvisi CdS', c.preavvisiCds], ['VdC CdS', c.vdcCds], ['Regolamento Polizia', c.regPolizia], ['Regolamento Edilizio', c.regEdilizio],
     ['Regolamento Benessere Animali', c.regBenessereAnimali], ['Annonaria / commercio', c.annonaria], [`Altre norme ${c.altreNormeDescrizione || ''}`, c.altreNorme], ['Fermi', c.fermi], ['Sequestri', c.sequestri], ['TOTALE', getTotaleViolazioni(report)]
   ], y, [150, 36], title, subtitle);
+
+  y = section(doc, 'Documenti ritirati', y, title, subtitle);
+  const docRows = (report.documentiRitirati || []).filter(d => d.tipo || d.quantita || d.note).map(d => [d.tipo || '-', d.quantita || '-', d.note || '-']);
+  y = simpleTable(doc, ['Tipo documento', 'Quantità', 'Note'], docRows.length ? docRows : [['Nessun documento ritirato', '-', '-']], y, [70, 28, 88], title, subtitle);
+
+  y = section(doc, 'Distinta verbali', y, title, subtitle);
+  const verbRows = (report.distintaVerbali || []).filter(v => v.numero || v.tipo || v.norma || v.importo || v.operatore || v.note).map(v => [v.numero || '-', v.tipo || '-', v.norma || '-', v.importo || '-', v.operatore || '-', v.note || '-']);
+  y = simpleTable(doc, ['N. verbale', 'Tipo', 'Norma', 'Importo', 'Operatore', 'Note'], verbRows.length ? verbRows : [['Nessun verbale in distinta', '-', '-', '-', '-', '-']], y, [28, 35, 34, 25, 34, 30], title, subtitle);
 
   y = section(doc, 'Note per UDT / Ufficiale di coordinamento', y, title, subtitle);
   y = paragraph(doc, report.noteUdt || '-', y, title, subtitle);
