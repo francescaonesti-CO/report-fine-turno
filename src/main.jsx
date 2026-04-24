@@ -81,6 +81,7 @@ function App() {
   const [importedReports, setImportedReports] = useState([]);
 
   return <main>
+    <img id="pdfLogo" src="/POLIZIA.png" alt="Logo Polizia Locale" style={{ display: 'none' }} />
     <header className="hero">
       <div>
         <p className="eyebrow">Polizia Locale</p>
@@ -306,38 +307,70 @@ function makePdf(title, subtitle = '') {
 }
 
 function addHeader(doc, title, subtitle = '') {
-  doc.setFillColor(245, 247, 250);
-  doc.rect(0, 0, 210, 31, 'F');
-  doc.setDrawColor(25, 55, 95);
-  doc.setLineWidth(0.8);
-  doc.line(12, 31, 198, 31);
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(11);
-  doc.text('COMUNE DI MONZA', 12, 11);
-  doc.setFontSize(9);
-  doc.setFont('helvetica', 'normal');
-  doc.text('Settore Polizia Locale e Protezione Civile', 12, 17);
-  doc.text('via Marsala 13 | 20900 Monza', 12, 22);
+  doc.setFillColor(255, 255, 255);
+  doc.rect(0, 0, 210, 34, 'F');
+  try {
+    const img = document.getElementById('pdfLogo');
+    if (img && img.complete) doc.addImage(img, 'PNG', 12, 6, 22, 22);
+  } catch (e) {}
+  doc.setDrawColor(12, 47, 97);
+  doc.setLineWidth(0.35);
+  doc.line(40, 7, 40, 28);
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(15);
-  doc.text(title, 198, 13, { align: 'right' });
+  doc.setTextColor(12, 47, 97);
+  doc.text('COMUNE DI MONZA', 45, 13);
+  doc.setFontSize(10.5);
+  doc.text('Settore Polizia Locale, Protezione Civile', 45, 20);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7.8);
+  doc.setTextColor(40, 48, 60);
+  doc.text('Via Marsala 13 | 20900 Monza', 145, 11);
+  doc.text('Tel. 039.2816313', 145, 17);
+  doc.text('polizialocale@comune.monza.it', 145, 23);
+  doc.setDrawColor(12, 47, 97);
+  doc.setLineWidth(0.6);
+  doc.line(12, 32, 198, 32);
+  doc.setFillColor(12, 47, 97);
+  doc.roundedRect(12, 38, 126, 10, 1.8, 1.8, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(12);
+  doc.text(title, 75, 44.5, { align: 'center' });
+  doc.setDrawColor(180, 196, 224);
+  doc.setLineWidth(1.2);
+  doc.line(141, 39, 136, 47);
+  doc.line(145, 39, 140, 47);
+  doc.line(149, 39, 144, 47);
   if (subtitle) {
+    doc.setTextColor(55, 65, 81);
     doc.setFont('helvetica', 'normal');
-    doc.setFontSize(9);
-    doc.text(subtitle, 198, 21, { align: 'right' });
+    doc.setFontSize(8.5);
+    doc.text(subtitle, 198, 44.5, { align: 'right' });
   }
+  doc.setTextColor(0, 0, 0);
 }
 
 function addFooter(doc) {
   const pages = doc.internal.getNumberOfPages();
   for (let i = 1; i <= pages; i++) {
     doc.setPage(i);
-    doc.setDrawColor(210, 215, 220);
-    doc.line(12, 286, 198, 286);
+    doc.setDrawColor(12, 47, 97);
+    doc.setLineWidth(0.35);
+    doc.line(12, 284, 198, 284);
     doc.setFont('helvetica', 'normal');
-    doc.setFontSize(7.5);
-    doc.text('Polizia Locale e Protezione Civile | Tel. 039.2816313 | email: polizialocale@comune.monza.it | PEC: monza@pec.comunedimonza.it', 12, 291);
-    doc.text(`Pagina ${i} di ${pages}`, 198, 291, { align: 'right' });
+    doc.setFontSize(7.4);
+    doc.setTextColor(12, 47, 97);
+    doc.text('Settore Polizia Locale, Protezione Civile', 12, 289);
+    doc.text('Via Marsala 13 | 20900 Monza', 12, 293);
+    doc.text('Tel. 039.2816313', 86, 291);
+    doc.text('polizialocale@comune.monza.it', 127, 291);
+    doc.setFillColor(12, 47, 97);
+    doc.roundedRect(178, 287, 20, 7, 1.2, 1.2, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.text(`Pag. ${i} di ${pages}`, 188, 291.6, { align: 'center' });
+    doc.setTextColor(0, 0, 0);
   }
 }
 
@@ -345,17 +378,20 @@ function ensureSpace(doc, y, needed = 18, title = '', subtitle = '') {
   if (y + needed <= 276) return y;
   doc.addPage();
   addHeader(doc, title, subtitle);
-  return 40;
+  return 54;
 }
 
 function section(doc, label, y, pdfTitle = '', subtitle = '') {
-  y = ensureSpace(doc, y, 14, pdfTitle, subtitle);
-  doc.setFillColor(25, 55, 95);
-  doc.roundedRect(12, y, 186, 8, 1.5, 1.5, 'F');
-  doc.setTextColor(255, 255, 255);
+  y = ensureSpace(doc, y, 13, pdfTitle, subtitle);
+  doc.setFillColor(245, 248, 252);
+  doc.setDrawColor(214, 222, 232);
+  doc.roundedRect(12, y, 186, 9, 1.4, 1.4, 'FD');
+  doc.setFillColor(12, 47, 97);
+  doc.rect(12, y, 3.2, 9, 'F');
+  doc.setTextColor(12, 47, 97);
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(9);
-  doc.text(label.toUpperCase(), 15, y + 5.4);
+  doc.setFontSize(9.5);
+  doc.text(label.toUpperCase(), 18, y + 6);
   doc.setTextColor(0, 0, 0);
   return y + 12;
 }
@@ -429,11 +465,83 @@ function paragraph(doc, text, y, pdfTitle = '', subtitle = '', maxWidth = 178) {
   return y + lines.length * 5 + 8;
 }
 
+
+function serviceSummaryBox(doc, report, y, pdfTitle = '', subtitle = '') {
+  y = ensureSpace(doc, y, 30, pdfTitle, subtitle);
+  const interventi = (report.interventi || []).length;
+  const violazioni = getTotaleViolazioni(report);
+  const atti = ['relazioni','annotazioni','verbaliCds','verbaliRegolamenti','sequestriAmministrativi','fermiAmministrativi','sequestriPenali','cnr','altriAttiNumero'].reduce((s, k) => s + n((report.counters || {})[k]), 0);
+  const criticita = (report.interventi || []).filter(isInterventoCritico).length + (testoCritico(report.noteUdt) ? 1 : 0);
+  doc.setFillColor(247, 250, 252);
+  doc.setDrawColor(214, 222, 232);
+  doc.roundedRect(12, y, 186, 29, 1.8, 1.8, 'FD');
+  const items = [
+    ['Interventi', interventi],
+    ['Violazioni / provv.', violazioni],
+    ['Atti redatti', atti],
+    ['Criticità', criticita],
+  ];
+  items.forEach((item, idx) => {
+    const x = 20 + idx * 44;
+    if (idx > 0) {
+      doc.setDrawColor(225, 231, 239);
+      doc.line(x - 8, y + 6, x - 8, y + 23);
+    }
+    doc.setTextColor(12, 47, 97);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(16);
+    doc.text(String(item[1]), x, y + 13);
+    doc.setFontSize(7.6);
+    doc.setTextColor(75, 85, 99);
+    doc.text(item[0].toUpperCase(), x, y + 21);
+  });
+  doc.setTextColor(0, 0, 0);
+  return y + 35;
+}
+
+function serviceInterventionCard(doc, i, idx, y, pdfTitle = '', subtitle = '') {
+  const critic = isInterventoCritico(i);
+  y = ensureSpace(doc, y, 30, pdfTitle, subtitle);
+  doc.setFillColor(255, 255, 255);
+  doc.setDrawColor(214, 222, 232);
+  doc.roundedRect(12, y, 186, 0.1, 1, 1, 'S');
+  const startY = y;
+  doc.setFillColor(critic ? 254 : 245, critic ? 242 : 248, critic ? 242 : 252);
+  doc.roundedRect(12, y, 186, 10, 1.4, 1.4, 'F');
+  doc.setFillColor(12, 47, 97);
+  doc.roundedRect(15, y + 2.1, 18, 5.8, 1.2, 1.2, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(7.5);
+  doc.text(`${i.oraInizio || '--'}-${i.oraFine || '--'}`, 24, y + 6.1, { align: 'center' });
+  doc.setTextColor(12, 47, 97);
+  doc.setFontSize(9.2);
+  doc.text(`${idx + 1}. ${i.tipo || 'Intervento'}`, 38, y + 6.3);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(65, 75, 90);
+  const origine = i.origine === 'Altro' ? `Altro: ${i.origineAltro || '-'}` : (i.origine || '-');
+  doc.text(`Origine: ${origine} | Luogo: ${i.luogo || '-'}`, 98, y + 6.3, { maxWidth: 96 });
+  y += 13;
+  const scuole = i.tipo === 'Servizio scuole' ? (i.scuole || []).filter(s => s.nome || s.momento || s.orario || s.criticita).map((s, pos) => `Scuola ${pos + 1}: ${s.nome || '-'} (${s.momento || '-'} ${s.orario || '-'}) Criticità: ${s.criticita || '-'}`).join('\n') : '';
+  const dettagli = extraDetails(i).replace(/\n/g, ' ').trim();
+  const body = `Descrizione: ${i.descrizione || '-'}\nEsito: ${i.esito || '-'}${dettagli ? '\n' + dettagli : ''}${scuole ? '\n' + scuole : ''}\nNote: ${i.note || '-'}`;
+  const lines = doc.splitTextToSize(body, 176);
+  const h = Math.max(14, lines.length * 4.4 + 7);
+  y = ensureSpace(doc, startY, 13 + h, pdfTitle, subtitle) + 13;
+  doc.setTextColor(15, 23, 42);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8.2);
+  doc.text(lines, 18, y + 3.5);
+  return y + h + 4;
+}
+
 function buildServicePdf(report) {
   const title = 'REPORT DI SERVIZIO';
   const subtitle = `${report.data} | Turno ${turnoLabel(report)} | ${report.orarioTipo}`;
   const doc = makePdf(title, subtitle);
-  let y = 40;
+  let y = 54;
+
+  y = serviceSummaryBox(doc, report, y, title, subtitle);
 
   y = section(doc, 'Dati generali del turno', y, title, subtitle);
   y = kvGrid(doc, [
@@ -454,15 +562,7 @@ function buildServicePdf(report) {
 
   y = section(doc, 'Interventi effettuati', y, title, subtitle);
   (report.interventi || []).forEach((i, idx) => {
-    const scuole = i.tipo === 'Servizio scuole' ? (i.scuole || []).filter(s => s.nome || s.momento || s.orario || s.criticita).map((s, pos) => `Scuola ${pos + 1}: ${s.nome || '-'} | ${s.momento || '-'} | ${s.orario || '-'} | Criticità: ${s.criticita || '-'}`).join('\n') : '';
-    const dettagli = extraDetails(i).replace(/\n/g, ' ').trim();
-    y = kvGrid(doc, [
-      { label: `Intervento ${idx + 1}`, value: i.tipo },
-      { label: 'Origine', value: i.origine === 'Altro' ? `Altro: ${i.origineAltro || '-'}` : i.origine },
-      { label: 'Orario', value: `${i.oraInizio || '-'} - ${i.oraFine || '-'}` },
-      { label: 'Luogo', value: i.luogo || '-' },
-    ], y, 2, title, subtitle);
-    y = paragraph(doc, `Descrizione: ${i.descrizione || '-'}\nEsito: ${i.esito || '-'}${dettagli ? '\n' + dettagli : ''}${scuole ? '\n' + scuole : ''}\nNote: ${i.note || '-'}`, y, title, subtitle);
+    y = serviceInterventionCard(doc, i, idx, y, title, subtitle);
   });
 
   y = section(doc, 'Atti redatti', y, title, subtitle);
@@ -502,7 +602,7 @@ function buildCommanderPdf(aggregate, reports, commanderNotes) {
   const title = 'REPORT AGGREGATO PER IL COMANDANTE';
   const subtitle = `Periodo/Data: ${aggregate.dateLabel}`;
   const doc = makePdf(title, subtitle);
-  let y = 40;
+  let y = 54;
 
   y = section(doc, 'Sintesi operativa', y, title, subtitle);
   y = kvGrid(doc, [
