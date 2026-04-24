@@ -53,3 +53,14 @@ th { background: #f3f6fa; color: #33415c; }
 .muted { color: #667085; }
 small { color: #667085; }
 @media (max-width: 900px) { .grid, .grid.two, .grid.three, .grid.four, .counterGrid, .metrics, .split { grid-template-columns: 1fr; } .hero h1 { font-size: 34px; } main { padding: 14px; } .counter { grid-template-columns: 1fr 38px 70px 38px; } }
+
+.miniPreview {
+  white-space: pre-wrap;
+  background: #f8fafc;
+  border: 1px solid #dbe4ef;
+  border-radius: 14px;
+  padding: 14px;
+  color: #1f2937;
+  line-height: 1.45;
+  overflow-x: auto;
+}

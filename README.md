@@ -1,26 +1,28 @@
-# Report Turno Polizia Locale - versione PDF agenti migliorato
+# Report Turno Polizia Locale - versione con Report Ufficiale UDT
 
-Web app React/Vite per:
-- compilare il report di servizio degli operatori;
-- generare PDF istituzionale con logo e layout migliorato;
-- esportare file dati JSON per la dashboard;
-- usare la dashboard ufficiale con report aggregato ed export Excel avanzato.
+Questa versione integra:
 
-## Novità di questa versione
-- PDF agenti con header Comune di Monza e logo Polizia Locale.
-- Dicitura: Settore Polizia Locale, Protezione Civile.
-- Layout più accattivante e leggibile: riepilogo iniziale, sezioni ordinate, schede intervento, footer istituzionale.
-- Mantenute dashboard, PDF aggregato ed export Excel avanzato.
+- Report operatore con PDF istituzionale e logo
+- Esportazione file dati JSON per ogni report
+- Dashboard ufficiale con aggregazione JSON
+- Export Excel avanzato
+- Nuovo pulsante **Report ufficiale**
+- Generazione PDF **Report Ufficiale di Turno** in modalità quasi automatica
+
+## Flusso consigliato
+
+1. Gli operatori compilano il report e scaricano PDF + JSON.
+2. L'ufficiale apre **Report ufficiale** o **Dashboard ufficiale**.
+3. Carica i JSON ricevuti dagli operatori.
+4. L'app genera sintesi, eventi rilevanti e tabella violazioni.
+5. L'ufficiale integra briefing, personale assente/in ritardo, anomalie, attività ispettive, esiti e note.
+6. Clicca **Genera PDF Report Ufficiale**.
 
 ## Deploy su Vercel
-1. Scompattare lo ZIP.
-2. Caricare tutti i file nella root del repository GitHub.
-3. Importare il repository su Vercel.
-4. Impostazioni:
-   - Framework: Vite
-   - Build command: npm run build
-   - Output directory: dist
-   - Install command: npm install
 
-## Attenzione
-Il file `public/POLIZIA.png` deve restare nel progetto: viene usato per il logo nei PDF.
+- Framework: Vite
+- Install Command: `npm install`
+- Build Command: `npm run build`
+- Output Directory: `dist`
+
+Caricare su GitHub tutti i file della cartella estratta, non lo ZIP.

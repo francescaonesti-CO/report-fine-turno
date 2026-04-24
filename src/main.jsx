@@ -75,10 +75,20 @@ function baseReport() {
   };
 }
 
+
+const emptyAttivitaIspettiva = () => ({ tipo: '', reparto: '', luogo: '', orario: '', esito: '', violazioni: '', note: '' });
+function baseOfficialReport() {
+  return {
+    data: today(), turno: '1° turno', ufficiale: '', qualifica: '', briefing: '', assenti: '', ritardi: '', noteGenerali: '',
+    eventiManuali: '', anomalie: '', attivitaIspettive: [emptyAttivitaIspettiva()], esiti: '', comunicazioneEq: '', notaComandante: ''
+  };
+}
+
 function App() {
   const [mode, setMode] = useState('operatore');
   const [report, setReport] = useState(baseReport());
   const [importedReports, setImportedReports] = useState([]);
+  const [officialReport, setOfficialReport] = useState(baseOfficialReport());
 
   return <main>
     <img id="pdfLogo" src="/POLIZIA.png" alt="Logo Polizia Locale" style={{ display: 'none' }} />
@@ -86,14 +96,17 @@ function App() {
       <div>
         <p className="eyebrow">Polizia Locale</p>
         <h1>Report Turno</h1>
-        <p>Compilazione operatori, file dati e dashboard aggregata per l'ufficiale.</p>
+        <p>Compilazione operatori, dashboard aggregata e report ufficiale UDT.</p>
       </div>
       <nav className="tabs">
         <button className={mode === 'operatore' ? 'active' : ''} onClick={() => setMode('operatore')}>Report operatore</button>
         <button className={mode === 'dashboard' ? 'active' : ''} onClick={() => setMode('dashboard')}>Dashboard ufficiale</button>
+        <button className={mode === 'ufficiale' ? 'active' : ''} onClick={() => setMode('ufficiale')}>Report ufficiale</button>
       </nav>
     </header>
-    {mode === 'operatore' ? <OperatorReport report={report} setReport={setReport} /> : <Dashboard reports={importedReports} setReports={setImportedReports} />}
+    {mode === 'operatore' && <OperatorReport report={report} setReport={setReport} />}
+    {mode === 'dashboard' && <Dashboard reports={importedReports} setReports={setImportedReports} />}
+    {mode === 'ufficiale' && <OfficialReport reports={importedReports} setReports={setImportedReports} official={officialReport} setOfficial={setOfficialReport} />}
   </main>;
 }
 
@@ -290,6 +303,54 @@ function Dashboard({ reports, setReports }) {
       <h2>Anteprima report aggregato</h2>
       <pre>{text}</pre>
     </section>
+  </>;
+}
+
+function OfficialReport({ reports, setReports, official, setOfficial }) {
+  const aggregate = useMemo(() => aggregateReports(reports), [reports]);
+  const autoSintesi = useMemo(() => officialSynthesis(aggregate, reports), [aggregate, reports]);
+  const autoEventi = useMemo(() => officialEventsText(reports), [reports]);
+  const preview = useMemo(() => officialReportText(aggregate, reports, official, autoSintesi, autoEventi), [aggregate, reports, official, autoSintesi, autoEventi]);
+  const update = (patch) => setOfficial(prev => ({ ...prev, ...patch }));
+  const updateAttivita = (idx, patch) => setOfficial(prev => ({ ...prev, attivitaIspettive: prev.attivitaIspettive.map((x, i) => i === idx ? { ...x, ...patch } : x) }));
+  const addAttivita = () => setOfficial(prev => ({ ...prev, attivitaIspettive: [...prev.attivitaIspettive, emptyAttivitaIspettiva()] }));
+  const removeAttivita = (idx) => setOfficial(prev => ({ ...prev, attivitaIspettive: prev.attivitaIspettive.filter((_, i) => i !== idx) }));
+
+  async function importFiles(e) {
+    const files = Array.from(e.target.files || []);
+    const parsed = [];
+    for (const file of files) {
+      try {
+        const raw = await file.text();
+        const data = JSON.parse(raw);
+        if (data && data.interventi && data.counters) parsed.push(data);
+      } catch (err) {
+        alert(`File non leggibile: ${file.name}`);
+      }
+    }
+    setReports(prev => [...prev, ...parsed]);
+    e.target.value = '';
+  }
+
+  function generateOfficialPdf() {
+    const doc = buildOfficialShiftPdf(aggregate, reports, official, autoSintesi, autoEventi);
+    doc.save(`report-ufficiale-turno-${sanitizeFileName(official.data || aggregate.dateLabel)}-${sanitizeFileName(official.turno)}.pdf`);
+  }
+
+  return <>
+    <section className="card notice">
+      <h2>Report ufficiale UDT</h2>
+      <p>Modalità quasi automatica: carica i JSON degli operatori, verifica la sintesi generata, integra briefing, personale, attività ispettive, anomalie e note per il Comandante.</p>
+      <div className="actions"><label className="fileButton">Carica JSON operatori<input type="file" accept="application/json,.json" multiple onChange={importFiles} /></label><button className="ghost" onClick={() => setReports([])}>Svuota dati caricati</button></div>
+    </section>
+    <section className="metrics"><Metric label="Report operatori" value={reports.length} /><Metric label="Interventi" value={aggregate.totalInterventi} /><Metric label="Violazioni / provvedimenti" value={aggregate.totaleViolazioni} /><Metric label="Km" value={aggregate.kmTotali} /></section>
+    <section className="card"><h2>1. Dati report ufficiale</h2><div className="grid four"><Field label="Data"><Input type="date" value={official.data} onChange={v => update({ data: v })} /></Field><Field label="Turno"><Input value={official.turno} onChange={v => update({ turno: v })} placeholder="es. 1° turno" /></Field><Field label="Ufficiale di turno"><Input value={official.ufficiale} onChange={v => update({ ufficiale: v })} /></Field><Field label="Qualifica"><Input value={official.qualifica} onChange={v => update({ qualifica: v })} placeholder="es. Commissario Capo" /></Field></div></section>
+    <section className="card"><h2>2. Sintesi automatica</h2><p className="muted">Questa sintesi nasce dai report operatori caricati. Nel PDF viene riportata come quadro iniziale.</p><pre className="miniPreview">{autoSintesi}</pre><Field label="Integrazioni dell'ufficiale alla sintesi"><Textarea value={official.eventiManuali} onChange={v => update({ eventiManuali: v })} placeholder="Inserire eventuali elementi aggiuntivi non presenti nei report operatori..." /></Field></section>
+    <section className="card"><h2>3. Briefing, personale e note</h2><div className="grid two"><Field label="Briefing operativo"><Input value={official.briefing} onChange={v => update({ briefing: v })} placeholder="es. 06.45" /></Field><Field label="Note generali"><Input value={official.noteGenerali} onChange={v => update({ noteGenerali: v })} placeholder="es. Con il personale a disposizione coperte 11 scuole" /></Field></div><div className="grid two"><Field label="A.P.L. assenti"><Textarea value={official.assenti} onChange={v => update({ assenti: v })} /></Field><Field label="A.P.L. in ritardo"><Textarea value={official.ritardi} onChange={v => update({ ritardi: v })} /></Field></div></section>
+    <section className="card"><h2>4. Eventi degni di rilievo</h2><p className="muted">Eventi rilevanti individuati automaticamente: sinistri con feriti, TSO/ASO, interventi con parole chiave critiche o lunga durata.</p><pre className="miniPreview">{autoEventi || 'Nessun evento rilevante automatico rilevato.'}</pre></section>
+    <section className="card"><h2>5. Anomalie e attività ispettive</h2><Field label="Anomalie riscontrate durante il turno"><Textarea value={official.anomalie} onChange={v => update({ anomalie: v })} /></Field><h3>Attività ispettive</h3>{official.attivitaIspettive.map((a, idx) => <div className="rowCard" key={idx}><div className="grid four"><Field label="Tipo attività"><Input value={a.tipo} onChange={v => updateAttivita(idx, { tipo: v })} placeholder="es. annonaria, ambiente..." /></Field><Field label="Reparto / pattuglia"><Input value={a.reparto} onChange={v => updateAttivita(idx, { reparto: v })} /></Field><Field label="Luogo"><Input value={a.luogo} onChange={v => updateAttivita(idx, { luogo: v })} /></Field><Field label="Orario"><Input value={a.orario} onChange={v => updateAttivita(idx, { orario: v })} /></Field></div><div className="grid three"><Field label="Esito"><Input value={a.esito} onChange={v => updateAttivita(idx, { esito: v })} /></Field><Field label="Violazioni collegate"><Input value={a.violazioni} onChange={v => updateAttivita(idx, { violazioni: v })} /></Field><Field label="Note"><Input value={a.note} onChange={v => updateAttivita(idx, { note: v })} /></Field></div><button className="ghost" onClick={() => removeAttivita(idx)}>Rimuovi attività</button></div>)}<button onClick={addAttivita}>+ Aggiungi attività ispettiva</button></section>
+    <section className="card"><h2>6. Esiti e comunicazioni</h2><Field label="Esiti"><Textarea value={official.esiti} onChange={v => update({ esiti: v })} /></Field><div className="grid two"><Field label="Comunicazione all'E.Q. di turno"><Textarea value={official.comunicazioneEq} onChange={v => update({ comunicazioneEq: v })} /></Field><Field label="Nota per il Comandante"><Textarea value={official.notaComandante} onChange={v => update({ notaComandante: v })} /></Field></div><div className="actions"><button className="primary" onClick={generateOfficialPdf}>Genera PDF Report Ufficiale</button></div></section>
+    <section className="card preview"><h2>Anteprima report ufficiale</h2><pre>{preview}</pre></section>
   </>;
 }
 
@@ -798,6 +859,61 @@ function commanderReportText(aggregate, reports, commanderNotes) {
   const details = reports.map((r, idx) => `${idx + 1}. ${r.data} | ${turnoLabel(r)} | ${r.orarioTipo} | ${repartoLabel(r)} | Operatori: ${operatorNames(r).join(', ') || '-'} | Interventi: ${(r.interventi || []).length} | Violazioni/Provvedimenti: ${getTotaleViolazioni(r)} | Km: ${getKmTotali(r)}`).join('\n') || '- Nessun report caricato';
   const notes = aggregate.notes.length ? aggregate.notes.map(n => `- ${n.data} ${n.turno} ${n.reparto}: ${n.testo}`).join('\n') : '- Nessuna nota rilevante';
   return `REPORT AGGREGATO PER IL COMANDANTE\n\nPERIODO / DATA: ${aggregate.dateLabel}\nREPORT RICEVUTI: ${reports.length}\nINTERVENTI TOTALI: ${aggregate.totalInterventi}\nVIOLAZIONI / PROVVEDIMENTI TOTALI: ${aggregate.totaleViolazioni}\nKM TOTALI PERCORSI: ${aggregate.kmTotali}\n\nINTERVENTI PER TIPOLOGIA\n${listEntries(aggregate.byTipo)}\n\nORIGINE INTERVENTI\n${listEntries(aggregate.byOrigine)}\n\nREPARTI / SERVIZI RENDICONTATI\n${listEntries(aggregate.byReparto)}\n\nATTI E VIOLAZIONI\n${listEntries(aggregate.counters, LABELS)}\n\nDETTAGLIO REPORT RICEVUTI\n${details}\n\nNOTE RILEVANTI / CRITICITÀ\n${notes}\n\nNOTE DELL'UFFICIALE PER IL COMANDANTE\n${commanderNotes || '-'}\n`;
+}
+
+function relevantInterventions(reports) {
+  const out = [];
+  reports.forEach(r => (r.interventi || []).forEach(i => {
+    const durata = durataMinuti(i.oraInizio, i.oraFine);
+    if (isInterventoCritico(i) || n(durata) >= 90) out.push({ report: r, intervento: i, durata });
+  }));
+  return out.sort((a, b) => (parseTimeToMinutes(a.intervento.oraInizio) ?? 9999) - (parseTimeToMinutes(b.intervento.oraInizio) ?? 9999));
+}
+function officialSynthesis(aggregate, reports) {
+  const topTipo = Object.entries(aggregate.byTipo || {}).sort((a, b) => n(b[1]) - n(a[1]))[0]?.[0] || 'attività operative ordinarie';
+  const all = reports.flatMap(r => r.interventi || []);
+  const conFeriti = all.filter(i => i.tipo === 'Sinistro stradale' && i.conFeriti === 'Con feriti').length;
+  const tso = all.filter(i => i.tipo === 'TSO').length;
+  const aso = all.filter(i => i.tipo === 'ASO').length;
+  return `Nel turno indicato sono stati acquisiti ${reports.length} report degli operatori, per complessivi ${aggregate.totalInterventi} interventi rendicontati. L'attività prevalente risulta: ${topTipo}. Sono state registrate ${aggregate.totaleViolazioni} violazioni/provvedimenti e ${aggregate.kmTotali} km complessivi. Si segnalano ${conFeriti} sinistri con feriti, ${tso} TSO e ${aso} ASO.`;
+}
+function officialEventsText(reports) {
+  return relevantInterventions(reports).map(({ report, intervento, durata }) => {
+    const op = operatorNames(report).join(', ') || repartoLabel(report);
+    const extra = durata ? ` Durata indicativa: ${durata} minuti.` : '';
+    return `- Ore ${intervento.oraInizio || '--'}: ${intervento.tipo || 'intervento'} in ${intervento.luogo || 'luogo non indicato'}, pattuglia/reparto ${op}. ${intervento.descrizione || ''} Esito: ${intervento.esito || '-'}${extra}`;
+  }).join('\n');
+}
+function officialReportText(aggregate, reports, official, autoSintesi, autoEventi) {
+  const attivita = (official.attivitaIspettive || []).filter(a => a.tipo || a.reparto || a.luogo || a.esito || a.note).map((a, idx) => `${idx + 1}. ${a.tipo || '-'} | ${a.reparto || '-'} | ${a.luogo || '-'} | ${a.orario || '-'} | Esito: ${a.esito || '-'} | Violazioni: ${a.violazioni || '-'} | Note: ${a.note || '-'}`).join('\n') || '- Nessuna attività ispettiva indicata';
+  return `REPORT UFFICIALE DI TURNO\n\nDATA E TURNO\n${official.data || aggregate.dateLabel} ${official.turno || ''}\n\nBRIEFING OPERATIVO\n${official.briefing || '-'}\n\nA.P.L. ASSENTI\n${official.assenti || '-'}\n\nA.P.L. IN RITARDO\n${official.ritardi || '-'}\n\nNOTE\n${official.noteGenerali || '-'}\n\nSINTESI OPERATIVA\n${autoSintesi}\n${official.eventiManuali ? '\nIntegrazioni: ' + official.eventiManuali : ''}\n\nEVENTI DEGNI DI RILIEVO\n${autoEventi || '- Nessun evento rilevante automatico rilevato'}\n\nANOMALIE RISCONTRATE DURANTE IL TURNO\n${official.anomalie || '-'}\n\nATTIVITÀ ISPETTIVE\n${attivita}\n\nESITI\n${official.esiti || '-'}\n\nCOMUNICAZIONE ALL'E.Q. DI TURNO\n${official.comunicazioneEq || '-'}\n\nNOTA PER IL COMANDANTE\n${official.notaComandante || '-'}\n\nVIOLAZIONI RISCONTRATE\nTotale violazioni/provvedimenti: ${aggregate.totaleViolazioni}\n\nFIRMA\n${official.qualifica || ''}\n${official.ufficiale || ''}`;
+}
+function buildOfficialShiftPdf(aggregate, reports, official, autoSintesi, autoEventi) {
+  const title = 'REPORT UFFICIALE DI TURNO';
+  const subtitle = `${official.data || aggregate.dateLabel} | ${official.turno || ''}`;
+  const doc = makePdf(title, subtitle);
+  let y = 54;
+  y = section(doc, 'Data e turno', y, title, subtitle);
+  y = kvGrid(doc, [{ label: 'Data', value: official.data || aggregate.dateLabel }, { label: 'Turno', value: official.turno || '-' }, { label: 'Ufficiale di turno', value: official.ufficiale || '-' }, { label: 'Qualifica', value: official.qualifica || '-' }], y, 2, title, subtitle) + 2;
+  y = section(doc, 'Riepilogo rapido', y, title, subtitle);
+  y = kvGrid(doc, [{ label: 'Report operatori', value: reports.length }, { label: 'Interventi totali', value: aggregate.totalInterventi }, { label: 'Violazioni / provvedimenti', value: aggregate.totaleViolazioni }, { label: 'Km complessivi', value: aggregate.kmTotali }], y, 4, title, subtitle) + 2;
+  y = section(doc, 'Briefing operativo', y, title, subtitle); y = paragraph(doc, official.briefing || '-', y, title, subtitle);
+  y = section(doc, 'Personale', y, title, subtitle);
+  y = kvGrid(doc, [{ label: 'A.P.L. assenti', value: official.assenti || '-' }, { label: 'A.P.L. in ritardo', value: official.ritardi || '-' }, { label: 'Note', value: official.noteGenerali || '-' }], y, 1, title, subtitle) + 2;
+  y = section(doc, 'Sintesi operativa', y, title, subtitle); y = paragraph(doc, `${autoSintesi}${official.eventiManuali ? '\n\nIntegrazioni: ' + official.eventiManuali : ''}`, y, title, subtitle);
+  y = section(doc, 'Eventi degni di rilievo', y, title, subtitle); y = paragraph(doc, autoEventi || 'Nessun evento rilevante automatico rilevato.', y, title, subtitle);
+  y = section(doc, 'Anomalie riscontrate durante il turno', y, title, subtitle); y = paragraph(doc, official.anomalie || '-', y, title, subtitle);
+  y = section(doc, 'Attività ispettive', y, title, subtitle);
+  const attivitaRows = (official.attivitaIspettive || []).filter(a => a.tipo || a.reparto || a.luogo || a.esito || a.note).map(a => [a.tipo || '-', a.reparto || '-', a.luogo || '-', a.orario || '-', a.esito || '-', a.violazioni || '-', a.note || '-']);
+  y = simpleTable(doc, ['Tipo', 'Reparto', 'Luogo', 'Orario', 'Esito', 'Viol.', 'Note'], attivitaRows.length ? attivitaRows : [['-', '-', '-', '-', '-', '-', '-']], y, [28, 30, 28, 18, 30, 18, 34], title, subtitle);
+  y = section(doc, 'Esiti', y, title, subtitle); y = paragraph(doc, official.esiti || '-', y, title, subtitle);
+  y = section(doc, "Comunicazione all'E.Q. di turno", y, title, subtitle); y = paragraph(doc, official.comunicazioneEq || '-', y, title, subtitle);
+  y = section(doc, 'Nota per il Comandante', y, title, subtitle); y = paragraph(doc, official.notaComandante || '-', y, title, subtitle);
+  y = section(doc, 'Violazioni riscontrate', y, title, subtitle);
+  const violationRows = reports.map(r => [operatorNames(r).join(', ') || '-', repartoLabel(r), n((r.counters || {}).preavvisiCds), n((r.counters || {}).vdcCds), getTotaleViolazioni(r)]);
+  y = simpleTable(doc, ['AA.PP.LL.', 'Zona/Reparto', 'Preavvisi CdS', 'VdC CdS/Altro', 'Totale'], violationRows.length ? violationRows : [['-', '-', '-', '-', '-']], y, [58, 48, 26, 28, 26], title, subtitle);
+  y = ensureSpace(doc, y, 22, title, subtitle); doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.text('FIRMA:', 16, y + 4); doc.text(official.qualifica || '-', 16, y + 12); doc.text(official.ufficiale || '-', 16, y + 18); doc.line(80, y + 18, 190, y + 18);
+  addFooter(doc); return doc;
 }
 
 createRoot(document.getElementById('root')).render(<App />);
