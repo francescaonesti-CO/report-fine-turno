@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import jsPDF from 'jspdf';
+import * as XLSX from 'xlsx';
 import './style.css';
 
 const TURNI = [
@@ -40,188 +41,159 @@ const emptyCounters = () => ({
   annonaria: 0, altreNorme: 0, altreNormeDescrizione: '', fermi: 0, sequestri: 0
 });
 
-function today() {
-  return new Date().toISOString().slice(0, 10);
-}
+const LABELS = {
+  relazioni: 'Relazioni di servizio', annotazioni: 'Annotazioni di servizio', verbaliCds: 'Verbali CdS', verbaliRegolamenti: 'Verbali regolamenti',
+  sequestriAmministrativi: 'Sequestri amministrativi', fermiAmministrativi: 'Fermi amministrativi', sequestriPenali: 'Sequestri penali', cnr: 'C.N.R.',
+  altriAttiNumero: 'Altri atti', preavvisiCds: 'Preavvisi CdS', vdcCds: 'VdC CdS', regPolizia: 'Regolamento Polizia',
+  regEdilizio: 'Regolamento Edilizio', regBenessereAnimali: 'Regolamento Benessere Animali', annonaria: 'Annonaria / commercio',
+  altreNorme: 'Altre norme', fermi: 'Fermi', sequestri: 'Sequestri'
+};
 
-function Field({ label, children }) {
-  return <label className="field"><span>{label}</span>{children}</label>;
-}
+function today() { return new Date().toISOString().slice(0, 10); }
+function n(value) { return Number(value || 0); }
+function km(v) { return Math.max(0, n(v.kmFine) - n(v.kmInizio)); }
+function turnoLabel(report) { return report.turno === 'Altro orario' ? `${report.altroTurnoInizio || '?'}-${report.altroTurnoFine || '?'}` : report.turno; }
+function repartoLabel(report) { return report.reparto === 'Altri servizi' ? `${report.reparto}: ${report.altroServizio || '-'}` : report.reparto; }
+function sanitizeFileName(s) { return String(s || 'report').replace(/[^a-z0-9._-]+/gi, '-').replace(/-+/g, '-'); }
 
-function Input({ value, onChange, type = 'text', placeholder = '' }) {
-  return <input type={type} value={value} placeholder={placeholder} onChange={e => onChange(e.target.value)} />;
-}
-
-function Textarea({ value, onChange, placeholder = '' }) {
-  return <textarea value={value} placeholder={placeholder} onChange={e => onChange(e.target.value)} />;
-}
-
-function Select({ value, onChange, children }) {
-  return <select value={value} onChange={e => onChange(e.target.value)}>{children}</select>;
-}
-
+function Field({ label, children }) { return <label className="field"><span>{label}</span>{children}</label>; }
+function Input({ value, onChange, type = 'text', placeholder = '' }) { return <input type={type} value={value} placeholder={placeholder} onChange={e => onChange(e.target.value)} />; }
+function Textarea({ value, onChange, placeholder = '' }) { return <textarea value={value} placeholder={placeholder} onChange={e => onChange(e.target.value)} />; }
+function Select({ value, onChange, children }) { return <select value={value} onChange={e => onChange(e.target.value)}>{children}</select>; }
 function Counter({ label, value, onChange }) {
-  const n = Number(value || 0);
-  return (
-    <div className="counter">
-      <span>{label}</span>
-      <button type="button" onClick={() => onChange(Math.max(0, n - 1))}>−</button>
-      <input type="number" min="0" value={n} onChange={e => onChange(Number(e.target.value || 0))} />
-      <button type="button" onClick={() => onChange(n + 1)}>+</button>
-    </div>
-  );
+  const valueNumber = n(value);
+  return <div className="counter"><span>{label}</span><button type="button" onClick={() => onChange(Math.max(0, valueNumber - 1))}>−</button><input type="number" min="0" value={valueNumber} onChange={e => onChange(n(e.target.value))} /><button type="button" onClick={() => onChange(valueNumber + 1)}>+</button></div>;
 }
 
-function App() {
-  const [report, setReport] = useState({
+function baseReport() {
+  return {
+    schemaVersion: 2,
     data: today(), turno: '06.00-13.00', altroTurnoInizio: '', altroTurnoFine: '', orarioTipo: 'Ordinario',
     reparto: 'Radiomobile', altroServizio: '', destinatario: '',
     operatori: [emptyOperatore(), emptyOperatore()], veicoli: [emptyVeicolo()], interventi: [emptyIntervento()],
-    counters: emptyCounters(), noteUdt: '', dichiarazione: false
-  });
+    counters: emptyCounters(), noteUdt: '', dichiarazione: false, createdAt: new Date().toISOString()
+  };
+}
 
+function App() {
+  const [mode, setMode] = useState('operatore');
+  const [report, setReport] = useState(baseReport());
+  const [importedReports, setImportedReports] = useState([]);
+
+  return <main>
+    <header className="hero">
+      <div>
+        <p className="eyebrow">Polizia Locale</p>
+        <h1>Report Turno</h1>
+        <p>Compilazione operatori, file dati e dashboard aggregata per l'ufficiale.</p>
+      </div>
+      <nav className="tabs">
+        <button className={mode === 'operatore' ? 'active' : ''} onClick={() => setMode('operatore')}>Report operatore</button>
+        <button className={mode === 'dashboard' ? 'active' : ''} onClick={() => setMode('dashboard')}>Dashboard ufficiale</button>
+      </nav>
+    </header>
+    {mode === 'operatore' ? <OperatorReport report={report} setReport={setReport} /> : <Dashboard reports={importedReports} setReports={setImportedReports} />}
+  </main>;
+}
+
+function OperatorReport({ report, setReport }) {
   const update = (patch) => setReport(prev => ({ ...prev, ...patch }));
   const updateArray = (key, index, patch) => setReport(prev => ({ ...prev, [key]: prev[key].map((x, i) => i === index ? { ...x, ...patch } : x) }));
   const addArray = (key, item) => setReport(prev => ({ ...prev, [key]: [...prev[key], item] }));
   const removeArray = (key, index) => setReport(prev => ({ ...prev, [key]: prev[key].filter((_, i) => i !== index) }));
 
-  const totalKm = useMemo(() => report.veicoli.reduce((sum, v) => sum + Math.max(0, Number(v.kmFine || 0) - Number(v.kmInizio || 0)), 0), [report.veicoli]);
-  const totaleViolazioni = useMemo(() => {
-    const c = report.counters;
-    return ['preavvisiCds','vdcCds','regPolizia','regEdilizio','regBenessereAnimali','annonaria','altreNorme','fermi','sequestri']
-      .reduce((s, k) => s + Number(c[k] || 0), 0);
-  }, [report.counters]);
-
-  function reportText() {
-    const turno = report.turno === 'Altro orario' ? `${report.altroTurnoInizio}-${report.altroTurnoFine}` : report.turno;
-    const reparto = report.reparto === 'Altri servizi' ? `${report.reparto}: ${report.altroServizio}` : report.reparto;
-    const ops = report.operatori.filter(o => o.nome || o.matricola || o.qualifica).map(o => `- ${o.nome} ${o.qualifica ? '(' + o.qualifica + ')' : ''} mtr. ${o.matricola}`).join('\n') || '- Non indicati';
-    const mezzi = report.veicoli.map(v => `- ${v.sigla || 'Veicolo'} | Km inizio ${v.kmInizio || '-'} | Km fine ${v.kmFine || '-'} | Km percorsi ${Math.max(0, Number(v.kmFine || 0) - Number(v.kmInizio || 0))}`).join('\n');
-    const interventi = report.interventi.map((i, idx) => {
-      const scuole = i.tipo === 'Servizio scuole' ? i.scuole.map((s, n) => `   Scuola ${n+1}: ${s.nome || '-'} | ${s.momento || '-'} | ${s.orario || '-'} | Criticità: ${s.criticita || '-'}`).join('\n') : '';
-      const dettagli = extraDetails(i);
-      return `${idx + 1}. ${i.tipo} | ${i.origine}${i.origine === 'Altro' ? ': ' + i.origineAltro : ''}\n   Orario: ${i.oraInizio || '-'} - ${i.oraFine || '-'} | Luogo: ${i.luogo || '-'}\n   Descrizione: ${i.descrizione || '-'}\n   Esito: ${i.esito || '-'}\n${dettagli}${scuole ? '\n' + scuole : ''}\n   Note: ${i.note || '-'}`;
-    }).join('\n\n');
-    const c = report.counters;
-    return `REPORT DI SERVIZIO - POLIZIA LOCALE\n\nDATA: ${report.data}\nTURNO: ${turno} (${report.orarioTipo})\nREPARTO: ${reparto}\n\nOPERATORI\n${ops}\n\nVEICOLI\n${mezzi}\nTotale km percorsi: ${totalKm}\n\nINTERVENTI EFFETTUATI\n${interventi}\n\nATTI REDATTI\nRelazioni: ${c.relazioni}\nAnnotazioni: ${c.annotazioni}\nVerbali CdS: ${c.verbaliCds}\nVerbali regolamenti: ${c.verbaliRegolamenti}\nSequestri amministrativi: ${c.sequestriAmministrativi}\nFermi amministrativi: ${c.fermiAmministrativi}\nSequestri penali: ${c.sequestriPenali}\nCNR: ${c.cnr}\nAltri atti: ${c.altriAttiNumero} ${c.altriAttiDescrizione}\n\nVIOLAZIONI / PROVVEDIMENTI\nPreavvisi CdS: ${c.preavvisiCds}\nVdC CdS: ${c.vdcCds}\nRegolamento Polizia: ${c.regPolizia}\nRegolamento Edilizio: ${c.regEdilizio}\nRegolamento Benessere Animali: ${c.regBenessereAnimali}\nAnnonaria / commercio: ${c.annonaria}\nAltre norme: ${c.altreNorme} ${c.altreNormeDescrizione}\nFermi: ${c.fermi}\nSequestri: ${c.sequestri}\nTOTALE: ${totaleViolazioni}\n\nNOTE PER UDT / UFFICIALE DI COORDINAMENTO\n${report.noteUdt || '-'}\n\nDICHIARAZIONE\nGli operatori dichiarano che quanto riportato corrisponde fedelmente alle attività effettivamente svolte e riscontrate durante il turno di servizio.\nConferma dichiarazione: ${report.dichiarazione ? 'SI' : 'NO'}\n`;
-  }
-
-  function extraDetails(i) {
-    if (i.tipo === 'Sinistro stradale') return `   Dettagli: ${i.conFeriti}; veicoli coinvolti ${i.veicoliCoinvolti || '-'}; rilievi ${i.rilievi}\n`;
-    if (i.tipo === 'Posto di controllo') return `   Controlli: veicoli ${i.veicoliControllati || '0'}; persone ${i.personeControllate || '0'}; verbali ${i.verbaliElevati || '0'}; fermi/sequestri ${i.fermiSequestri || '0'}\n`;
-    if (i.tipo === 'Viabilità') return `   Motivo: ${i.motivoViabilita || '-'}; strade interessate: ${i.strade || '-'}\n`;
-    return '';
-  }
+  const totalKm = useMemo(() => report.veicoli.reduce((sum, v) => sum + km(v), 0), [report.veicoli]);
+  const totaleViolazioni = useMemo(() => getTotaleViolazioni(report), [report]);
+  const text = useMemo(() => reportText(report), [report, totalKm, totaleViolazioni]);
 
   function generatePdf() {
-    const doc = new jsPDF({ unit: 'mm', format: 'a4' });
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(15);
-    doc.text('REPORT DI SERVIZIO', 105, 15, { align: 'center' });
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(10);
-    const lines = doc.splitTextToSize(reportText(), 180);
-    let y = 28;
-    lines.forEach(line => {
-      if (y > 280) { doc.addPage(); y = 15; }
-      doc.text(line, 15, y);
-      y += 5;
-    });
-    doc.save(`report-turno-${report.data}.pdf`);
+    const doc = buildServicePdf(report);
+    doc.save(`report-turno-${sanitizeFileName(report.data)}-${sanitizeFileName(turnoLabel(report))}.pdf`);
+  }
+
+  function exportJson() {
+    const payload = { ...report, schemaVersion: 2, exportedAt: new Date().toISOString() };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `dati-report-${sanitizeFileName(report.data)}-${sanitizeFileName(turnoLabel(report))}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
   }
 
   function sendMail() {
-    const subject = encodeURIComponent(`Report turno Polizia Locale - ${report.data} - ${report.turno}`);
-    const body = encodeURIComponent(`Si trasmette il report del turno di servizio.\n\nNota: allegare il PDF scaricato dall'app.\n\n${reportText().slice(0, 1200)}${reportText().length > 1200 ? '\n\n[Report completo in allegato PDF]' : ''}`);
+    const subject = encodeURIComponent(`Report turno Polizia Locale - ${report.data} - ${turnoLabel(report)}`);
+    const body = encodeURIComponent(`Si trasmette il report del turno di servizio.\n\nAllegare il PDF scaricato dall'app e, per la dashboard dell'ufficiale, anche il file dati JSON.\n\n${text.slice(0, 1200)}${text.length > 1200 ? '\n\n[Report completo in allegato PDF]' : ''}`);
     window.location.href = `mailto:${encodeURIComponent(report.destinatario)}?subject=${subject}&body=${body}`;
   }
 
-  return (
-    <main>
-      <header className="hero">
-        <div>
-          <p className="eyebrow">Polizia Locale</p>
-          <h1>Report Turno</h1>
-          <p>Compilazione guidata, PDF e invio email a fine servizio.</p>
-        </div>
-      </header>
+  return <>
+    <section className="card notice">
+      <h2>Flusso operativo</h2>
+      <p>Al termine del turno l'operatore scarica <strong>PDF</strong> e <strong>file dati JSON</strong>, poi invia entrambi all'ufficiale. L'ufficiale carica i JSON nella dashboard e genera il report aggregato per il Comandante.</p>
+    </section>
 
-      <section className="card">
-        <h2>1. Dati turno</h2>
-        <div className="grid">
-          <Field label="Data servizio"><Input type="date" value={report.data} onChange={v => update({ data: v })} /></Field>
-          <Field label="Turno"><Select value={report.turno} onChange={v => update({ turno: v })}>{TURNI.map(t => <option key={t}>{t}</option>)}</Select></Field>
-          <Field label="Tipologia orario"><Select value={report.orarioTipo} onChange={v => update({ orarioTipo: v })}><option>Ordinario</option><option>Straordinario</option></Select></Field>
-          <Field label="Reparto"><Select value={report.reparto} onChange={v => update({ reparto: v })}>{REPARTI.map(r => <option key={r}>{r}</option>)}</Select></Field>
-        </div>
-        {report.turno === 'Altro orario' && <div className="grid two"><Field label="Ora inizio"><Input value={report.altroTurnoInizio} onChange={v => update({ altroTurnoInizio: v })} placeholder="es. 10.00" /></Field><Field label="Ora fine"><Input value={report.altroTurnoFine} onChange={v => update({ altroTurnoFine: v })} placeholder="es. 17.00" /></Field></div>}
-        {report.reparto === 'Altri servizi' && <Field label="Specificare servizio"><Input value={report.altroServizio} onChange={v => update({ altroServizio: v })} /></Field>}
-      </section>
+    <section className="card">
+      <h2>1. Dati turno</h2>
+      <div className="grid">
+        <Field label="Data servizio"><Input type="date" value={report.data} onChange={v => update({ data: v })} /></Field>
+        <Field label="Turno"><Select value={report.turno} onChange={v => update({ turno: v })}>{TURNI.map(t => <option key={t}>{t}</option>)}</Select></Field>
+        <Field label="Tipologia orario"><Select value={report.orarioTipo} onChange={v => update({ orarioTipo: v })}><option>Ordinario</option><option>Straordinario</option></Select></Field>
+        <Field label="Reparto"><Select value={report.reparto} onChange={v => update({ reparto: v })}>{REPARTI.map(r => <option key={r}>{r}</option>)}</Select></Field>
+      </div>
+      {report.turno === 'Altro orario' && <div className="grid two"><Field label="Ora inizio"><Input value={report.altroTurnoInizio} onChange={v => update({ altroTurnoInizio: v })} placeholder="es. 10.00" /></Field><Field label="Ora fine"><Input value={report.altroTurnoFine} onChange={v => update({ altroTurnoFine: v })} placeholder="es. 17.00" /></Field></div>}
+      {report.reparto === 'Altri servizi' && <Field label="Specificare altro servizio"><Input value={report.altroServizio} onChange={v => update({ altroServizio: v })} /></Field>}
+    </section>
 
-      <section className="card">
-        <h2>2. Operatori</h2>
-        {report.operatori.map((o, idx) => <div className="rowCard" key={idx}><div className="grid three"><Field label="Nome e cognome"><Input value={o.nome} onChange={v => updateArray('operatori', idx, { nome: v })} /></Field><Field label="Matricola"><Input value={o.matricola} onChange={v => updateArray('operatori', idx, { matricola: v })} /></Field><Field label="Qualifica"><Input value={o.qualifica} onChange={v => updateArray('operatori', idx, { qualifica: v })} /></Field></div><button className="ghost" onClick={() => removeArray('operatori', idx)}>Rimuovi</button></div>)}
-        <button onClick={() => addArray('operatori', emptyOperatore())}>+ Aggiungi operatore</button>
-      </section>
+    <section className="card">
+      <h2>2. Operatori</h2>
+      {report.operatori.map((op, idx) => <div className="rowCard" key={idx}><div className="grid three"><Field label="Nome e cognome"><Input value={op.nome} onChange={v => updateArray('operatori', idx, { nome: v })} /></Field><Field label="Matricola"><Input value={op.matricola} onChange={v => updateArray('operatori', idx, { matricola: v })} /></Field><Field label="Qualifica"><Input value={op.qualifica} onChange={v => updateArray('operatori', idx, { qualifica: v })} /></Field></div><button className="ghost" onClick={() => removeArray('operatori', idx)}>Rimuovi</button></div>)}
+      <button onClick={() => addArray('operatori', emptyOperatore())}>+ Aggiungi operatore</button>
+    </section>
 
-      <section className="card">
-        <h2>3. Veicoli e chilometraggio</h2>
-        {report.veicoli.map((v, idx) => <div className="rowCard" key={idx}><div className="grid four"><Field label="Veicolo"><Input value={v.sigla} onChange={x => updateArray('veicoli', idx, { sigla: x })} /></Field><Field label="Km inizio"><Input type="number" value={v.kmInizio} onChange={x => updateArray('veicoli', idx, { kmInizio: x })} /></Field><Field label="Km fine"><Input type="number" value={v.kmFine} onChange={x => updateArray('veicoli', idx, { kmFine: x })} /></Field><Field label="Km percorsi"><input readOnly value={Math.max(0, Number(v.kmFine || 0) - Number(v.kmInizio || 0))} /></Field></div><button className="ghost" onClick={() => removeArray('veicoli', idx)}>Rimuovi</button></div>)}
-        <button onClick={() => addArray('veicoli', emptyVeicolo())}>+ Aggiungi veicolo</button>
-      </section>
+    <section className="card">
+      <h2>3. Veicoli e chilometraggio</h2>
+      {report.veicoli.map((v, idx) => <div className="rowCard" key={idx}><div className="grid four"><Field label="Veicolo / sigla"><Input value={v.sigla} onChange={x => updateArray('veicoli', idx, { sigla: x })} /></Field><Field label="Km inizio"><Input type="number" value={v.kmInizio} onChange={x => updateArray('veicoli', idx, { kmInizio: x })} /></Field><Field label="Km fine"><Input type="number" value={v.kmFine} onChange={x => updateArray('veicoli', idx, { kmFine: x })} /></Field><Field label="Km percorsi"><input readOnly value={km(v)} /></Field></div><button className="ghost" onClick={() => removeArray('veicoli', idx)}>Rimuovi</button></div>)}
+      <button onClick={() => addArray('veicoli', emptyVeicolo())}>+ Aggiungi veicolo</button>
+    </section>
 
-      <section className="card">
-        <h2>4. Interventi effettuati</h2>
-        {report.interventi.map((i, idx) => <Intervento key={idx} i={i} idx={idx} updateIntervento={(patch) => updateArray('interventi', idx, patch)} remove={() => removeArray('interventi', idx)} />)}
-        <button onClick={() => addArray('interventi', emptyIntervento())}>+ Aggiungi intervento</button>
-      </section>
+    <section className="card">
+      <h2>4. Interventi effettuati</h2>
+      {report.interventi.map((i, idx) => <Intervento key={idx} i={i} idx={idx} updateIntervento={(patch) => updateArray('interventi', idx, patch)} remove={() => removeArray('interventi', idx)} />)}
+      <button onClick={() => addArray('interventi', emptyIntervento())}>+ Aggiungi intervento</button>
+    </section>
 
-      <section className="card">
-        <h2>5. Atti redatti</h2>
-        <div className="counterGrid">
-          <Counter label="Relazioni di servizio" value={report.counters.relazioni} onChange={v => update({ counters: { ...report.counters, relazioni: v } })} />
-          <Counter label="Annotazioni di servizio" value={report.counters.annotazioni} onChange={v => update({ counters: { ...report.counters, annotazioni: v } })} />
-          <Counter label="Verbali CdS" value={report.counters.verbaliCds} onChange={v => update({ counters: { ...report.counters, verbaliCds: v } })} />
-          <Counter label="Verbali regolamenti" value={report.counters.verbaliRegolamenti} onChange={v => update({ counters: { ...report.counters, verbaliRegolamenti: v } })} />
-          <Counter label="Sequestri amministrativi" value={report.counters.sequestriAmministrativi} onChange={v => update({ counters: { ...report.counters, sequestriAmministrativi: v } })} />
-          <Counter label="Fermi amministrativi" value={report.counters.fermiAmministrativi} onChange={v => update({ counters: { ...report.counters, fermiAmministrativi: v } })} />
-          <Counter label="Sequestri penali" value={report.counters.sequestriPenali} onChange={v => update({ counters: { ...report.counters, sequestriPenali: v } })} />
-          <Counter label="C.N.R." value={report.counters.cnr} onChange={v => update({ counters: { ...report.counters, cnr: v } })} />
-        </div>
-        <div className="grid two"><Counter label="Altri atti" value={report.counters.altriAttiNumero} onChange={v => update({ counters: { ...report.counters, altriAttiNumero: v } })} /><Field label="Descrizione altri atti"><Input value={report.counters.altriAttiDescrizione} onChange={v => update({ counters: { ...report.counters, altriAttiDescrizione: v } })} /></Field></div>
-      </section>
+    <section className="card">
+      <h2>5. Atti redatti</h2>
+      <div className="counterGrid">
+        {['relazioni','annotazioni','verbaliCds','verbaliRegolamenti','sequestriAmministrativi','fermiAmministrativi','sequestriPenali','cnr'].map(key => <Counter key={key} label={LABELS[key]} value={report.counters[key]} onChange={v => update({ counters: { ...report.counters, [key]: v } })} />)}
+      </div>
+      <div className="grid two"><Counter label="Altri atti" value={report.counters.altriAttiNumero} onChange={v => update({ counters: { ...report.counters, altriAttiNumero: v } })} /><Field label="Descrizione altri atti"><Input value={report.counters.altriAttiDescrizione} onChange={v => update({ counters: { ...report.counters, altriAttiDescrizione: v } })} /></Field></div>
+    </section>
 
-      <section className="card">
-        <h2>6. Violazioni e provvedimenti</h2>
-        <div className="counterGrid">
-          <Counter label="Preavvisi CdS" value={report.counters.preavvisiCds} onChange={v => update({ counters: { ...report.counters, preavvisiCds: v } })} />
-          <Counter label="VdC CdS" value={report.counters.vdcCds} onChange={v => update({ counters: { ...report.counters, vdcCds: v } })} />
-          <Counter label="Reg. Polizia" value={report.counters.regPolizia} onChange={v => update({ counters: { ...report.counters, regPolizia: v } })} />
-          <Counter label="Reg. Edilizio" value={report.counters.regEdilizio} onChange={v => update({ counters: { ...report.counters, regEdilizio: v } })} />
-          <Counter label="Reg. Benessere Animali" value={report.counters.regBenessereAnimali} onChange={v => update({ counters: { ...report.counters, regBenessereAnimali: v } })} />
-          <Counter label="Annonaria / commercio" value={report.counters.annonaria} onChange={v => update({ counters: { ...report.counters, annonaria: v } })} />
-          <Counter label="Altre norme" value={report.counters.altreNorme} onChange={v => update({ counters: { ...report.counters, altreNorme: v } })} />
-          <Counter label="Fermi" value={report.counters.fermi} onChange={v => update({ counters: { ...report.counters, fermi: v } })} />
-          <Counter label="Sequestri" value={report.counters.sequestri} onChange={v => update({ counters: { ...report.counters, sequestri: v } })} />
-        </div>
-        <Field label="Specificare altre norme"><Input value={report.counters.altreNormeDescrizione} onChange={v => update({ counters: { ...report.counters, altreNormeDescrizione: v } })} /></Field>
-        <div className="totalBox">Totale violazioni / provvedimenti: <strong>{totaleViolazioni}</strong></div>
-      </section>
+    <section className="card">
+      <h2>6. Violazioni e provvedimenti</h2>
+      <div className="counterGrid">
+        {['preavvisiCds','vdcCds','regPolizia','regEdilizio','regBenessereAnimali','annonaria','altreNorme','fermi','sequestri'].map(key => <Counter key={key} label={LABELS[key]} value={report.counters[key]} onChange={v => update({ counters: { ...report.counters, [key]: v } })} />)}
+      </div>
+      <Field label="Specificare altre norme"><Input value={report.counters.altreNormeDescrizione} onChange={v => update({ counters: { ...report.counters, altreNormeDescrizione: v } })} /></Field>
+      <div className="totalBox">Totale violazioni / provvedimenti: <strong>{totaleViolazioni}</strong></div>
+    </section>
 
-      <section className="card">
-        <h2>7. Note e invio</h2>
-        <Field label="Note per UDT / Ufficiale di coordinamento"><Textarea value={report.noteUdt} onChange={v => update({ noteUdt: v })} /></Field>
-        <Field label="Email ufficiale destinatario"><Input value={report.destinatario} onChange={v => update({ destinatario: v })} placeholder="es. ufficiale@comune.monza.it" /></Field>
-        <label className="check"><input type="checkbox" checked={report.dichiarazione} onChange={e => update({ dichiarazione: e.target.checked })} /> Confermo la dichiarazione finale degli operatori.</label>
-        <div className="actions"><button onClick={generatePdf}>Scarica PDF</button><button className="primary" onClick={sendMail}>Invia email precompilata</button></div>
-      </section>
+    <section className="card">
+      <h2>7. Note e invio</h2>
+      <Field label="Note per UDT / Ufficiale di coordinamento"><Textarea value={report.noteUdt} onChange={v => update({ noteUdt: v })} /></Field>
+      <Field label="Email ufficiale destinatario"><Input value={report.destinatario} onChange={v => update({ destinatario: v })} placeholder="es. ufficiale@comune.monza.it" /></Field>
+      <label className="check"><input type="checkbox" checked={report.dichiarazione} onChange={e => update({ dichiarazione: e.target.checked })} /> Confermo la dichiarazione finale degli operatori.</label>
+      <div className="actions"><button onClick={generatePdf}>Scarica PDF</button><button onClick={exportJson}>Scarica file dati JSON</button><button className="primary" onClick={sendMail}>Invia email precompilata</button></div>
+    </section>
 
-      <section className="card preview">
-        <h2>Anteprima report</h2>
-        <pre>{reportText()}</pre>
-      </section>
-    </main>
-  );
+    <section className="card preview">
+      <h2>Anteprima report</h2>
+      <pre>{text}</pre>
+    </section>
+  </>;
 }
 
 function Intervento({ i, idx, updateIntervento, remove }) {
@@ -239,6 +211,493 @@ function Intervento({ i, idx, updateIntervento, remove }) {
     {i.tipo === 'Servizio scuole' && <div className="schoolBox"><h4>Scuole presidiate</h4>{i.scuole.map((s, sidx) => <div className="rowCard" key={sidx}><div className="grid four"><Field label={`Scuola ${sidx + 1}`}><Input value={s.nome} onChange={v => updateScuola(sidx, { nome: v })} /></Field><Field label="Ingresso / uscita"><Select value={s.momento} onChange={v => updateScuola(sidx, { momento: v })}><option value="">Seleziona</option><option>Ingresso</option><option>Uscita</option><option>Ingresso e uscita</option></Select></Field><Field label="Orario"><Input value={s.orario} onChange={v => updateScuola(sidx, { orario: v })} /></Field><Field label="Criticità"><Input value={s.criticita} onChange={v => updateScuola(sidx, { criticita: v })} /></Field></div>{i.scuole.length > 1 && <button className="ghost" onClick={() => removeScuola(sidx)}>Rimuovi scuola</button>}</div>)}{i.scuole.length < 3 && <button onClick={addScuola}>+ Aggiungi scuola</button>}</div>}
     <div className="grid two"><Field label="Esito"><Input value={i.esito} onChange={v => updateIntervento({ esito: v })} /></Field><Field label="Note"><Input value={i.note} onChange={v => updateIntervento({ note: v })} /></Field></div>
   </div>;
+}
+
+function Dashboard({ reports, setReports }) {
+  const [commanderNotes, setCommanderNotes] = useState('');
+  const aggregate = useMemo(() => aggregateReports(reports), [reports]);
+  const text = useMemo(() => commanderReportText(aggregate, reports, commanderNotes), [aggregate, reports, commanderNotes]);
+
+  async function importFiles(e) {
+    const files = Array.from(e.target.files || []);
+    const parsed = [];
+    for (const file of files) {
+      try {
+        const raw = await file.text();
+        const data = JSON.parse(raw);
+        if (data && data.interventi && data.counters) parsed.push(data);
+      } catch (err) {
+        alert(`File non leggibile: ${file.name}`);
+      }
+    }
+    setReports(prev => [...prev, ...parsed]);
+    e.target.value = '';
+  }
+
+  function generateCommanderPdf() {
+    const doc = buildCommanderPdf(aggregate, reports, commanderNotes);
+    doc.save(`report-aggregato-comandante-${sanitizeFileName(aggregate.dateLabel)}.pdf`);
+  }
+
+  function exportCsv() {
+    const rows = [['Data','Turno','Orario','Reparto','Operatori','Interventi','Violazioni/Provvedimenti','Km','Note']];
+    reports.forEach(r => rows.push([r.data, turnoLabel(r), r.orarioTipo, repartoLabel(r), operatorNames(r).join('; '), r.interventi?.length || 0, getTotaleViolazioni(r), getKmTotali(r), r.noteUdt || '']));
+    const csv = rows.map(row => row.map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(';')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `tabella-report-${sanitizeFileName(aggregate.dateLabel)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  return <>
+    <section className="card notice">
+      <h2>Dashboard ufficiale</h2>
+      <p>Carica i file <strong>JSON</strong> ricevuti dagli operatori. La dashboard aggrega automaticamente interventi, reparti, origini, violazioni, atti, chilometri e note rilevanti.</p>
+      <div className="actions"><label className="fileButton">Carica file JSON<input type="file" accept="application/json,.json" multiple onChange={importFiles} /></label><button className="ghost" onClick={() => setReports([])}>Svuota dashboard</button></div>
+    </section>
+
+    <section className="metrics">
+      <Metric label="Report caricati" value={reports.length} />
+      <Metric label="Interventi totali" value={aggregate.totalInterventi} />
+      <Metric label="Violazioni / provvedimenti" value={aggregate.totaleViolazioni} />
+      <Metric label="Km percorsi" value={aggregate.kmTotali} />
+    </section>
+
+    <section className="card">
+      <h2>Quadro riepilogativo</h2>
+      {reports.length === 0 ? <p className="muted">Nessun report caricato.</p> : <div className="tableWrap"><table><thead><tr><th>Data</th><th>Turno</th><th>Reparto</th><th>Operatori</th><th>Interventi</th><th>Violazioni</th><th>Km</th></tr></thead><tbody>{reports.map((r, idx) => <tr key={idx}><td>{r.data}</td><td>{turnoLabel(r)}<br/><small>{r.orarioTipo}</small></td><td>{repartoLabel(r)}</td><td>{operatorNames(r).join(', ') || '-'}</td><td>{r.interventi?.length || 0}</td><td>{getTotaleViolazioni(r)}</td><td>{getKmTotali(r)}</td></tr>)}</tbody></table></div>}
+    </section>
+
+    <section className="card split">
+      <Distribution title="Interventi per tipologia" data={aggregate.byTipo} />
+      <Distribution title="Origine interventi" data={aggregate.byOrigine} />
+      <Distribution title="Reparti" data={aggregate.byReparto} />
+      <Distribution title="Atti e violazioni" data={aggregate.counters} labels={LABELS} />
+    </section>
+
+    <section className="card">
+      <h2>Note rilevanti e criticità</h2>
+      {aggregate.notes.length === 0 ? <p className="muted">Nessuna nota inserita nei report caricati.</p> : <ul className="noteList">{aggregate.notes.map((note, idx) => <li key={idx}><strong>{note.data} - {note.turno} - {note.reparto}</strong><br/>{note.testo}</li>)}</ul>}
+      <Field label="Note dell'ufficiale per il Comandante"><Textarea value={commanderNotes} onChange={setCommanderNotes} placeholder="Inserire valutazioni, criticità da attenzionare, esigenze operative, proposte..." /></Field>
+      <div className="actions"><button onClick={generateCommanderPdf}>Genera PDF aggregato</button><button onClick={() => exportExcelAvanzato(reports, aggregate, commanderNotes)}>Esporta Excel avanzato</button><button onClick={exportCsv}>Esporta tabella CSV</button></div>
+    </section>
+
+    <section className="card preview">
+      <h2>Anteprima report aggregato</h2>
+      <pre>{text}</pre>
+    </section>
+  </>;
+}
+
+function Metric({ label, value }) { return <div className="metric"><strong>{value}</strong><span>{label}</span></div>; }
+function Distribution({ title, data, labels = {} }) {
+  const entries = Object.entries(data || {}).filter(([, value]) => n(value) > 0).sort((a, b) => n(b[1]) - n(a[1]));
+  return <div><h3>{title}</h3>{entries.length === 0 ? <p className="muted">Nessun dato.</p> : <ul className="distList">{entries.map(([key, value]) => <li key={key}><span>{labels[key] || key}</span><strong>{value}</strong></li>)}</ul>}</div>;
+}
+
+function makePdf(title, subtitle = '') {
+  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+  doc.setProperties({ title, subject: 'Report Polizia Locale', author: 'Polizia Locale' });
+  addHeader(doc, title, subtitle);
+  return doc;
+}
+
+function addHeader(doc, title, subtitle = '') {
+  doc.setFillColor(245, 247, 250);
+  doc.rect(0, 0, 210, 31, 'F');
+  doc.setDrawColor(25, 55, 95);
+  doc.setLineWidth(0.8);
+  doc.line(12, 31, 198, 31);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(11);
+  doc.text('COMUNE DI MONZA', 12, 11);
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'normal');
+  doc.text('Settore Polizia Locale e Protezione Civile', 12, 17);
+  doc.text('via Marsala 13 | 20900 Monza', 12, 22);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(15);
+  doc.text(title, 198, 13, { align: 'right' });
+  if (subtitle) {
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.text(subtitle, 198, 21, { align: 'right' });
+  }
+}
+
+function addFooter(doc) {
+  const pages = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= pages; i++) {
+    doc.setPage(i);
+    doc.setDrawColor(210, 215, 220);
+    doc.line(12, 286, 198, 286);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7.5);
+    doc.text('Polizia Locale e Protezione Civile | Tel. 039.2816313 | email: polizialocale@comune.monza.it | PEC: monza@pec.comunedimonza.it', 12, 291);
+    doc.text(`Pagina ${i} di ${pages}`, 198, 291, { align: 'right' });
+  }
+}
+
+function ensureSpace(doc, y, needed = 18, title = '', subtitle = '') {
+  if (y + needed <= 276) return y;
+  doc.addPage();
+  addHeader(doc, title, subtitle);
+  return 40;
+}
+
+function section(doc, label, y, pdfTitle = '', subtitle = '') {
+  y = ensureSpace(doc, y, 14, pdfTitle, subtitle);
+  doc.setFillColor(25, 55, 95);
+  doc.roundedRect(12, y, 186, 8, 1.5, 1.5, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(9);
+  doc.text(label.toUpperCase(), 15, y + 5.4);
+  doc.setTextColor(0, 0, 0);
+  return y + 12;
+}
+
+function box(doc, y, h, pdfTitle = '', subtitle = '') {
+  y = ensureSpace(doc, y, h + 4, pdfTitle, subtitle);
+  doc.setDrawColor(222, 226, 230);
+  doc.setFillColor(255, 255, 255);
+  doc.roundedRect(12, y, 186, h, 1.5, 1.5, 'FD');
+  return y;
+}
+
+function kvGrid(doc, items, y, columns = 2, pdfTitle = '', subtitle = '') {
+  const rowH = 11;
+  const rows = Math.ceil(items.length / columns);
+  y = box(doc, y, rows * rowH + 4, pdfTitle, subtitle) + 7;
+  const colW = 186 / columns;
+  items.forEach((item, idx) => {
+    const col = idx % columns;
+    const row = Math.floor(idx / columns);
+    const x = 16 + col * colW;
+    const yy = y + row * rowH;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(7.5);
+    doc.setTextColor(80, 86, 94);
+    doc.text(item.label, x, yy);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.setTextColor(0, 0, 0);
+    doc.text(String(item.value || '-'), x, yy + 4.5, { maxWidth: colW - 9 });
+  });
+  return y + rows * rowH + 2;
+}
+
+function simpleTable(doc, headers, rows, y, widths, pdfTitle = '', subtitle = '') {
+  const headerH = 8;
+  const lineH = 5;
+  y = ensureSpace(doc, y, headerH + 8, pdfTitle, subtitle);
+  let x = 12;
+  doc.setFillColor(235, 239, 244);
+  doc.rect(12, y, 186, headerH, 'F');
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(7.8);
+  headers.forEach((h, i) => { doc.text(h, x + 2, y + 5.2, { maxWidth: widths[i] - 4 }); x += widths[i]; });
+  y += headerH;
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7.6);
+  rows.forEach(row => {
+    const cellLines = row.map((cell, i) => doc.splitTextToSize(String(cell || '-'), widths[i] - 4));
+    const h = Math.max(7, Math.max(...cellLines.map(lines => lines.length)) * lineH + 2);
+    y = ensureSpace(doc, y, h + 2, pdfTitle, subtitle);
+    doc.setDrawColor(232, 235, 238);
+    doc.rect(12, y, 186, h);
+    let xx = 12;
+    cellLines.forEach((lines, i) => {
+      doc.text(lines, xx + 2, y + 5, { maxWidth: widths[i] - 4 });
+      xx += widths[i];
+      if (i < widths.length - 1) doc.line(xx, y, xx, y + h);
+    });
+    y += h;
+  });
+  return y + 4;
+}
+
+function paragraph(doc, text, y, pdfTitle = '', subtitle = '', maxWidth = 178) {
+  const lines = doc.splitTextToSize(String(text || '-'), maxWidth);
+  y = ensureSpace(doc, y, lines.length * 5 + 8, pdfTitle, subtitle);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8.5);
+  doc.text(lines, 16, y + 5);
+  return y + lines.length * 5 + 8;
+}
+
+function buildServicePdf(report) {
+  const title = 'REPORT DI SERVIZIO';
+  const subtitle = `${report.data} | Turno ${turnoLabel(report)} | ${report.orarioTipo}`;
+  const doc = makePdf(title, subtitle);
+  let y = 40;
+
+  y = section(doc, 'Dati generali del turno', y, title, subtitle);
+  y = kvGrid(doc, [
+    { label: 'Data servizio', value: report.data },
+    { label: 'Turno', value: turnoLabel(report) },
+    { label: 'Tipologia orario', value: report.orarioTipo },
+    { label: 'Reparto / servizio', value: repartoLabel(report) },
+  ], y, 2, title, subtitle) + 2;
+
+  y = section(doc, 'Operatori', y, title, subtitle);
+  const operatorRows = (report.operatori || []).filter(o => o.nome || o.matricola || o.qualifica).map(o => [o.nome, o.matricola, o.qualifica]);
+  y = simpleTable(doc, ['Nominativo', 'Matricola', 'Qualifica'], operatorRows.length ? operatorRows : [['-', '-', '-']], y, [90, 40, 56], title, subtitle);
+
+  y = section(doc, 'Veicoli e chilometraggio', y, title, subtitle);
+  const vehicleRows = (report.veicoli || []).map(v => [v.sigla || '-', v.kmInizio || '-', v.kmFine || '-', km(v)]);
+  y = simpleTable(doc, ['Veicolo', 'Km inizio', 'Km fine', 'Km percorsi'], vehicleRows.length ? vehicleRows : [['-', '-', '-', '-']], y, [72, 38, 38, 38], title, subtitle);
+  y = kvGrid(doc, [{ label: 'Totale km percorsi', value: getKmTotali(report) }], y, 1, title, subtitle) + 2;
+
+  y = section(doc, 'Interventi effettuati', y, title, subtitle);
+  (report.interventi || []).forEach((i, idx) => {
+    const scuole = i.tipo === 'Servizio scuole' ? (i.scuole || []).filter(s => s.nome || s.momento || s.orario || s.criticita).map((s, pos) => `Scuola ${pos + 1}: ${s.nome || '-'} | ${s.momento || '-'} | ${s.orario || '-'} | Criticità: ${s.criticita || '-'}`).join('\n') : '';
+    const dettagli = extraDetails(i).replace(/\n/g, ' ').trim();
+    y = kvGrid(doc, [
+      { label: `Intervento ${idx + 1}`, value: i.tipo },
+      { label: 'Origine', value: i.origine === 'Altro' ? `Altro: ${i.origineAltro || '-'}` : i.origine },
+      { label: 'Orario', value: `${i.oraInizio || '-'} - ${i.oraFine || '-'}` },
+      { label: 'Luogo', value: i.luogo || '-' },
+    ], y, 2, title, subtitle);
+    y = paragraph(doc, `Descrizione: ${i.descrizione || '-'}\nEsito: ${i.esito || '-'}${dettagli ? '\n' + dettagli : ''}${scuole ? '\n' + scuole : ''}\nNote: ${i.note || '-'}`, y, title, subtitle);
+  });
+
+  y = section(doc, 'Atti redatti', y, title, subtitle);
+  const c = report.counters || emptyCounters();
+  y = simpleTable(doc, ['Tipologia', 'N.'], [
+    ['Relazioni di servizio', c.relazioni], ['Annotazioni di servizio', c.annotazioni], ['Verbali CdS', c.verbaliCds], ['Verbali regolamenti', c.verbaliRegolamenti],
+    ['Sequestri amministrativi', c.sequestriAmministrativi], ['Fermi amministrativi', c.fermiAmministrativi], ['Sequestri penali', c.sequestriPenali], ['C.N.R.', c.cnr], [`Altri atti ${c.altriAttiDescrizione || ''}`, c.altriAttiNumero]
+  ], y, [150, 36], title, subtitle);
+
+  y = section(doc, 'Violazioni e provvedimenti', y, title, subtitle);
+  y = simpleTable(doc, ['Tipologia', 'N.'], [
+    ['Preavvisi CdS', c.preavvisiCds], ['VdC CdS', c.vdcCds], ['Regolamento Polizia', c.regPolizia], ['Regolamento Edilizio', c.regEdilizio],
+    ['Regolamento Benessere Animali', c.regBenessereAnimali], ['Annonaria / commercio', c.annonaria], [`Altre norme ${c.altreNormeDescrizione || ''}`, c.altreNorme], ['Fermi', c.fermi], ['Sequestri', c.sequestri], ['TOTALE', getTotaleViolazioni(report)]
+  ], y, [150, 36], title, subtitle);
+
+  y = section(doc, 'Note per UDT / Ufficiale di coordinamento', y, title, subtitle);
+  y = paragraph(doc, report.noteUdt || '-', y, title, subtitle);
+
+  y = section(doc, 'Dichiarazione e firme', y, title, subtitle);
+  y = paragraph(doc, 'Gli operatori dichiarano che quanto riportato nel presente report corrisponde fedelmente alle attività effettivamente svolte e riscontrate durante il turno di servizio, consapevoli delle proprie responsabilità amministrative e penali anche in considerazione dell’art. 328 C.P.', y, title, subtitle);
+  y = ensureSpace(doc, y, 24, title, subtitle);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8.5);
+  const names = operatorNames(report);
+  const signRows = names.length ? names : ['Operatore 1', 'Operatore 2', 'Operatore 3'];
+  signRows.slice(0, 6).forEach((name, idx) => {
+    const yy = y + idx * 9;
+    doc.text(name, 16, yy);
+    doc.line(82, yy + 1, 190, yy + 1);
+  });
+
+  addFooter(doc);
+  return doc;
+}
+
+function buildCommanderPdf(aggregate, reports, commanderNotes) {
+  const title = 'REPORT AGGREGATO PER IL COMANDANTE';
+  const subtitle = `Periodo/Data: ${aggregate.dateLabel}`;
+  const doc = makePdf(title, subtitle);
+  let y = 40;
+
+  y = section(doc, 'Sintesi operativa', y, title, subtitle);
+  y = kvGrid(doc, [
+    { label: 'Report ricevuti', value: reports.length },
+    { label: 'Interventi totali', value: aggregate.totalInterventi },
+    { label: 'Violazioni / provvedimenti', value: aggregate.totaleViolazioni },
+    { label: 'Km totali percorsi', value: aggregate.kmTotali },
+  ], y, 4, title, subtitle) + 2;
+
+  y = section(doc, 'Interventi per tipologia', y, title, subtitle);
+  y = simpleTable(doc, ['Tipologia', 'Totale'], objectRows(aggregate.byTipo), y, [150, 36], title, subtitle);
+
+  y = section(doc, 'Origine degli interventi', y, title, subtitle);
+  y = simpleTable(doc, ['Origine', 'Totale'], objectRows(aggregate.byOrigine), y, [150, 36], title, subtitle);
+
+  y = section(doc, 'Reparti / servizi rendicontati', y, title, subtitle);
+  y = simpleTable(doc, ['Reparto / servizio', 'Report'], objectRows(aggregate.byReparto), y, [150, 36], title, subtitle);
+
+  y = section(doc, 'Atti, violazioni e provvedimenti', y, title, subtitle);
+  y = simpleTable(doc, ['Voce', 'Totale'], objectRows(aggregate.counters, LABELS), y, [150, 36], title, subtitle);
+
+  y = section(doc, 'Dettaglio report ricevuti', y, title, subtitle);
+  const detailRows = reports.map(r => [r.data, turnoLabel(r), r.orarioTipo, repartoLabel(r), operatorNames(r).join(', ') || '-', (r.interventi || []).length, getTotaleViolazioni(r), getKmTotali(r)]);
+  y = simpleTable(doc, ['Data', 'Turno', 'Tipo', 'Reparto', 'Operatori', 'Int.', 'Viol.', 'Km'], detailRows.length ? detailRows : [['-', '-', '-', '-', '-', '-', '-', '-']], y, [22, 27, 23, 36, 43, 11, 12, 12], title, subtitle);
+
+  y = section(doc, 'Note rilevanti / criticità', y, title, subtitle);
+  const notes = aggregate.notes.length ? aggregate.notes.map(n => `${n.data} | ${n.turno} | ${n.reparto}: ${n.testo}`).join('\n\n') : 'Nessuna nota rilevante.';
+  y = paragraph(doc, notes, y, title, subtitle);
+
+  y = section(doc, 'Note dell\'ufficiale per il Comandante', y, title, subtitle);
+  y = paragraph(doc, commanderNotes || '-', y, title, subtitle);
+
+  addFooter(doc);
+  return doc;
+}
+
+function objectRows(obj, labels = {}) {
+  const rows = Object.entries(obj || {}).filter(([, value]) => n(value) > 0).sort((a, b) => n(b[1]) - n(a[1])).map(([key, value]) => [labels[key] || key, value]);
+  return rows.length ? rows : [['Nessun dato', '-']];
+}
+
+
+function parseTimeToMinutes(value) {
+  if (!value) return null;
+  const clean = String(value).trim().replace('.', ':');
+  const match = clean.match(/^(\d{1,2})(?::(\d{1,2}))?$/);
+  if (!match) return null;
+  const h = Number(match[1]);
+  const m = Number(match[2] || 0);
+  if (Number.isNaN(h) || Number.isNaN(m)) return null;
+  return (h * 60 + m) % 1440;
+}
+function durataMinuti(oraInizio, oraFine) {
+  const start = parseTimeToMinutes(oraInizio);
+  const end = parseTimeToMinutes(oraFine);
+  if (start === null || end === null) return '';
+  return end >= start ? end - start : (1440 - start) + end;
+}
+function fasciaOraria(oraInizio) {
+  const minutes = parseTimeToMinutes(oraInizio);
+  if (minutes === null) return 'Non indicata';
+  const h = Math.floor(minutes / 60);
+  if (h >= 6 && h < 12) return 'Mattino';
+  if (h >= 12 && h < 18) return 'Pomeriggio';
+  if (h >= 18 && h < 22) return 'Sera';
+  return 'Notte';
+}
+function testoCritico(text = '') {
+  const value = String(text).toLowerCase();
+  return ['critic', 'pericol', 'ferit', 'aggression', 'grave', 'emergenza', 'rischio', 'tso', 'aso', 'sinistro'].some(k => value.includes(k));
+}
+function isInterventoCritico(intervento) {
+  return intervento?.conFeriti === 'Con feriti' || ['TSO', 'ASO'].includes(intervento?.tipo) || testoCritico(`${intervento?.tipo || ''} ${intervento?.descrizione || ''} ${intervento?.esito || ''} ${intervento?.note || ''}`);
+}
+function addCount(target, key, amount = 1) {
+  const label = key || 'Non indicato';
+  target[label] = n(target[label]) + n(amount || 0);
+}
+function orderedObjectRows(obj, labels = {}) {
+  return Object.entries(obj || {}).filter(([, value]) => n(value) > 0).sort((a, b) => n(b[1]) - n(a[1])).map(([key, value]) => ({ Voce: labels[key] || key, Totale: n(value) }));
+}
+function makeBar(value, max) {
+  const blocks = Math.round((n(value) / Math.max(1, n(max))) * 20);
+  return '█'.repeat(blocks);
+}
+function buildExcelData(reports, aggregate, commanderNotes) {
+  const interventiRows = [];
+  const reportRows = [];
+  const countersRows = [];
+  const byFascia = { Mattino: 0, Pomeriggio: 0, Sera: 0, Notte: 0, 'Non indicata': 0 };
+  let interventoPiuLungo = { durata: -1, label: '-' };
+  const criticitaRows = [];
+  reports.forEach((r, reportIndex) => {
+    const operatori = operatorNames(r).join('; ');
+    reportRows.push({ Data: r.data || '', Turno: turnoLabel(r), 'Tipologia orario': r.orarioTipo || '', 'Reparto / servizio': repartoLabel(r), Operatori: operatori, 'Numero operatori': (r.operatori || []).filter(o => o.nome || o.matricola || o.qualifica).length, 'Interventi totali': (r.interventi || []).length, 'Violazioni / provvedimenti': getTotaleViolazioni(r), 'Km percorsi': getKmTotali(r), 'Note UDT': r.noteUdt || '' });
+    Object.entries(r.counters || {}).forEach(([key, value]) => { if (typeof value === 'number' && n(value) > 0) countersRows.push({ Data: r.data || '', Turno: turnoLabel(r), Reparto: repartoLabel(r), Voce: LABELS[key] || key, Totale: n(value) }); });
+    (r.interventi || []).forEach((i, idx) => {
+      const durata = durataMinuti(i.oraInizio, i.oraFine);
+      const fascia = fasciaOraria(i.oraInizio);
+      addCount(byFascia, fascia);
+      const origine = i.origine === 'Altro' ? `Altro: ${i.origineAltro || '-'}` : (i.origine || 'Non indicata');
+      const scuole = i.tipo === 'Servizio scuole' ? (i.scuole || []).filter(s => s.nome || s.momento || s.orario || s.criticita).map((s, pos) => `Scuola ${pos + 1}: ${s.nome || '-'} (${s.momento || '-'} ${s.orario || '-'}) Criticità: ${s.criticita || '-'}`).join(' | ') : '';
+      const criticita = isInterventoCritico(i) ? 'Sì' : 'No';
+      if (durata !== '' && durata > interventoPiuLungo.durata) interventoPiuLungo = { durata, label: `${r.data || ''} ${turnoLabel(r)} - ${i.tipo || '-'} (${durata} min)` };
+      const row = { Data: r.data || '', Turno: turnoLabel(r), 'Tipologia orario': r.orarioTipo || '', 'Reparto / servizio': repartoLabel(r), Operatori: operatori, 'N. report': reportIndex + 1, 'N. intervento': idx + 1, 'Tipo intervento': i.tipo || '', Origine: origine, 'Ora inizio': i.oraInizio || '', 'Ora fine': i.oraFine || '', 'Durata minuti': durata, 'Fascia oraria': fascia, Luogo: i.luogo || '', Descrizione: i.descrizione || '', Esito: i.esito || '', Note: i.note || '', Criticità: criticita, Feriti: i.conFeriti || '', 'Veicoli coinvolti': i.veicoliCoinvolti || '', 'Rilievi effettuati': i.rilievi || '', 'Veicoli controllati': i.veicoliControllati || '', 'Persone controllate': i.personeControllate || '', 'Verbali elevati': i.verbaliElevati || '', 'Fermi / sequestri intervento': i.fermiSequestri || '', 'Motivo viabilità': i.motivoViabilita || '', 'Strade interessate': i.strade || '', 'Scuole presidiate': scuole };
+      interventiRows.push(row);
+      if (criticita === 'Sì') criticitaRows.push({ Data: row.Data, Turno: row.Turno, Reparto: row['Reparto / servizio'], 'Tipo intervento': row['Tipo intervento'], Orario: `${row['Ora inizio']} - ${row['Ora fine']}`, Luogo: row.Luogo, Motivo: `${row.Descrizione} ${row.Note}`.trim() });
+    });
+  });
+  const maxTipo = Math.max(1, ...Object.values(aggregate.byTipo || {}).map(n));
+  const maxOrigine = Math.max(1, ...Object.values(aggregate.byOrigine || {}).map(n));
+  const maxReparto = Math.max(1, ...Object.values(aggregate.byReparto || {}).map(n));
+  const maxFascia = Math.max(1, ...Object.values(byFascia).map(n));
+  const topTipo = orderedObjectRows(aggregate.byTipo)[0]?.Voce || '-';
+  const topReparto = orderedObjectRows(aggregate.byReparto)[0]?.Voce || '-';
+  const topFascia = orderedObjectRows(byFascia)[0]?.Voce || '-';
+  const dashboardRows = [['REPORT AGGREGATO POLIZIA LOCALE - DASHBOARD EXCEL', ''], ['Periodo / data', aggregate.dateLabel], ['Report ricevuti', reports.length], ['Interventi totali', aggregate.totalInterventi], ['Violazioni / provvedimenti', aggregate.totaleViolazioni], ['Km totali percorsi', aggregate.kmTotali], ['Tipologia intervento prevalente', topTipo], ['Reparto più impegnato', topReparto], ['Fascia oraria più intensa', topFascia], ['Intervento più lungo', interventoPiuLungo.label], ['Note ufficiale', commanderNotes || '-']];
+  const graficiRows = [['Sezione', 'Voce', 'Totale', 'Grafico'], ...orderedObjectRows(aggregate.byTipo).map(r => ['Tipologia interventi', r.Voce, r.Totale, makeBar(r.Totale, maxTipo)]), [], ['Sezione', 'Voce', 'Totale', 'Grafico'], ...orderedObjectRows(aggregate.byOrigine).map(r => ['Origine interventi', r.Voce, r.Totale, makeBar(r.Totale, maxOrigine)]), [], ['Sezione', 'Voce', 'Totale', 'Grafico'], ...orderedObjectRows(aggregate.byReparto).map(r => ['Reparti / servizi', r.Voce, r.Totale, makeBar(r.Totale, maxReparto)]), [], ['Sezione', 'Voce', 'Totale', 'Grafico'], ...orderedObjectRows(byFascia).map(r => ['Fasce orarie', r.Voce, r.Totale, makeBar(r.Totale, maxFascia)])];
+  const riepilogoRows = [{ Sezione: 'KPI', Voce: 'Report ricevuti', Totale: reports.length }, { Sezione: 'KPI', Voce: 'Interventi totali', Totale: aggregate.totalInterventi }, { Sezione: 'KPI', Voce: 'Violazioni / provvedimenti', Totale: aggregate.totaleViolazioni }, { Sezione: 'KPI', Voce: 'Km totali percorsi', Totale: aggregate.kmTotali }, ...orderedObjectRows(aggregate.byTipo).map(r => ({ Sezione: 'Tipologia interventi', Voce: r.Voce, Totale: r.Totale })), ...orderedObjectRows(aggregate.byOrigine).map(r => ({ Sezione: 'Origine interventi', Voce: r.Voce, Totale: r.Totale })), ...orderedObjectRows(aggregate.byReparto).map(r => ({ Sezione: 'Reparti / servizi', Voce: r.Voce, Totale: r.Totale })), ...orderedObjectRows(byFascia).map(r => ({ Sezione: 'Fasce orarie', Voce: r.Voce, Totale: r.Totale })), ...orderedObjectRows(aggregate.counters, LABELS).map(r => ({ Sezione: 'Atti e violazioni', Voce: r.Voce, Totale: r.Totale }))];
+  const readmeRows = [['Foglio', 'Contenuto'], ['Dashboard', 'KPI principali e sintesi operativa pronta per lettura comando.'], ['Grafici', 'Tabelle visuali con barre orizzontali compatibili con Excel, utili per stampa e analisi rapida.'], ['Interventi', 'Dataset dettagliato: una riga per ogni intervento, pronto per filtri e tabelle pivot.'], ['Report', 'Una riga per ogni report caricato.'], ['Riepilogo', 'Dati aggregati per categoria.'], ['Criticità', 'Interventi evidenziati automaticamente come rilevanti.'], ['Atti_Violazioni', 'Dettaglio contatori per report.']];
+  return { dashboardRows, graficiRows, interventiRows, reportRows, riepilogoRows, criticitaRows, countersRows, readmeRows };
+}
+function applyWorksheetLayout(ws, widths = []) {
+  ws['!cols'] = widths.map(w => ({ wch: w }));
+  const range = XLSX.utils.decode_range(ws['!ref'] || 'A1:A1');
+  ws['!autofilter'] = { ref: XLSX.utils.encode_range(range) };
+}
+function exportExcelAvanzato(reports, aggregate, commanderNotes) {
+  if (!reports.length) { alert('Carica almeno un file JSON prima di esportare Excel.'); return; }
+  const data = buildExcelData(reports, aggregate, commanderNotes);
+  const wb = XLSX.utils.book_new();
+  const wsDashboard = XLSX.utils.aoa_to_sheet(data.dashboardRows); applyWorksheetLayout(wsDashboard, [38, 90]); XLSX.utils.book_append_sheet(wb, wsDashboard, 'Dashboard');
+  const wsGrafici = XLSX.utils.aoa_to_sheet(data.graficiRows); applyWorksheetLayout(wsGrafici, [26, 48, 12, 28]); XLSX.utils.book_append_sheet(wb, wsGrafici, 'Grafici');
+  const wsInterventi = XLSX.utils.json_to_sheet(data.interventiRows.length ? data.interventiRows : [{ Messaggio: 'Nessun intervento presente nei report caricati' }]); applyWorksheetLayout(wsInterventi, [12,16,18,32,36,10,12,28,24,12,12,14,16,30,48,36,36,12,18,16,16,18,18,18,18,18,30,32,48]); XLSX.utils.book_append_sheet(wb, wsInterventi, 'Interventi');
+  const wsReport = XLSX.utils.json_to_sheet(data.reportRows.length ? data.reportRows : [{ Messaggio: 'Nessun report caricato' }]); applyWorksheetLayout(wsReport, [12,16,18,32,42,16,16,24,14,50]); XLSX.utils.book_append_sheet(wb, wsReport, 'Report');
+  const wsRiepilogo = XLSX.utils.json_to_sheet(data.riepilogoRows); applyWorksheetLayout(wsRiepilogo, [26,48,14]); XLSX.utils.book_append_sheet(wb, wsRiepilogo, 'Riepilogo');
+  const wsCriticita = XLSX.utils.json_to_sheet(data.criticitaRows.length ? data.criticitaRows : [{ Messaggio: 'Nessuna criticità automatica rilevata' }]); applyWorksheetLayout(wsCriticita, [12,16,30,28,18,30,80]); XLSX.utils.book_append_sheet(wb, wsCriticita, 'Criticità');
+  const wsCounters = XLSX.utils.json_to_sheet(data.countersRows.length ? data.countersRows : [{ Messaggio: 'Nessun atto o violazione conteggiato' }]); applyWorksheetLayout(wsCounters, [12,16,32,40,12]); XLSX.utils.book_append_sheet(wb, wsCounters, 'Atti_Violazioni');
+  const wsReadme = XLSX.utils.aoa_to_sheet(data.readmeRows); applyWorksheetLayout(wsReadme, [24,100]); XLSX.utils.book_append_sheet(wb, wsReadme, 'README');
+  XLSX.writeFile(wb, `report-aggregato-analisi-${sanitizeFileName(aggregate.dateLabel)}.xlsx`, { compression: true });
+}
+function getKmTotali(report) { return (report.veicoli || []).reduce((sum, v) => sum + km(v), 0); }
+function getTotaleViolazioni(report) {
+  const c = report.counters || {};
+  return ['preavvisiCds','vdcCds','regPolizia','regEdilizio','regBenessereAnimali','annonaria','altreNorme','fermi','sequestri'].reduce((s, k) => s + n(c[k]), 0);
+}
+function operatorNames(report) { return (report.operatori || []).filter(o => o.nome || o.matricola || o.qualifica).map(o => `${o.nome || 'Operatore'}${o.matricola ? ` mtr. ${o.matricola}` : ''}`); }
+function extraDetails(i) {
+  if (i.tipo === 'Sinistro stradale') return `   Dettagli: ${i.conFeriti}; veicoli coinvolti ${i.veicoliCoinvolti || '-'}; rilievi ${i.rilievi}\n`;
+  if (i.tipo === 'Posto di controllo') return `   Controlli: veicoli ${i.veicoliControllati || '0'}; persone ${i.personeControllate || '0'}; verbali ${i.verbaliElevati || '0'}; fermi/sequestri ${i.fermiSequestri || '0'}\n`;
+  if (i.tipo === 'Viabilità') return `   Motivo: ${i.motivoViabilita || '-'}; strade interessate: ${i.strade || '-'}\n`;
+  return '';
+}
+
+function reportText(report) {
+  const ops = operatorNames(report).map(x => `- ${x}`).join('\n') || '- Non indicati';
+  const mezzi = (report.veicoli || []).map(v => `- ${v.sigla || 'Veicolo'} | Km inizio ${v.kmInizio || '-'} | Km fine ${v.kmFine || '-'} | Km percorsi ${km(v)}`).join('\n');
+  const interventi = (report.interventi || []).map((i, idx) => {
+    const scuole = i.tipo === 'Servizio scuole' ? (i.scuole || []).map((s, pos) => `   Scuola ${pos+1}: ${s.nome || '-'} | ${s.momento || '-'} | ${s.orario || '-'} | Criticità: ${s.criticita || '-'}`).join('\n') : '';
+    return `${idx + 1}. ${i.tipo} | ${i.origine}${i.origine === 'Altro' ? ': ' + (i.origineAltro || '-') : ''}\n   Orario: ${i.oraInizio || '-'} - ${i.oraFine || '-'} | Luogo: ${i.luogo || '-'}\n   Descrizione: ${i.descrizione || '-'}\n   Esito: ${i.esito || '-'}\n${extraDetails(i)}${scuole ? '\n' + scuole : ''}\n   Note: ${i.note || '-'}`;
+  }).join('\n\n') || '- Nessun intervento inserito';
+  const c = report.counters || emptyCounters();
+  return `REPORT DI SERVIZIO - POLIZIA LOCALE\n\nDATA: ${report.data}\nTURNO: ${turnoLabel(report)} (${report.orarioTipo})\nREPARTO: ${repartoLabel(report)}\n\nOPERATORI\n${ops}\n\nVEICOLI\n${mezzi || '- Non indicati'}\nTotale km percorsi: ${getKmTotali(report)}\n\nINTERVENTI EFFETTUATI\n${interventi}\n\nATTI REDATTI\nRelazioni: ${c.relazioni}\nAnnotazioni: ${c.annotazioni}\nVerbali CdS: ${c.verbaliCds}\nVerbali regolamenti: ${c.verbaliRegolamenti}\nSequestri amministrativi: ${c.sequestriAmministrativi}\nFermi amministrativi: ${c.fermiAmministrativi}\nSequestri penali: ${c.sequestriPenali}\nCNR: ${c.cnr}\nAltri atti: ${c.altriAttiNumero} ${c.altriAttiDescrizione || ''}\n\nVIOLAZIONI / PROVVEDIMENTI\nPreavvisi CdS: ${c.preavvisiCds}\nVdC CdS: ${c.vdcCds}\nRegolamento Polizia: ${c.regPolizia}\nRegolamento Edilizio: ${c.regEdilizio}\nRegolamento Benessere Animali: ${c.regBenessereAnimali}\nAnnonaria / commercio: ${c.annonaria}\nAltre norme: ${c.altreNorme} ${c.altreNormeDescrizione || ''}\nFermi: ${c.fermi}\nSequestri: ${c.sequestri}\nTOTALE: ${getTotaleViolazioni(report)}\n\nNOTE PER UDT / UFFICIALE DI COORDINAMENTO\n${report.noteUdt || '-'}\n\nDICHIARAZIONE\nGli operatori dichiarano che quanto riportato corrisponde fedelmente alle attività effettivamente svolte e riscontrate durante il turno di servizio.\nConferma dichiarazione: ${report.dichiarazione ? 'SI' : 'NO'}\n`;
+}
+
+function aggregateReports(reports) {
+  const aggregate = { totalInterventi: 0, totaleViolazioni: 0, kmTotali: 0, byTipo: {}, byOrigine: {}, byReparto: {}, counters: {}, notes: [], dates: new Set() };
+  reports.forEach(r => {
+    if (r.data) aggregate.dates.add(r.data);
+    aggregate.totalInterventi += (r.interventi || []).length;
+    aggregate.totaleViolazioni += getTotaleViolazioni(r);
+    aggregate.kmTotali += getKmTotali(r);
+    aggregate.byReparto[repartoLabel(r)] = n(aggregate.byReparto[repartoLabel(r)]) + 1;
+    (r.interventi || []).forEach(i => {
+      aggregate.byTipo[i.tipo || 'Non indicato'] = n(aggregate.byTipo[i.tipo || 'Non indicato']) + 1;
+      const origine = i.origine === 'Altro' ? `Altro: ${i.origineAltro || '-'}` : (i.origine || 'Non indicata');
+      aggregate.byOrigine[origine] = n(aggregate.byOrigine[origine]) + 1;
+    });
+    Object.entries(r.counters || {}).forEach(([key, value]) => { if (typeof value === 'number') aggregate.counters[key] = n(aggregate.counters[key]) + n(value); });
+    if (r.noteUdt) aggregate.notes.push({ data: r.data, turno: turnoLabel(r), reparto: repartoLabel(r), testo: r.noteUdt });
+  });
+  const dates = Array.from(aggregate.dates).sort();
+  aggregate.dateLabel = dates.length === 0 ? today() : dates.length === 1 ? dates[0] : `${dates[0]}_${dates[dates.length - 1]}`;
+  return aggregate;
+}
+
+function listEntries(obj, labels = {}) {
+  const entries = Object.entries(obj || {}).filter(([, value]) => n(value) > 0).sort((a, b) => n(b[1]) - n(a[1]));
+  return entries.length ? entries.map(([k, v]) => `- ${labels[k] || k}: ${v}`).join('\n') : '- Nessun dato';
+}
+
+function commanderReportText(aggregate, reports, commanderNotes) {
+  const details = reports.map((r, idx) => `${idx + 1}. ${r.data} | ${turnoLabel(r)} | ${r.orarioTipo} | ${repartoLabel(r)} | Operatori: ${operatorNames(r).join(', ') || '-'} | Interventi: ${(r.interventi || []).length} | Violazioni/Provvedimenti: ${getTotaleViolazioni(r)} | Km: ${getKmTotali(r)}`).join('\n') || '- Nessun report caricato';
+  const notes = aggregate.notes.length ? aggregate.notes.map(n => `- ${n.data} ${n.turno} ${n.reparto}: ${n.testo}`).join('\n') : '- Nessuna nota rilevante';
+  return `REPORT AGGREGATO PER IL COMANDANTE\n\nPERIODO / DATA: ${aggregate.dateLabel}\nREPORT RICEVUTI: ${reports.length}\nINTERVENTI TOTALI: ${aggregate.totalInterventi}\nVIOLAZIONI / PROVVEDIMENTI TOTALI: ${aggregate.totaleViolazioni}\nKM TOTALI PERCORSI: ${aggregate.kmTotali}\n\nINTERVENTI PER TIPOLOGIA\n${listEntries(aggregate.byTipo)}\n\nORIGINE INTERVENTI\n${listEntries(aggregate.byOrigine)}\n\nREPARTI / SERVIZI RENDICONTATI\n${listEntries(aggregate.byReparto)}\n\nATTI E VIOLAZIONI\n${listEntries(aggregate.counters, LABELS)}\n\nDETTAGLIO REPORT RICEVUTI\n${details}\n\nNOTE RILEVANTI / CRITICITÀ\n${notes}\n\nNOTE DELL'UFFICIALE PER IL COMANDANTE\n${commanderNotes || '-'}\n`;
 }
 
 createRoot(document.getElementById('root')).render(<App />);
