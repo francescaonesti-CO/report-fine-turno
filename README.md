@@ -1,22 +1,43 @@
-# Report Turno Polizia Locale - versione con Report Ufficiale UDT
+# Report Turno Polizia Locale - versione con salvataggio automatico
 
 Questa versione integra:
 
 - Report operatore con PDF istituzionale e logo
+- Salvataggio automatico della bozza operatore sul dispositivo
+- Pulsante **Nuovo turno / cancella bozza**
 - Esportazione file dati JSON per ogni report
 - Dashboard ufficiale con aggregazione JSON
 - Export Excel avanzato
-- Nuovo pulsante **Report ufficiale**
+- Pulsante **Report ufficiale**
 - Generazione PDF **Report Ufficiale di Turno** in modalità quasi automatica
+
+## Salvataggio automatico
+
+Il report operatore viene salvato automaticamente nel browser del dispositivo usato dall'operatore.
+
+Questo significa che l'operatore può:
+
+1. iniziare il report durante il turno;
+2. chiudere l'app;
+3. riaprirla più tardi;
+4. ritrovare i dati già inseriti.
+
+A fine turno deve comunque scaricare:
+
+- PDF del report;
+- file dati JSON.
+
+Quando si inizia un nuovo servizio, usare il pulsante **Nuovo turno / cancella bozza**.
 
 ## Flusso consigliato
 
-1. Gli operatori compilano il report e scaricano PDF + JSON.
-2. L'ufficiale apre **Report ufficiale** o **Dashboard ufficiale**.
-3. Carica i JSON ricevuti dagli operatori.
-4. L'app genera sintesi, eventi rilevanti e tabella violazioni.
-5. L'ufficiale integra briefing, personale assente/in ritardo, anomalie, attività ispettive, esiti e note.
-6. Clicca **Genera PDF Report Ufficiale**.
+1. Gli operatori compilano il report durante il turno.
+2. A fine turno scaricano PDF + JSON.
+3. L'ufficiale apre **Report ufficiale** o **Dashboard ufficiale**.
+4. Carica i JSON ricevuti dagli operatori.
+5. L'app genera sintesi, eventi rilevanti e tabella violazioni.
+6. L'ufficiale integra briefing, personale assente/in ritardo, anomalie, attività ispettive, esiti e note.
+7. Clicca **Genera PDF Report Ufficiale**.
 
 ## Deploy su Vercel
 

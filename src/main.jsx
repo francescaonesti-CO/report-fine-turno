@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import jsPDF from 'jspdf';
 import * as XLSX from 'xlsx';
@@ -86,11 +86,64 @@ function baseOfficialReport() {
   };
 }
 
+
+const REPORT_DRAFT_KEY = 'reportTurnoPoliziaLocale_draft_operatore_v1';
+
+function loadReportDraft() {
+  if (typeof window === 'undefined') return baseReport();
+  try {
+    const saved = window.localStorage.getItem(REPORT_DRAFT_KEY);
+    if (!saved) return baseReport();
+    const parsed = JSON.parse(saved);
+    const fresh = baseReport();
+    return {
+      ...fresh,
+      ...parsed,
+      counters: { ...emptyCounters(), ...(parsed.counters || {}) },
+      operatori: Array.isArray(parsed.operatori) && parsed.operatori.length ? parsed.operatori : fresh.operatori,
+      veicoli: Array.isArray(parsed.veicoli) && parsed.veicoli.length ? parsed.veicoli : fresh.veicoli,
+      interventi: Array.isArray(parsed.interventi) && parsed.interventi.length ? parsed.interventi : fresh.interventi,
+      documentiRitirati: Array.isArray(parsed.documentiRitirati) ? parsed.documentiRitirati : [],
+      distintaVerbali: Array.isArray(parsed.distintaVerbali) ? parsed.distintaVerbali : []
+    };
+  } catch (e) {
+    console.warn('Bozza report non leggibile, avvio nuovo report.', e);
+    return baseReport();
+  }
+}
+
+function saveReportDraft(report) {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.setItem(REPORT_DRAFT_KEY, JSON.stringify({ ...report, draftSavedAt: new Date().toISOString() }));
+  } catch (e) {
+    console.warn('Salvataggio automatico non riuscito.', e);
+  }
+}
+
+function clearReportDraft() {
+  if (typeof window === 'undefined') return;
+  window.localStorage.removeItem(REPORT_DRAFT_KEY);
+}
+
 function App() {
   const [mode, setMode] = useState('operatore');
-  const [report, setReport] = useState(baseReport());
+  const [report, setReport] = useState(loadReportDraft);
+  const [lastSaved, setLastSaved] = useState('');
   const [importedReports, setImportedReports] = useState([]);
   const [officialReport, setOfficialReport] = useState(baseOfficialReport());
+
+  useEffect(() => {
+    saveReportDraft(report);
+    setLastSaved(new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' }));
+  }, [report]);
+
+  function resetOperatorReport() {
+    const ok = window.confirm('Vuoi iniziare un nuovo report? La bozza salvata su questo dispositivo verrà cancellata. Prima di procedere, scarica PDF e JSON se il turno è concluso.');
+    if (!ok) return;
+    clearReportDraft();
+    setReport(baseReport());
+  }
 
   return <main>
     <img id="pdfLogo" src="/POLIZIA.png" alt="Logo Polizia Locale" style={{ display: 'none' }} />
@@ -106,13 +159,13 @@ function App() {
         <button className={mode === 'ufficiale' ? 'active' : ''} onClick={() => setMode('ufficiale')}>Report ufficiale</button>
       </nav>
     </header>
-    {mode === 'operatore' && <OperatorReport report={report} setReport={setReport} />}
+    {mode === 'operatore' && <OperatorReport report={report} setReport={setReport} lastSaved={lastSaved} resetReport={resetOperatorReport} />}
     {mode === 'dashboard' && <Dashboard reports={importedReports} setReports={setImportedReports} />}
     {mode === 'ufficiale' && <OfficialReport reports={importedReports} setReports={setImportedReports} official={officialReport} setOfficial={setOfficialReport} />}
   </main>;
 }
 
-function OperatorReport({ report, setReport }) {
+function OperatorReport({ report, setReport, lastSaved, resetReport }) {
   const update = (patch) => setReport(prev => ({ ...prev, ...patch }));
   const updateArray = (key, index, patch) => setReport(prev => ({ ...prev, [key]: prev[key].map((x, i) => i === index ? { ...x, ...patch } : x) }));
   const addArray = (key, item) => setReport(prev => ({ ...prev, [key]: [...prev[key], item] }));
@@ -147,6 +200,9 @@ function OperatorReport({ report, setReport }) {
   return <>
     <section className="card notice">
       <h2>Flusso operativo</h2>
+      <p>Il report viene <strong>salvato automaticamente su questo dispositivo</strong> mentre viene compilato. L'operatore può inserirlo durante il turno, chiudere l'app e ritrovarlo alla riapertura.</p>
+      <p className="muted">Ultimo salvataggio automatico: <strong>{lastSaved || 'in corso'}</strong></p>
+      <div className="actions"><button className="ghost" onClick={resetReport}>Nuovo turno / cancella bozza</button></div>
       <p>Al termine del turno l'operatore scarica <strong>PDF</strong> e <strong>file dati JSON</strong>, poi invia entrambi all'ufficiale. L'ufficiale carica i JSON nella dashboard e genera il report aggregato per il Comandante.</p>
     </section>
 
