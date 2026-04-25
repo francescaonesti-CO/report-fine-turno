@@ -142,7 +142,7 @@ function LoginScreen({ onLogin }) {
     e.preventDefault();
     const persona = findPersonaByMatricola(matricola);
     if (!persona) { setError('Matricola non riconosciuta. Verificare il numero inserito.'); return; }
-    onLogin({ persona, ruolo: isUfficiale(persona) ? 'ufficiale' : 'operatore' });
+    onLogin({ persona, ruolo: matricola.trim() === '9654' ? 'admin' : (isUfficiale(persona) ? 'ufficiale' : 'operatore') });
   }
   return <main><img id="pdfLogo" src="/POLIZIA.png" alt="Logo Polizia Locale" style={{ display: 'none' }} />
     <section className="loginCard"><div className="loginBrand"><img src="/POLIZIA.png" alt="Polizia Locale" /><div><p className="eyebrow">Comune di Monza</p><h1>Report Turno</h1><p>Accesso riservato al personale di Polizia Locale.</p></div></div>
@@ -151,18 +151,18 @@ function LoginScreen({ onLogin }) {
 
 function App() {
   const [auth, setAuth] = useState(() => { try { return JSON.parse(window.localStorage.getItem('reportPL_auth') || 'null'); } catch { return null; } });
-  const [mode, setMode] = useState(() => auth?.ruolo === 'ufficiale' ? 'dashboard' : 'operatore');
+  const [mode, setMode] = useState(() => (auth?.ruolo === 'ufficiale' || auth?.ruolo === 'admin') ? 'dashboard' : 'operatore');
   const [report, setReport] = useState(loadReportDraft);
   const [lastSaved, setLastSaved] = useState('');
   const [importedReports, setImportedReports] = useState([]);
   const [officialReport, setOfficialReport] = useState(baseOfficialReport());
-  useEffect(() => { if (!auth?.persona) return; const persona = auth.persona; const nominativo = fullNamePersona(persona); setReport(prev => { const ops = Array.isArray(prev.operatori) ? [...prev.operatori] : []; const has = ops.some(o => String(o.matricola) === persona.matricola); const blank = ops.findIndex(o => !o.nome && !o.matricola && !o.qualifica); if (!has) { const op = { nome: nominativo, matricola: persona.matricola, qualifica: persona.qualifica }; if (blank >= 0) ops[blank] = op; else ops.unshift(op); } return { ...prev, operatori: ops.length ? ops : [{ nome: nominativo, matricola: persona.matricola, qualifica: persona.qualifica }] }; }); if (isUfficiale(persona)) setOfficialReport(prev => ({ ...prev, ufficiale: prev.ufficiale || nominativo, qualifica: prev.qualifica || persona.qualifica })); }, [auth]);
+  useEffect(() => { if (!auth?.persona) return; const persona = auth.persona; const nominativo = fullNamePersona(persona); setReport(prev => { const ops = Array.isArray(prev.operatori) ? [...prev.operatori] : []; const has = ops.some(o => String(o.matricola) === persona.matricola); const blank = ops.findIndex(o => !o.nome && !o.matricola && !o.qualifica); if (!has) { const op = { nome: nominativo, matricola: persona.matricola, qualifica: persona.qualifica }; if (blank >= 0) ops[blank] = op; else ops.unshift(op); } return { ...prev, operatori: ops.length ? ops : [{ nome: nominativo, matricola: persona.matricola, qualifica: persona.qualifica }] }; }); if (auth?.ruolo === 'admin' || isUfficiale(persona)) setOfficialReport(prev => ({ ...prev, ufficiale: prev.ufficiale || nominativo, qualifica: prev.qualifica || persona.qualifica })); }, [auth]);
   useEffect(() => { saveReportDraft(report); setLastSaved(new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })); }, [report]);
-  function handleLogin(nextAuth) { window.localStorage.setItem('reportPL_auth', JSON.stringify(nextAuth)); setAuth(nextAuth); setMode(nextAuth.ruolo === 'ufficiale' ? 'dashboard' : 'operatore'); }
+  function handleLogin(nextAuth) { window.localStorage.setItem('reportPL_auth', JSON.stringify(nextAuth)); setAuth(nextAuth); setMode((nextAuth.ruolo === 'ufficiale' || nextAuth.ruolo === 'admin') ? 'dashboard' : 'operatore'); }
   function logout() { window.localStorage.removeItem('reportPL_auth'); setAuth(null); setMode('operatore'); }
   function resetOperatorReport() { const ok = window.confirm('Vuoi iniziare un nuovo report? La bozza salvata su questo dispositivo verrà cancellata. Prima di procedere, scarica PDF e JSON se il turno è concluso.'); if (!ok) return; clearReportDraft(); const fresh = baseReport(); if (auth?.persona) fresh.operatori = [{ nome: fullNamePersona(auth.persona), matricola: auth.persona.matricola, qualifica: auth.persona.qualifica }]; setReport(fresh); }
   if (!auth) return <LoginScreen onLogin={handleLogin} />;
-  const ufficiale = auth.ruolo === 'ufficiale';
+  const ufficiale = auth.ruolo === 'ufficiale' || auth.ruolo === 'admin';
   return <main><img id="pdfLogo" src="/POLIZIA.png" alt="Logo Polizia Locale" style={{ display: 'none' }} /><header className="hero"><div><p className="eyebrow">Polizia Locale</p><h1>Report Turno</h1><p>Accesso: <strong>{fullNamePersona(auth.persona)}</strong> — {auth.persona.qualifica}</p></div><nav className="tabs"><button className={mode === 'operatore' ? 'active' : ''} onClick={() => setMode('operatore')}>Report operatore</button>{ufficiale && <button className={mode === 'dashboard' ? 'active' : ''} onClick={() => setMode('dashboard')}>Dashboard ufficiale</button>}{ufficiale && <button className={mode === 'ufficiale' ? 'active' : ''} onClick={() => setMode('ufficiale')}>Report ufficiale</button>}<button className="ghost" onClick={logout}>Esci</button></nav></header>{mode === 'operatore' && <OperatorReport report={report} setReport={setReport} lastSaved={lastSaved} resetReport={resetOperatorReport} />}{mode === 'dashboard' && ufficiale && <Dashboard reports={importedReports} setReports={setImportedReports} />}{mode === 'ufficiale' && ufficiale && <OfficialReport reports={importedReports} setReports={setImportedReports} official={officialReport} setOfficial={setOfficialReport} />}</main>;
 }
 
