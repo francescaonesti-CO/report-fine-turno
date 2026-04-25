@@ -25,6 +25,15 @@ const TIPI_INTERVENTO = [
 
 const ORIGINI = ['Centrale Operativa', 'UDT', 'Di iniziativa', 'Altro'];
 
+
+const PERSONALE = [
+  ['DONGIOVANNI','GIOVANNI','11267','Dirigente'], ['GALLI','FRANCESCA','6164','Commissario capo coord.'], ['MORA','GIORGIO','5181','Commissario capo coord.'], ['ESPOSITO','GERARDO','2675','Commissario capo coord.'], ['IENGO','FERDINANDO','5182','Commissario capo coord.'], ['DI GIOVANNANTONIO','LEONILDA','5723','Commissario capo coord.'], ['ANGLANI','PAOLO','3093','Commissario Capo'], ['DI SIMONE','CINZIA ANTONELLA','4878','Commissario'], ['BARNABA','ANTONIO','6160','Vice Commissario'], ['FABRIS','ALESSANDRO','6743','Vice Commissario'], ['MAGGI','GIUSEPPANTONIO','7499','Vice Commissario'], ['NEOLA','SALVATORE','10331','Vice Commissario'], ['MILITELLO','LORETO','7701','Vice Commissario'], ['RANGO','MONIA','9969','Vice Commissario'], ['GALASSO','PIERLUIGI','11471','Vice Commissario'], ['LONGO','GIOVANNA','11012','Vice Commissario'], ['LOCATI','EMANUELA','3104','Specialista di Vigilanza'], ['FERRARO','SERGIO','10244','Sovrintendente esperto'], ['ADAMO','MASSIMO','5024','Sovrintendente esperto'], ['VISCIONE','ADELE ROSA','4818','Sovrintendente scelto'], ['PESCE','LAURA','5627','Sovrintendente scelto'], ['CERIELLO','LORENZO','5673','Sovrintendente scelto'], ['GIORGILLI','GUIDO','5680','Sovrintendente scelto'], ['ROTELLI','CLAUDIO','6179','Sovrintendente'], ['LAURIOLA','GIOVANNI','6169','Sovrintendente'], ['SCARAMOZZINO','MARIA ASSUNTA','6304','Sovrintendente'], ['REPICI','VINCENZO','6631','Sovrintendente'], ['CELLAMARE','LEONORA','6334','Sovrintendente'], ['MINACAPILLI','SALVATORE','6337','Sovrintendente'], ['MARZOLI','SABRINA','7004','Sovrintendente'], ['MONTALBANO','CATERINA','6648','Sovrintendente'], ['CAPUTO','MAURIZIO','6901','Sovrintendente'], ['GRANILLO','GIUSEPPE','6788','Sovrintendente'], ['MORELLI','PAOLO','6628','Sovrintendente'], ['SEPE','ANTONIO','6867','Sovrintendente'], ['SCINO','ROBERTO','6869','Sovrintendente'], ['LEMBO','ANTONINO','7005','Assistente esperto'], ['D ALCONZO','LUIGI','7009','Assistente esperto'], ['SCRENCI','SALVATORE','7016','Assistente esperto'], ['PALAZZO','MASSIMILIANO','7017','Assistente esperto'], ['COLOMBO','CHIARA','7491','Assistente esperto'], ['VESCERA','MARCO','7143','Assistente esperto'], ['INVERNIZZI','ANDREA PIETRO','7495','Assistente esperto'], ['PIEMONTESE','PAOLO','7703','Assistente esperto'], ['MAIORANO','GERARDO','7700','Assistente esperto'], ['CALO','DAVIDE','7704','Vice Commissario'], ['GIUGNO','CLAUDIO','7494','Assistente esperto'], ['CARAMELLA','GIUSEPPE','10324','Assistente esperto'], ['AGNELLO','LORENZO','10107','Assistente esperto'], ['SUOZZO','MARIO','10965','Assistente Scelto'], ['LAMONICA','PAOLA','9818','Assistente Scelto'], ['SCALISE','MARCO','10820','Assistente Scelto'], ['DELL ERBA','DOMENICO','10461','Assistente Scelto'], ['MARCONI','INES BARBARA','5663','Assistente Scelto'], ['ONESTI','FRANCESCA','9654','Assistente Scelto'], ['LAZZATI','ALESSANDRO','9657','Assistente Scelto'], ['IANDOLO','FABIO','9659','Assistente Scelto'], ['TRENTO','LORENA','9668','Assistente Scelto'], ['GOFFO','RAUL','9819','Assistente Scelto'], ['SALA','ERIKA','10117','Assistente Scelto'], ['BANCOLINI','SIMONE','11150','Assistente'], ['DASSI','BARBARA','10010','Assistente Scelto'], ['SCIBILIA','LOREDANA','10459','Assistente'], ['SCARPIELLO','RAFFAELE','10249','Assistente'], ['SPATARI','MARIA PAOLA','10251','Assistente'], ['AQUINO','PATRIZIA','10333','Assistente'], ['SAMMARCO','MARIA ORSOLA','10457','Assistente'], ['PEDRAZZI','ALICE','10685','Agente Scelto'], ['MOTTA','CRISTIAN','10686','Agente Scelto'], ['SPINA','GIUSEPPE','10687','Agente Scelto'], ['TOSI','FABIO','11151','Agente Scelto'], ['MUSCIACCHIO','ANTONIO','10774','Agente Scelto'], ['ZERRI','EMANUELE','11144','Agente Scelto'], ['BOLIGNANI','MIRKO','10909','Agente Scelto'], ['SCIBELLI','FILIPPO','10897','Agente Scelto'], ['CANTORE','PIERLUIGI','9996','Agente Scelto'], ['CUSCUNA','ALESSANDRO','10896','Agente Scelto'], ['ALABISO','ROBERTO','11056','Agente Scelto'], ['GIORDANO','ANNAMARIA','11010','Agente Scelto'], ['CASCIANA','CONCETTA CHIARA','11053','Agente Scelto'], ['CAROTENUTO','ILARIA','11004','Agente Scelto'], ['ABBRESCIA','MARGHERITA','11002','Agente Scelto'], ['PAOLELLA','GABRIELE','11014','Agente Scelto'], ['FUSCO','LUIGI','11009','Agente Scelto'], ['DELL UTRI','MARCO','11007','Agente Scelto'], ['BERGNA','EMANUELE','11246','Agente'], ['SGUEGLIA','FABIO','11179','Agente'], ['BARBIERI','ENRICO','11248','Agente'], ['LATTUADA','SERGIO IVAN','11052','Agente'], ['COPPOLA','DANIELE','11369','Agente'], ['PAPPALARDO','MARIAGRAZIA','11371','Agente'], ['RANIERI','CRISTINA MARTINA','11245','Agente'], ['PATANE','VALENTINA CARMELA','10910','Agente'], ['ELEFANTE COSTANZA','CHRISTIAN','11250','Agente'], ['TOMARCHIO','ROSARIO','11252','Agente'], ['CONDELLO','ANDREA','11255','Agente'], ['IOVINELLA','MARCO','11256','Agente'], ['CALABRESE','FRANCESCA','11257','Agente'], ['SALIERNO','DESIDERIA','11365','Agente'], ['LAPORTA','DAMIANO','11253','Agente'], ['BARZAGHI','MATTEO','11268','Agente'], ['PEPE','DONATO','11285','Agente'], ['GIAMBELLUCA','SALVATORE','11286','Agente'], ['ANGIULI','VITO','11296','Agente'], ['CORATTO','DAVIDE','11352','Agente'], ['TALERICO','CONCETTA','11351','Agente'], ['RAIOLA','ALFONSO','11364','Agente'], ['D ANGELO','EMANUELA','11366','Agente'], ['FILETTI','MATTIA','11367','Agente'], ['PORTALURI','RICCARDO','11368','Agente'], ['OLTOLINI','MATTIA','11404','Agente']
+].map(([cognome, nome, matricola, qualifica]) => ({ cognome, nome, matricola, qualifica }));
+const QUALIFICHE_UFFICIALI = ['Dirigente', 'Commissario capo coord.', 'Commissario Capo', 'Commissario', 'Vice Commissario', 'Specialista di Vigilanza'];
+function isUfficiale(persona) { return persona && QUALIFICHE_UFFICIALI.includes(persona.qualifica); }
+function fullNamePersona(p) { return p.cognome + ' ' + p.nome; }
+function findPersonaByMatricola(matricola) { return PERSONALE.find(p => p.matricola === String(matricola || '').trim()); }
+
 const emptyOperatore = () => ({ nome: '', matricola: '', qualifica: '' });
 const emptyVeicolo = () => ({ sigla: '', kmInizio: '', kmFine: '', carburante: 'No', importoCarburante: '', oraPrelievoCard: '', oraRestituzioneCard: '', anomaliaVeicolo: '' });
 const emptyScuola = () => ({ nome: '', momento: '', orario: '', criticita: '' });
@@ -126,43 +135,35 @@ function clearReportDraft() {
   window.localStorage.removeItem(REPORT_DRAFT_KEY);
 }
 
+function LoginScreen({ onLogin }) {
+  const [matricola, setMatricola] = useState('');
+  const [error, setError] = useState('');
+  function submit(e) {
+    e.preventDefault();
+    const persona = findPersonaByMatricola(matricola);
+    if (!persona) { setError('Matricola non riconosciuta. Verificare il numero inserito.'); return; }
+    onLogin({ persona, ruolo: isUfficiale(persona) ? 'ufficiale' : 'operatore' });
+  }
+  return <main><img id="pdfLogo" src="/POLIZIA.png" alt="Logo Polizia Locale" style={{ display: 'none' }} />
+    <section className="loginCard"><div className="loginBrand"><img src="/POLIZIA.png" alt="Polizia Locale" /><div><p className="eyebrow">Comune di Monza</p><h1>Report Turno</h1><p>Accesso riservato al personale di Polizia Locale.</p></div></div>
+    <form onSubmit={submit} className="loginForm"><Field label="Matricola"><Input value={matricola} onChange={setMatricola} placeholder="Inserisci la tua matricola" /></Field>{error && <p className="errorText">{error}</p>}<button className="primary" type="submit">Accedi</button></form><p className="muted">Protezione base tramite matricola personale. Per l'uso istituzionale definitivo sarà necessaria validazione IT/DPO.</p></section></main>;
+}
+
 function App() {
-  const [mode, setMode] = useState('operatore');
+  const [auth, setAuth] = useState(() => { try { return JSON.parse(window.localStorage.getItem('reportPL_auth') || 'null'); } catch { return null; } });
+  const [mode, setMode] = useState(() => auth?.ruolo === 'ufficiale' ? 'dashboard' : 'operatore');
   const [report, setReport] = useState(loadReportDraft);
   const [lastSaved, setLastSaved] = useState('');
   const [importedReports, setImportedReports] = useState([]);
   const [officialReport, setOfficialReport] = useState(baseOfficialReport());
-
-  useEffect(() => {
-    saveReportDraft(report);
-    setLastSaved(new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' }));
-  }, [report]);
-
-  function resetOperatorReport() {
-    const ok = window.confirm('Vuoi iniziare un nuovo report? La bozza salvata su questo dispositivo verrà cancellata. Prima di procedere, scarica PDF e JSON se il turno è concluso.');
-    if (!ok) return;
-    clearReportDraft();
-    setReport(baseReport());
-  }
-
-  return <main>
-    <img id="pdfLogo" src="/POLIZIA.png" alt="Logo Polizia Locale" style={{ display: 'none' }} />
-    <header className="hero">
-      <div>
-        <p className="eyebrow">Polizia Locale</p>
-        <h1>Report Turno</h1>
-        <p>Compilazione operatori, dashboard aggregata e report ufficiale UDT.</p>
-      </div>
-      <nav className="tabs">
-        <button className={mode === 'operatore' ? 'active' : ''} onClick={() => setMode('operatore')}>Report operatore</button>
-        <button className={mode === 'dashboard' ? 'active' : ''} onClick={() => setMode('dashboard')}>Dashboard ufficiale</button>
-        <button className={mode === 'ufficiale' ? 'active' : ''} onClick={() => setMode('ufficiale')}>Report ufficiale</button>
-      </nav>
-    </header>
-    {mode === 'operatore' && <OperatorReport report={report} setReport={setReport} lastSaved={lastSaved} resetReport={resetOperatorReport} />}
-    {mode === 'dashboard' && <Dashboard reports={importedReports} setReports={setImportedReports} />}
-    {mode === 'ufficiale' && <OfficialReport reports={importedReports} setReports={setImportedReports} official={officialReport} setOfficial={setOfficialReport} />}
-  </main>;
+  useEffect(() => { if (!auth?.persona) return; const persona = auth.persona; const nominativo = fullNamePersona(persona); setReport(prev => { const ops = Array.isArray(prev.operatori) ? [...prev.operatori] : []; const has = ops.some(o => String(o.matricola) === persona.matricola); const blank = ops.findIndex(o => !o.nome && !o.matricola && !o.qualifica); if (!has) { const op = { nome: nominativo, matricola: persona.matricola, qualifica: persona.qualifica }; if (blank >= 0) ops[blank] = op; else ops.unshift(op); } return { ...prev, operatori: ops.length ? ops : [{ nome: nominativo, matricola: persona.matricola, qualifica: persona.qualifica }] }; }); if (isUfficiale(persona)) setOfficialReport(prev => ({ ...prev, ufficiale: prev.ufficiale || nominativo, qualifica: prev.qualifica || persona.qualifica })); }, [auth]);
+  useEffect(() => { saveReportDraft(report); setLastSaved(new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })); }, [report]);
+  function handleLogin(nextAuth) { window.localStorage.setItem('reportPL_auth', JSON.stringify(nextAuth)); setAuth(nextAuth); setMode(nextAuth.ruolo === 'ufficiale' ? 'dashboard' : 'operatore'); }
+  function logout() { window.localStorage.removeItem('reportPL_auth'); setAuth(null); setMode('operatore'); }
+  function resetOperatorReport() { const ok = window.confirm('Vuoi iniziare un nuovo report? La bozza salvata su questo dispositivo verrà cancellata. Prima di procedere, scarica PDF e JSON se il turno è concluso.'); if (!ok) return; clearReportDraft(); const fresh = baseReport(); if (auth?.persona) fresh.operatori = [{ nome: fullNamePersona(auth.persona), matricola: auth.persona.matricola, qualifica: auth.persona.qualifica }]; setReport(fresh); }
+  if (!auth) return <LoginScreen onLogin={handleLogin} />;
+  const ufficiale = auth.ruolo === 'ufficiale';
+  return <main><img id="pdfLogo" src="/POLIZIA.png" alt="Logo Polizia Locale" style={{ display: 'none' }} /><header className="hero"><div><p className="eyebrow">Polizia Locale</p><h1>Report Turno</h1><p>Accesso: <strong>{fullNamePersona(auth.persona)}</strong> — {auth.persona.qualifica}</p></div><nav className="tabs"><button className={mode === 'operatore' ? 'active' : ''} onClick={() => setMode('operatore')}>Report operatore</button>{ufficiale && <button className={mode === 'dashboard' ? 'active' : ''} onClick={() => setMode('dashboard')}>Dashboard ufficiale</button>}{ufficiale && <button className={mode === 'ufficiale' ? 'active' : ''} onClick={() => setMode('ufficiale')}>Report ufficiale</button>}<button className="ghost" onClick={logout}>Esci</button></nav></header>{mode === 'operatore' && <OperatorReport report={report} setReport={setReport} lastSaved={lastSaved} resetReport={resetOperatorReport} />}{mode === 'dashboard' && ufficiale && <Dashboard reports={importedReports} setReports={setImportedReports} />}{mode === 'ufficiale' && ufficiale && <OfficialReport reports={importedReports} setReports={setImportedReports} official={officialReport} setOfficial={setOfficialReport} />}</main>;
 }
 
 function OperatorReport({ report, setReport, lastSaved, resetReport }) {
@@ -260,12 +261,12 @@ function OperatorReport({ report, setReport, lastSaved, resetReport }) {
     </section>
 
     <section className="card">
-      <h2>6. Violazioni e provvedimenti</h2>
+      <h2>6. Violazioni</h2>
       <div className="counterGrid">
-        {['preavvisiCds','vdcCds','regPolizia','regEdilizio','regBenessereAnimali','annonaria','altreNorme','fermi','sequestri'].map(key => <Counter key={key} label={LABELS[key]} value={report.counters[key]} onChange={v => update({ counters: { ...report.counters, [key]: v } })} />)}
+        {['preavvisiCds','vdcCds','regPolizia','regEdilizio','regBenessereAnimali','annonaria','altreNorme'].map(key => <Counter key={key} label={LABELS[key]} value={report.counters[key]} onChange={v => update({ counters: { ...report.counters, [key]: v } })} />)}
       </div>
       <Field label="Specificare altre norme"><Input value={report.counters.altreNormeDescrizione} onChange={v => update({ counters: { ...report.counters, altreNormeDescrizione: v } })} /></Field>
-      <div className="totalBox">Totale violazioni / provvedimenti: <strong>{totaleViolazioni}</strong></div>
+      <div className="totalBox">Totale violazioni: <strong>{totaleViolazioni}</strong></div>
     </section>
 
     <section className="card">
@@ -285,7 +286,7 @@ function OperatorReport({ report, setReport, lastSaved, resetReport }) {
 
     <section className="card">
       <h2>8. Distinta verbali</h2>
-      <p className="muted">La distinta viene generata automaticamente dai numeri inseriti nella sezione “Violazioni e provvedimenti”. Non serve compilare i singoli verbali uno per uno.</p>
+      <p className="muted">La distinta viene generata automaticamente dai numeri inseriti nella sezione “Violazioni”. Non serve compilare i singoli verbali uno per uno.</p>
       <div className="totalBox">Totale distinta: <strong>{totaleViolazioni}</strong></div>
       <div className="actions"><button onClick={() => buildVerbaliPdf(report).save(`distinta-verbali-${sanitizeFileName(report.data)}-${sanitizeFileName(turnoLabel(report))}.pdf`)}>Scarica PDF distinta verbali</button></div>
     </section>
@@ -345,7 +346,7 @@ function Dashboard({ reports, setReports }) {
   }
 
   function exportCsv() {
-    const rows = [['Data','Turno','Orario','Reparto','Operatori','Interventi','Violazioni/Provvedimenti','Km','Note']];
+    const rows = [['Data','Turno','Orario','Reparto','Operatori','Interventi','Violazioni','Km','Note']];
     reports.forEach(r => rows.push([r.data, turnoLabel(r), r.orarioTipo, repartoLabel(r), operatorNames(r).join('; '), r.interventi?.length || 0, getTotaleViolazioni(r), getKmTotali(r), r.noteUdt || '']));
     const csv = rows.map(row => row.map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(';')).join('\n');
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
@@ -367,7 +368,7 @@ function Dashboard({ reports, setReports }) {
     <section className="metrics">
       <Metric label="Report caricati" value={reports.length} />
       <Metric label="Interventi totali" value={aggregate.totalInterventi} />
-      <Metric label="Violazioni / provvedimenti" value={aggregate.totaleViolazioni} />
+      <Metric label="Violazioni" value={aggregate.totaleViolazioni} />
       <Metric label="Km percorsi" value={aggregate.kmTotali} />
     </section>
 
@@ -429,7 +430,7 @@ function OfficialReport({ reports, setReports, official, setOfficial }) {
       <p>Modalità quasi automatica: carica i JSON degli operatori, verifica la sintesi generata, integra briefing, personale, attività ispettive, anomalie e note per il Comandante.</p>
       <div className="actions"><label className="fileButton">Carica JSON operatori<input type="file" accept="application/json,.json" multiple onChange={importFiles} /></label><button className="ghost" onClick={() => setReports([])}>Svuota dati caricati</button></div>
     </section>
-    <section className="metrics"><Metric label="Report operatori" value={reports.length} /><Metric label="Interventi" value={aggregate.totalInterventi} /><Metric label="Violazioni / provvedimenti" value={aggregate.totaleViolazioni} /><Metric label="Km" value={aggregate.kmTotali} /></section>
+    <section className="metrics"><Metric label="Report operatori" value={reports.length} /><Metric label="Interventi" value={aggregate.totalInterventi} /><Metric label="Violazioni" value={aggregate.totaleViolazioni} /><Metric label="Km" value={aggregate.kmTotali} /></section>
     <section className="card"><h2>1. Dati report ufficiale</h2><div className="grid four"><Field label="Data"><Input type="date" value={official.data} onChange={v => update({ data: v })} /></Field><Field label="Turno"><Input value={official.turno} onChange={v => update({ turno: v })} placeholder="es. 1° turno" /></Field><Field label="Ufficiale di turno"><Input value={official.ufficiale} onChange={v => update({ ufficiale: v })} /></Field><Field label="Qualifica"><Input value={official.qualifica} onChange={v => update({ qualifica: v })} placeholder="es. Commissario Capo" /></Field></div></section>
     <section className="card"><h2>2. Sintesi automatica</h2><p className="muted">Questa sintesi nasce dai report operatori caricati. Nel PDF viene riportata come quadro iniziale.</p><pre className="miniPreview">{autoSintesi}</pre><Field label="Integrazioni dell'ufficiale alla sintesi"><Textarea value={official.eventiManuali} onChange={v => update({ eventiManuali: v })} placeholder="Inserire eventuali elementi aggiuntivi non presenti nei report operatori..." /></Field></section>
     <section className="card"><h2>3. Briefing, personale e note</h2><div className="grid two"><Field label="Briefing operativo"><Input value={official.briefing} onChange={v => update({ briefing: v })} placeholder="es. 06.45" /></Field><Field label="Note generali"><Input value={official.noteGenerali} onChange={v => update({ noteGenerali: v })} placeholder="es. Con il personale a disposizione coperte 11 scuole" /></Field></div><div className="grid two"><Field label="A.P.L. assenti"><Textarea value={official.assenti} onChange={v => update({ assenti: v })} /></Field><Field label="A.P.L. in ritardo"><Textarea value={official.ritardi} onChange={v => update({ ritardi: v })} /></Field></div></section>
@@ -677,7 +678,7 @@ function serviceInterventionCard(doc, i, idx, y, pdfTitle = '', subtitle = '') {
 }
 
 function buildVerbaliPdf(report) {
-  const title = 'DISTINTA VERBALI DEL TURNO';
+  const title = 'DISTINTA VIOLAZIONI DEL TURNO';
   const subtitle = `${report.data} | Turno ${turnoLabel(report)} | ${repartoLabel(report)}`;
   const doc = makePdf(title, subtitle);
   const c = report.counters || emptyCounters();
@@ -701,13 +702,11 @@ function buildVerbaliPdf(report) {
     ['Verbali Regolamento Benessere Animali', c.regBenessereAnimali],
     ['Verbali Annonaria / commercio', c.annonaria],
     [`Altre violazioni ${c.altreNormeDescrizione || ''}`, c.altreNorme],
-    ['Fermi', c.fermi],
-    ['Sequestri', c.sequestri],
     ['TOTALE', getTotaleViolazioni(report)]
   ], y, [150, 36], title, subtitle);
 
   y = section(doc, 'Note', y, title, subtitle);
-  y = paragraph(doc, 'La presente distinta è generata automaticamente dai dati inseriti nella sezione “Violazioni e provvedimenti” del report di servizio.', y, title, subtitle);
+  y = paragraph(doc, 'La presente distinta è generata automaticamente dai dati inseriti nella sezione “Violazioni” del report di servizio.', y, title, subtitle);
   addFooter(doc);
   return doc;
 }
@@ -750,10 +749,10 @@ function buildServicePdf(report) {
     ['Sequestri amministrativi', c.sequestriAmministrativi], ['Fermi amministrativi', c.fermiAmministrativi], ['Sequestri penali', c.sequestriPenali], ['C.N.R.', c.cnr], [`Altri atti ${c.altriAttiDescrizione || ''}`, c.altriAttiNumero]
   ], y, [150, 36], title, subtitle);
 
-  y = section(doc, 'Violazioni e provvedimenti', y, title, subtitle);
+  y = section(doc, 'Violazioni', y, title, subtitle);
   y = simpleTable(doc, ['Tipologia', 'N.'], [
     ['Preavvisi CdS', c.preavvisiCds], ['VdC CdS', c.vdcCds], ['Regolamento Polizia', c.regPolizia], ['Regolamento Edilizio', c.regEdilizio],
-    ['Regolamento Benessere Animali', c.regBenessereAnimali], ['Annonaria / commercio', c.annonaria], [`Altre norme ${c.altreNormeDescrizione || ''}`, c.altreNorme], ['Fermi', c.fermi], ['Sequestri', c.sequestri], ['TOTALE', getTotaleViolazioni(report)]
+    ['Regolamento Benessere Animali', c.regBenessereAnimali], ['Annonaria / commercio', c.annonaria], [`Altre norme ${c.altreNormeDescrizione || ''}`, c.altreNorme], ['TOTALE', getTotaleViolazioni(report)]
   ], y, [150, 36], title, subtitle);
 
   y = section(doc, 'Documenti ritirati', y, title, subtitle);
@@ -790,7 +789,7 @@ function buildCommanderPdf(aggregate, reports, commanderNotes) {
   y = kvGrid(doc, [
     { label: 'Report ricevuti', value: reports.length },
     { label: 'Interventi totali', value: aggregate.totalInterventi },
-    { label: 'Violazioni / provvedimenti', value: aggregate.totaleViolazioni },
+    { label: 'Violazioni', value: aggregate.totaleViolazioni },
     { label: 'Km totali percorsi', value: aggregate.kmTotali },
   ], y, 4, title, subtitle) + 2;
 
@@ -879,7 +878,7 @@ function buildExcelData(reports, aggregate, commanderNotes) {
   const criticitaRows = [];
   reports.forEach((r, reportIndex) => {
     const operatori = operatorNames(r).join('; ');
-    reportRows.push({ Data: r.data || '', Turno: turnoLabel(r), 'Tipologia orario': r.orarioTipo || '', 'Reparto / servizio': repartoLabel(r), Operatori: operatori, 'Numero operatori': (r.operatori || []).filter(o => o.nome || o.matricola || o.qualifica).length, 'Interventi totali': (r.interventi || []).length, 'Violazioni / provvedimenti': getTotaleViolazioni(r), 'Km percorsi': getKmTotali(r), 'Note UDT': r.noteUdt || '' });
+    reportRows.push({ Data: r.data || '', Turno: turnoLabel(r), 'Tipologia orario': r.orarioTipo || '', 'Reparto / servizio': repartoLabel(r), Operatori: operatori, 'Numero operatori': (r.operatori || []).filter(o => o.nome || o.matricola || o.qualifica).length, 'Interventi totali': (r.interventi || []).length, 'Violazioni': getTotaleViolazioni(r), 'Km percorsi': getKmTotali(r), 'Note UDT': r.noteUdt || '' });
     Object.entries(r.counters || {}).forEach(([key, value]) => { if (typeof value === 'number' && n(value) > 0) countersRows.push({ Data: r.data || '', Turno: turnoLabel(r), Reparto: repartoLabel(r), Voce: LABELS[key] || key, Totale: n(value) }); });
     (r.interventi || []).forEach((i, idx) => {
       const durata = durataMinuti(i.oraInizio, i.oraFine);
@@ -901,9 +900,9 @@ function buildExcelData(reports, aggregate, commanderNotes) {
   const topTipo = orderedObjectRows(aggregate.byTipo)[0]?.Voce || '-';
   const topReparto = orderedObjectRows(aggregate.byReparto)[0]?.Voce || '-';
   const topFascia = orderedObjectRows(byFascia)[0]?.Voce || '-';
-  const dashboardRows = [['REPORT AGGREGATO POLIZIA LOCALE - DASHBOARD EXCEL', ''], ['Periodo / data', aggregate.dateLabel], ['Report ricevuti', reports.length], ['Interventi totali', aggregate.totalInterventi], ['Violazioni / provvedimenti', aggregate.totaleViolazioni], ['Km totali percorsi', aggregate.kmTotali], ['Tipologia intervento prevalente', topTipo], ['Reparto più impegnato', topReparto], ['Fascia oraria più intensa', topFascia], ['Intervento più lungo', interventoPiuLungo.label], ['Note ufficiale', commanderNotes || '-']];
+  const dashboardRows = [['REPORT AGGREGATO POLIZIA LOCALE - DASHBOARD EXCEL', ''], ['Periodo / data', aggregate.dateLabel], ['Report ricevuti', reports.length], ['Interventi totali', aggregate.totalInterventi], ['Violazioni', aggregate.totaleViolazioni], ['Km totali percorsi', aggregate.kmTotali], ['Tipologia intervento prevalente', topTipo], ['Reparto più impegnato', topReparto], ['Fascia oraria più intensa', topFascia], ['Intervento più lungo', interventoPiuLungo.label], ['Note ufficiale', commanderNotes || '-']];
   const graficiRows = [['Sezione', 'Voce', 'Totale', 'Grafico'], ...orderedObjectRows(aggregate.byTipo).map(r => ['Tipologia interventi', r.Voce, r.Totale, makeBar(r.Totale, maxTipo)]), [], ['Sezione', 'Voce', 'Totale', 'Grafico'], ...orderedObjectRows(aggregate.byOrigine).map(r => ['Origine interventi', r.Voce, r.Totale, makeBar(r.Totale, maxOrigine)]), [], ['Sezione', 'Voce', 'Totale', 'Grafico'], ...orderedObjectRows(aggregate.byReparto).map(r => ['Reparti / servizi', r.Voce, r.Totale, makeBar(r.Totale, maxReparto)]), [], ['Sezione', 'Voce', 'Totale', 'Grafico'], ...orderedObjectRows(byFascia).map(r => ['Fasce orarie', r.Voce, r.Totale, makeBar(r.Totale, maxFascia)])];
-  const riepilogoRows = [{ Sezione: 'KPI', Voce: 'Report ricevuti', Totale: reports.length }, { Sezione: 'KPI', Voce: 'Interventi totali', Totale: aggregate.totalInterventi }, { Sezione: 'KPI', Voce: 'Violazioni / provvedimenti', Totale: aggregate.totaleViolazioni }, { Sezione: 'KPI', Voce: 'Km totali percorsi', Totale: aggregate.kmTotali }, ...orderedObjectRows(aggregate.byTipo).map(r => ({ Sezione: 'Tipologia interventi', Voce: r.Voce, Totale: r.Totale })), ...orderedObjectRows(aggregate.byOrigine).map(r => ({ Sezione: 'Origine interventi', Voce: r.Voce, Totale: r.Totale })), ...orderedObjectRows(aggregate.byReparto).map(r => ({ Sezione: 'Reparti / servizi', Voce: r.Voce, Totale: r.Totale })), ...orderedObjectRows(byFascia).map(r => ({ Sezione: 'Fasce orarie', Voce: r.Voce, Totale: r.Totale })), ...orderedObjectRows(aggregate.counters, LABELS).map(r => ({ Sezione: 'Atti e violazioni', Voce: r.Voce, Totale: r.Totale }))];
+  const riepilogoRows = [{ Sezione: 'KPI', Voce: 'Report ricevuti', Totale: reports.length }, { Sezione: 'KPI', Voce: 'Interventi totali', Totale: aggregate.totalInterventi }, { Sezione: 'KPI', Voce: 'Violazioni', Totale: aggregate.totaleViolazioni }, { Sezione: 'KPI', Voce: 'Km totali percorsi', Totale: aggregate.kmTotali }, ...orderedObjectRows(aggregate.byTipo).map(r => ({ Sezione: 'Tipologia interventi', Voce: r.Voce, Totale: r.Totale })), ...orderedObjectRows(aggregate.byOrigine).map(r => ({ Sezione: 'Origine interventi', Voce: r.Voce, Totale: r.Totale })), ...orderedObjectRows(aggregate.byReparto).map(r => ({ Sezione: 'Reparti / servizi', Voce: r.Voce, Totale: r.Totale })), ...orderedObjectRows(byFascia).map(r => ({ Sezione: 'Fasce orarie', Voce: r.Voce, Totale: r.Totale })), ...orderedObjectRows(aggregate.counters, LABELS).map(r => ({ Sezione: 'Atti e violazioni', Voce: r.Voce, Totale: r.Totale }))];
   const readmeRows = [['Foglio', 'Contenuto'], ['Dashboard', 'KPI principali e sintesi operativa pronta per lettura comando.'], ['Grafici', 'Tabelle visuali con barre orizzontali compatibili con Excel, utili per stampa e analisi rapida.'], ['Interventi', 'Dataset dettagliato: una riga per ogni intervento, pronto per filtri e tabelle pivot.'], ['Report', 'Una riga per ogni report caricato.'], ['Riepilogo', 'Dati aggregati per categoria.'], ['Criticità', 'Interventi evidenziati automaticamente come rilevanti.'], ['Atti_Violazioni', 'Dettaglio contatori per report.']];
   return { dashboardRows, graficiRows, interventiRows, reportRows, riepilogoRows, criticitaRows, countersRows, readmeRows };
 }
@@ -929,7 +928,7 @@ function exportExcelAvanzato(reports, aggregate, commanderNotes) {
 function getKmTotali(report) { return (report.veicoli || []).reduce((sum, v) => sum + km(v), 0); }
 function getTotaleViolazioni(report) {
   const c = report.counters || {};
-  return ['preavvisiCds','vdcCds','regPolizia','regEdilizio','regBenessereAnimali','annonaria','altreNorme','fermi','sequestri'].reduce((s, k) => s + n(c[k]), 0);
+  return ['preavvisiCds','vdcCds','regPolizia','regEdilizio','regBenessereAnimali','annonaria','altreNorme'].reduce((s, k) => s + n(c[k]), 0);
 }
 function operatorNames(report) { return (report.operatori || []).filter(o => o.nome || o.matricola || o.qualifica).map(o => `${o.nome || 'Operatore'}${o.matricola ? ` mtr. ${o.matricola}` : ''}`); }
 function extraDetails(i) {
@@ -977,7 +976,7 @@ function listEntries(obj, labels = {}) {
 }
 
 function commanderReportText(aggregate, reports, commanderNotes) {
-  const details = reports.map((r, idx) => `${idx + 1}. ${r.data} | ${turnoLabel(r)} | ${r.orarioTipo} | ${repartoLabel(r)} | Operatori: ${operatorNames(r).join(', ') || '-'} | Interventi: ${(r.interventi || []).length} | Violazioni/Provvedimenti: ${getTotaleViolazioni(r)} | Km: ${getKmTotali(r)}`).join('\n') || '- Nessun report caricato';
+  const details = reports.map((r, idx) => `${idx + 1}. ${r.data} | ${turnoLabel(r)} | ${r.orarioTipo} | ${repartoLabel(r)} | Operatori: ${operatorNames(r).join(', ') || '-'} | Interventi: ${(r.interventi || []).length} | Violazioni: ${getTotaleViolazioni(r)} | Km: ${getKmTotali(r)}`).join('\n') || '- Nessun report caricato';
   const notes = aggregate.notes.length ? aggregate.notes.map(n => `- ${n.data} ${n.turno} ${n.reparto}: ${n.testo}`).join('\n') : '- Nessuna nota rilevante';
   return `REPORT AGGREGATO PER IL COMANDANTE\n\nPERIODO / DATA: ${aggregate.dateLabel}\nREPORT RICEVUTI: ${reports.length}\nINTERVENTI TOTALI: ${aggregate.totalInterventi}\nVIOLAZIONI / PROVVEDIMENTI TOTALI: ${aggregate.totaleViolazioni}\nKM TOTALI PERCORSI: ${aggregate.kmTotali}\n\nINTERVENTI PER TIPOLOGIA\n${listEntries(aggregate.byTipo)}\n\nORIGINE INTERVENTI\n${listEntries(aggregate.byOrigine)}\n\nREPARTI / SERVIZI RENDICONTATI\n${listEntries(aggregate.byReparto)}\n\nATTI E VIOLAZIONI\n${listEntries(aggregate.counters, LABELS)}\n\nDETTAGLIO REPORT RICEVUTI\n${details}\n\nNOTE RILEVANTI / CRITICITÀ\n${notes}\n\nNOTE DELL'UFFICIALE PER IL COMANDANTE\n${commanderNotes || '-'}\n`;
 }
@@ -996,7 +995,7 @@ function officialSynthesis(aggregate, reports) {
   const conFeriti = all.filter(i => i.tipo === 'Sinistro stradale' && i.conFeriti === 'Con feriti').length;
   const tso = all.filter(i => i.tipo === 'TSO').length;
   const aso = all.filter(i => i.tipo === 'ASO').length;
-  return `Nel turno indicato sono stati acquisiti ${reports.length} report degli operatori, per complessivi ${aggregate.totalInterventi} interventi rendicontati. L'attività prevalente risulta: ${topTipo}. Sono state registrate ${aggregate.totaleViolazioni} violazioni/provvedimenti e ${aggregate.kmTotali} km complessivi. Si segnalano ${conFeriti} sinistri con feriti, ${tso} TSO e ${aso} ASO.`;
+  return `Nel turno indicato sono stati acquisiti ${reports.length} report degli operatori, per complessivi ${aggregate.totalInterventi} interventi rendicontati. L'attività prevalente risulta: ${topTipo}. Sono state registrate ${aggregate.totaleViolazioni} violazioni e ${aggregate.kmTotali} km complessivi. Si segnalano ${conFeriti} sinistri con feriti, ${tso} TSO e ${aso} ASO.`;
 }
 function officialEventsText(reports) {
   return relevantInterventions(reports).map(({ report, intervento, durata }) => {
@@ -1007,7 +1006,7 @@ function officialEventsText(reports) {
 }
 function officialReportText(aggregate, reports, official, autoSintesi, autoEventi) {
   const attivita = (official.attivitaIspettive || []).filter(a => a.tipo || a.reparto || a.luogo || a.esito || a.note).map((a, idx) => `${idx + 1}. ${a.tipo || '-'} | ${a.reparto || '-'} | ${a.luogo || '-'} | ${a.orario || '-'} | Esito: ${a.esito || '-'} | Violazioni: ${a.violazioni || '-'} | Note: ${a.note || '-'}`).join('\n') || '- Nessuna attività ispettiva indicata';
-  return `REPORT UFFICIALE DI TURNO\n\nDATA E TURNO\n${official.data || aggregate.dateLabel} ${official.turno || ''}\n\nBRIEFING OPERATIVO\n${official.briefing || '-'}\n\nA.P.L. ASSENTI\n${official.assenti || '-'}\n\nA.P.L. IN RITARDO\n${official.ritardi || '-'}\n\nNOTE\n${official.noteGenerali || '-'}\n\nSINTESI OPERATIVA\n${autoSintesi}\n${official.eventiManuali ? '\nIntegrazioni: ' + official.eventiManuali : ''}\n\nEVENTI DEGNI DI RILIEVO\n${autoEventi || '- Nessun evento rilevante automatico rilevato'}\n\nANOMALIE RISCONTRATE DURANTE IL TURNO\n${official.anomalie || '-'}\n\nATTIVITÀ ISPETTIVE\n${attivita}\n\nESITI\n${official.esiti || '-'}\n\nCOMUNICAZIONE ALL'E.Q. DI TURNO\n${official.comunicazioneEq || '-'}\n\nNOTA PER IL COMANDANTE\n${official.notaComandante || '-'}\n\nVIOLAZIONI RISCONTRATE\nTotale violazioni/provvedimenti: ${aggregate.totaleViolazioni}\n\nFIRMA\n${official.qualifica || ''}\n${official.ufficiale || ''}`;
+  return `REPORT UFFICIALE DI TURNO\n\nDATA E TURNO\n${official.data || aggregate.dateLabel} ${official.turno || ''}\n\nBRIEFING OPERATIVO\n${official.briefing || '-'}\n\nA.P.L. ASSENTI\n${official.assenti || '-'}\n\nA.P.L. IN RITARDO\n${official.ritardi || '-'}\n\nNOTE\n${official.noteGenerali || '-'}\n\nSINTESI OPERATIVA\n${autoSintesi}\n${official.eventiManuali ? '\nIntegrazioni: ' + official.eventiManuali : ''}\n\nEVENTI DEGNI DI RILIEVO\n${autoEventi || '- Nessun evento rilevante automatico rilevato'}\n\nANOMALIE RISCONTRATE DURANTE IL TURNO\n${official.anomalie || '-'}\n\nATTIVITÀ ISPETTIVE\n${attivita}\n\nESITI\n${official.esiti || '-'}\n\nCOMUNICAZIONE ALL'E.Q. DI TURNO\n${official.comunicazioneEq || '-'}\n\nNOTA PER IL COMANDANTE\n${official.notaComandante || '-'}\n\nVIOLAZIONI RISCONTRATE\nTotale violazioni: ${aggregate.totaleViolazioni}\n\nFIRMA\n${official.qualifica || ''}\n${official.ufficiale || ''}`;
 }
 function buildOfficialShiftPdf(aggregate, reports, official, autoSintesi, autoEventi) {
   const title = 'REPORT UFFICIALE DI TURNO';
@@ -1017,7 +1016,7 @@ function buildOfficialShiftPdf(aggregate, reports, official, autoSintesi, autoEv
   y = section(doc, 'Data e turno', y, title, subtitle);
   y = kvGrid(doc, [{ label: 'Data', value: official.data || aggregate.dateLabel }, { label: 'Turno', value: official.turno || '-' }, { label: 'Ufficiale di turno', value: official.ufficiale || '-' }, { label: 'Qualifica', value: official.qualifica || '-' }], y, 2, title, subtitle) + 2;
   y = section(doc, 'Riepilogo rapido', y, title, subtitle);
-  y = kvGrid(doc, [{ label: 'Report operatori', value: reports.length }, { label: 'Interventi totali', value: aggregate.totalInterventi }, { label: 'Violazioni / provvedimenti', value: aggregate.totaleViolazioni }, { label: 'Km complessivi', value: aggregate.kmTotali }], y, 4, title, subtitle) + 2;
+  y = kvGrid(doc, [{ label: 'Report operatori', value: reports.length }, { label: 'Interventi totali', value: aggregate.totalInterventi }, { label: 'Violazioni', value: aggregate.totaleViolazioni }, { label: 'Km complessivi', value: aggregate.kmTotali }], y, 4, title, subtitle) + 2;
   y = section(doc, 'Briefing operativo', y, title, subtitle); y = paragraph(doc, official.briefing || '-', y, title, subtitle);
   y = section(doc, 'Personale', y, title, subtitle);
   y = kvGrid(doc, [{ label: 'A.P.L. assenti', value: official.assenti || '-' }, { label: 'A.P.L. in ritardo', value: official.ritardi || '-' }, { label: 'Note', value: official.noteGenerali || '-' }], y, 1, title, subtitle) + 2;
@@ -1030,9 +1029,14 @@ function buildOfficialShiftPdf(aggregate, reports, official, autoSintesi, autoEv
   y = section(doc, 'Esiti', y, title, subtitle); y = paragraph(doc, official.esiti || '-', y, title, subtitle);
   y = section(doc, "Comunicazione all'E.Q. di turno", y, title, subtitle); y = paragraph(doc, official.comunicazioneEq || '-', y, title, subtitle);
   y = section(doc, 'Nota per il Comandante', y, title, subtitle); y = paragraph(doc, official.notaComandante || '-', y, title, subtitle);
-  y = section(doc, 'Violazioni riscontrate', y, title, subtitle);
-  const violationRows = reports.map(r => [operatorNames(r).join(', ') || '-', repartoLabel(r), n((r.counters || {}).preavvisiCds), n((r.counters || {}).vdcCds), getTotaleViolazioni(r)]);
-  y = simpleTable(doc, ['AA.PP.LL.', 'Zona/Reparto', 'Preavvisi CdS', 'VdC CdS/Altro', 'Totale'], violationRows.length ? violationRows : [['-', '-', '-', '-', '-']], y, [58, 48, 26, 28, 26], title, subtitle);
+  y = section(doc, 'Violazioni riscontrate per pattuglia / reparto', y, title, subtitle);
+  const violationRows = reports.map(r => { const c = r.counters || {}; return [operatorNames(r).join(' / ') || '-', repartoLabel(r), n(c.preavvisiCds), n(c.vdcCds), n(c.regPolizia), n(c.regEdilizio), n(c.regBenessereAnimali), n(c.annonaria), n(c.altreNorme), getTotaleViolazioni(r)]; });
+  const tot = reports.reduce((acc, r) => { const c = r.counters || {}; ['preavvisiCds','vdcCds','regPolizia','regEdilizio','regBenessereAnimali','annonaria','altreNorme'].forEach(k => acc[k] = n(acc[k]) + n(c[k])); return acc; }, {});
+  if (reports.length) violationRows.push(['TOTALE COMPLESSIVO', '-', n(tot.preavvisiCds), n(tot.vdcCds), n(tot.regPolizia), n(tot.regEdilizio), n(tot.regBenessereAnimali), n(tot.annonaria), n(tot.altreNorme), reports.reduce((sum, r) => sum + getTotaleViolazioni(r), 0)]);
+  y = simpleTable(doc, ['Pattuglia / Operatori', 'Reparto', 'Prev.', 'VdC', 'Reg.PU', 'Edil.', 'Anim.', 'Ann.', 'Altre', 'Tot.'], violationRows.length ? violationRows : [['-', '-', '-', '-', '-', '-', '-', '-', '-', '-']], y, [40, 34, 14, 14, 16, 14, 16, 16, 16, 16], title, subtitle);
+  y = section(doc, 'Atti redatti - riepilogo separato', y, title, subtitle);
+  const attiTot = reports.reduce((acc, r) => { const c = r.counters || {}; ['relazioni','annotazioni','sequestriAmministrativi','fermiAmministrativi','sequestriPenali','cnr','altriAttiNumero'].forEach(k => acc[k] = n(acc[k]) + n(c[k])); return acc; }, {});
+  y = simpleTable(doc, ['Tipologia atto', 'Totale'], [['Relazioni di servizio', n(attiTot.relazioni)], ['Annotazioni di servizio', n(attiTot.annotazioni)], ['Sequestri amministrativi', n(attiTot.sequestriAmministrativi)], ['Fermi amministrativi', n(attiTot.fermiAmministrativi)], ['Sequestri penali', n(attiTot.sequestriPenali)], ['C.N.R.', n(attiTot.cnr)], ['Altri atti', n(attiTot.altriAttiNumero)]], y, [150, 36], title, subtitle);
   y = ensureSpace(doc, y, 22, title, subtitle); doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.text('FIRMA:', 16, y + 4); doc.text(official.qualifica || '-', 16, y + 12); doc.text(official.ufficiale || '-', 16, y + 18); doc.line(80, y + 18, 190, y + 18);
   addFooter(doc); return doc;
 }
