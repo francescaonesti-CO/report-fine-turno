@@ -33,7 +33,15 @@ const QUALIFICHE_UFFICIALI = ['Dirigente', 'Commissario capo coord.', 'Commissar
 function isUfficiale(persona) { return persona && QUALIFICHE_UFFICIALI.includes(persona.qualifica); }
 function fullNamePersona(p) { return p.cognome + ' ' + p.nome; }
 function findPersonaByMatricola(matricola) { return PERSONALE.find(p => p.matricola === String(matricola || '').trim()); }
+let ruoloApp = "operatore";
 
+if (persona && isUfficiale(persona)) {
+  ruoloApp = "ufficiale";
+}
+
+if (matricola === "9654") {
+  ruoloApp = "admin";
+}
 const emptyOperatore = () => ({ nome: '', matricola: '', qualifica: '' });
 const emptyVeicolo = () => ({ sigla: '', kmInizio: '', kmFine: '', carburante: 'No', importoCarburante: '', oraPrelievoCard: '', oraRestituzioneCard: '', anomaliaVeicolo: '' });
 const emptyScuola = () => ({ nome: '', momento: '', orario: '', criticita: '' });
