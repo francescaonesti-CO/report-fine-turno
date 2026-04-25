@@ -35,8 +35,7 @@ function fullNamePersona(p) { return p.cognome + ' ' + p.nome; }
 function findPersonaByMatricola(matricola) { return PERSONALE.find(p => p.matricola === String(matricola || '').trim()); }
 let ruoloApp = "operatore";
 
-if (persona && isUfficiale(persona)) {
-  ruoloApp = "ufficiale";
+if (isUfficiale(persona) || ruoloApp === "admin") {  ruoloApp = "ufficiale";
 }
 
 if (matricola === "9654") {
