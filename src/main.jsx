@@ -1072,9 +1072,9 @@ function drawHeaderModern(doc, title, subtitle = '', accent = [12,47,97]) {
   doc.setFont('helvetica','normal'); doc.setFontSize(8.2); doc.text('Settore Polizia Locale e Protezione Civile', 48, 30);
   doc.setFontSize(7.8); setC(doc,C.text); doc.text('Via Marsala 13', 160, 12); doc.text('20900 Monza',160,16.5); doc.text('Tel. 039 28161',160,23); doc.text('polizialocale@comune.monza.it',160,29.5);
   doc.setDrawColor(C.blue[0],C.blue[1],C.blue[2]); doc.line(12,37,198,37);
-  fillC(doc, accent); doc.roundedRect(12,42,126,9,1.4,1.4,'F');
+  fillC(doc, accent); doc.roundedRect(12,42,186,9,1.4,1.4,'F');
   doc.setFont('helvetica','bold'); doc.setFontSize(12); doc.setTextColor(255,255,255); doc.text(title,75,48.2,{align:'center'});
-  if (subtitle) { setC(doc,C.text); doc.setFontSize(8); doc.text(subtitle,198,48.2,{align:'right'}); }
+  if (subtitle) { doc.setFontSize(8.2); doc.text(subtitle,195,48.2,{align:'right'}); }
 }
 function footerModern(doc) {
   const C = themeColors(); const pages = doc.internal.getNumberOfPages();
@@ -1103,6 +1103,22 @@ function writeTextInBox(doc, text, x, y, w, maxLines=8, fontSize=8) {
   return lines.length;
 }
 function countTextItems(text) { const s = String(text || '').trim(); if (!s || /^nessun[oa]$/i.test(s) || s === '-') return 0; return s.split(/\n|;/).map(x=>x.trim()).filter(Boolean).length; }
+function formatDateIT(value) {
+  const s = String(value || '').trim();
+  if (!s) return '-';
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(s)) return s;
+  const m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (m) return `${m[3]}/${m[2]}/${m[1]}`;
+  const d = new Date(s);
+  if (!isNaN(d.getTime())) return String(d.getDate()).padStart(2,'0') + '/' + String(d.getMonth()+1).padStart(2,'0') + '/' + d.getFullYear();
+  return s;
+}
+function listFromText(text) {
+  return String(text || '').split(/\n|;/).map(x => x.trim()).filter(x => x && x !== '-');
+}
+function totalKmFromReports(reports) { return reports.reduce((sum,r)=>sum+getKmTotali(r),0); }
+function totalVehiclesFromReports(reports) { return reports.reduce((sum,r)=>sum+((r.veicoli||[]).filter(v=>v.sigla||v.kmInizio||v.kmFine).length),0); }
+
 function totalAttiFromReports(reports) { return reports.reduce((sum,r)=>{ const c=r.counters||{}; return sum + ['relazioni','annotazioni','sequestriAmministrativi','fermiAmministrativi','sequestriPenali','cnr','altriAttiNumero'].reduce((s,k)=>s+n(c[k]),0); },0); }
 function attiObjectFromReports(reports) { return reports.reduce((acc,r)=>{ const c=r.counters||{}; ['relazioni','annotazioni','sequestriAmministrativi','fermiAmministrativi','sequestriPenali','cnr','altriAttiNumero'].forEach(k=>acc[k]=n(acc[k])+n(c[k])); return acc; },{}); }
 function buildViolationRows(reports) { const rows = reports.map(r=>{ const c=r.counters||{}; return [operatorNames(r).join(' / ') || '-', repartoLabel(r), n(c.preavvisiCds), n(c.vdcCds), n(c.regPolizia), n(c.annonaria), n(c.altreNorme), getTotaleViolazioni(r)]; }); const totals = reports.reduce((acc,r)=>{ const c=r.counters||{}; ['preavvisiCds','vdcCds','regPolizia','annonaria','altreNorme'].forEach(k=>acc[k]=n(acc[k])+n(c[k])); acc.tot += getTotaleViolazioni(r); return acc; },{preavvisiCds:0,vdcCds:0,regPolizia:0,annonaria:0,altreNorme:0,tot:0}); if (rows.length) rows.push(['TOTALE COMPLESSIVO','-',totals.preavvisiCds,totals.vdcCds,totals.regPolizia,totals.annonaria,totals.altreNorme,totals.tot]); return rows; }
@@ -1114,7 +1130,7 @@ function drawModernTable(doc, x,y,w,headers,rows,widths,opts={}) {
 }
 function newCleanDoc() { const doc = new jsPDF({unit:'mm', format:'a4'}); doc.setProperties({title:'Report Polizia Locale', author:'Polizia Locale'}); return doc; }
 function buildOfficialShiftPdf(aggregate, reports, official, autoSintesi, autoEventi) {
-  const C=themeColors(); const doc=newCleanDoc(); const subtitle=`${official.data || aggregate.dateLabel} | ${official.turno || ''}`;
+  const C=themeColors(); const doc=newCleanDoc(); const subtitle=`${formatDateIT(official.data || aggregate.dateLabel)} | ${official.turno || ''}`;
   drawHeaderModern(doc,'REPORT UFFICIALE DI TURNO',subtitle,C.blue);
   drawKpiBox(doc,12,58,40,38,'car','Interventi',aggregate.totalInterventi,C.blue);
   drawKpiBox(doc,58,58,40,38,'doc','Verbali',aggregate.totaleViolazioni,C.blue);
@@ -1122,11 +1138,20 @@ function buildOfficialShiftPdf(aggregate, reports, official, autoSintesi, autoEv
   drawKpiBox(doc,150,58,48,38,'clip','Atti redatti',totalAttiFromReports(reports),C.blue);
   drawPanel(doc,12,104,67,55,'Personale','people');
   const presenti = new Set(reports.flatMap(r=>(r.operatori||[]).map(o=>o.matricola||o.nome).filter(Boolean))).size;
-  const ritardi=countTextItems(official.ritardi); const assenti=countTextItems(official.assenti); doc.setFontSize(8.2); setC(doc,C.text); doc.text('Presenti',18,122); setC(doc,C.green); doc.setFont('helvetica','bold'); doc.text(String(presenti || '-'),72,122,{align:'right'}); setC(doc,C.text); doc.setFont('helvetica','normal'); doc.line(18,126,73,126); doc.text('Ritardo',18,133); setC(doc,C.orange); doc.setFont('helvetica','bold'); doc.text(String(ritardi),72,133,{align:'right'}); setC(doc,C.text); doc.setFont('helvetica','normal'); doc.line(18,137,73,137); doc.text('Assenti',18,144); setC(doc,C.red); doc.setFont('helvetica','bold'); doc.text(String(assenti),72,144,{align:'right'}); setC(doc,C.text); doc.setFont('helvetica','normal'); doc.line(18,148,73,148); doc.text('Totale',18,155); doc.setFont('helvetica','bold'); doc.text(String(presenti+ritardi+assenti || '-'),72,155,{align:'right'});
+  const ritardiList=listFromText(official.ritardi); const assentiList=listFromText(official.assenti);
+  const ritardi=ritardiList.length; const assenti=assentiList.length;
+  doc.setFontSize(8); setC(doc,C.text); doc.setFont('helvetica','normal');
+  doc.text('Presenti',18,121); setC(doc,C.green); doc.setFont('helvetica','bold'); doc.text(String(presenti || '-'),72,121,{align:'right'});
+  doc.setDrawColor(C.line[0],C.line[1],C.line[2]); doc.line(18,124,73,124);
+  setC(doc,C.text); doc.setFont('helvetica','normal'); doc.text('Ritardo',18,130); setC(doc,C.orange); doc.setFont('helvetica','bold'); doc.text(String(ritardi),72,130,{align:'right'});
+  if (ritardiList.length) { setC(doc,C.muted); doc.setFont('helvetica','normal'); doc.setFontSize(6.6); doc.text(doc.splitTextToSize(ritardiList.join(', '),50).slice(0,2),18,135); }
+  doc.setDrawColor(C.line[0],C.line[1],C.line[2]); doc.line(18,142,73,142);
+  setC(doc,C.text); doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.text('Assenti',18,148); setC(doc,C.red); doc.setFont('helvetica','bold'); doc.text(String(assenti),72,148,{align:'right'});
+  if (assentiList.length) { setC(doc,C.muted); doc.setFont('helvetica','normal'); doc.setFontSize(6.6); doc.text(doc.splitTextToSize(assentiList.join(', '),50).slice(0,2),18,153); }
   drawPanel(doc,84,104,114,55,'Briefing operativo','list'); writeTextInBox(doc, official.briefing || '-', 90, 122, 100, 7, 8);
   drawPanel(doc,12,166,186,45,'Eventi / anomalie degne di rilievo','warn',{leftStripe:C.orange,bg:[255,251,245],border:[245,208,166],accent:C.orange}); writeTextInBox(doc, `${autoEventi || 'Nessun evento rilevante automatico rilevato.'}${official.anomalie ? '\nAnomalie: '+official.anomalie : ''}`, 18, 184, 172, 5, 8.2);
   drawPanel(doc,12,218,90,38,'Note generali','doc'); writeTextInBox(doc, official.noteGenerali || '-', 18,236,78,4,8);
-  drawPanel(doc,108,218,90,38,'Sintesi operativa','list'); writeTextInBox(doc, `${autoSintesi}${official.eventiManuali ? '\n'+official.eventiManuali : ''}`, 114,236,78,4,8);
+  drawPanel(doc,108,218,90,38,'Sintesi operativa','list'); writeTextInBox(doc, `${autoSintesi}${official.eventiManuali ? '\n'+official.eventiManuali : ''}\nKm totali veicoli: ${totalKmFromReports(reports)} km`, 114,236,78,4,8);
   footerModern(doc);
   doc.addPage(); drawHeaderModern(doc,'REPORT UFFICIALE DI TURNO - DETTAGLIO',subtitle,C.blue);
   drawPanel(doc,12,58,186,10,'Violazioni riscontrate','list');
@@ -1139,11 +1164,16 @@ function buildOfficialShiftPdf(aggregate, reports, official, autoSintesi, autoEv
   footerModern(doc); return doc;
 }
 function buildServicePdf(report) {
-  const C=themeColors(); const doc=newCleanDoc(); const subtitle=`${report.data} | ${turnoLabel(report)} | ${report.orarioTipo}`;
+  const C=themeColors(); const doc=newCleanDoc(); const subtitle=`${formatDateIT(report.data)} | ${turnoLabel(report)} | ${report.orarioTipo}`;
   drawHeaderModern(doc,'REPORT DI SERVIZIO',subtitle,C.green);
   const interventi=(report.interventi||[]).length; const violazioni=getTotaleViolazioni(report); const c=report.counters||emptyCounters(); const atti=['relazioni','annotazioni','sequestriAmministrativi','fermiAmministrativi','sequestriPenali','cnr','altriAttiNumero'].reduce((s,k)=>s+n(c[k]),0); const eventi=(report.interventi||[]).filter(isInterventoCritico).length;
   drawKpiBox(doc,12,58,40,38,'car','Interventi',interventi,C.green); drawKpiBox(doc,58,58,40,38,'doc','Violazioni',violazioni,C.green); drawKpiBox(doc,104,58,40,38,'clip','Atti redatti',atti,C.green); drawKpiBox(doc,150,58,48,38,'warn','Eventi',eventi,C.orange);
-  drawPanel(doc,12,104,60,48,'Veicolo in uso','car',{accent:C.green}); const v=(report.veicoli||[])[0]||{}; doc.setFontSize(8); setC(doc,C.text); doc.text(`Veicolo: ${v.sigla || '-'}`,18,122); doc.text(`Km iniziali: ${v.kmInizio || '-'}`,18,129); doc.text(`Km finali: ${v.kmFine || '-'}`,18,136); doc.setFont('helvetica','bold'); doc.text(`Totale Km: ${getKmTotali(report)}`,18,144);
+  drawPanel(doc,12,104,60,48,'Veicoli','car',{accent:C.green});
+  const v=(report.veicoli||[])[0]||{}; const veicoliUsati=(report.veicoli||[]).filter(vv=>vv.sigla||vv.kmInizio||vv.kmFine).length;
+  doc.setFontSize(8); setC(doc,C.text); doc.setFont('helvetica','normal');
+  doc.text(`Veicoli impiegati: ${veicoliUsati || '-'}`,18,122);
+  doc.setFont('helvetica','bold'); doc.setFontSize(11); setC(doc,C.green); doc.text(`${getKmTotali(report)} km`,18,134);
+  setC(doc,C.text); doc.setFont('helvetica','normal'); doc.setFontSize(7.3); doc.text('Totale km percorsi nel turno',18,143);
   drawPanel(doc,78,104,60,48,'Carburante','list',{accent:C.green}); doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.text(`Effettuato: ${v.carburante || 'No'}`,84,122); doc.text(`Importo: ${v.importoCarburante || '-'}`,84,129); doc.text(`Card presa: ${v.oraPrelievoCard || '-'}`,84,136); doc.text(`Card resa: ${v.oraRestituzioneCard || '-'}`,84,143);
   drawPanel(doc,144,104,54,48,'Anomalie veicolo','warn',{accent:C.green}); writeTextInBox(doc, (report.veicoli||[]).filter(x=>x.anomaliaVeicolo).map(x=>`${x.sigla||'Veicolo'}: ${x.anomaliaVeicolo}`).join('\n') || 'Nessuna anomalia segnalata.', 150,122,42,4,8);
   drawPanel(doc,12,160,186,45,'Note di servizio','list',{accent:C.green}); writeTextInBox(doc, report.noteUdt || '-',18,178,174,5,8);
