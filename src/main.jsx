@@ -711,7 +711,7 @@ function buildVerbaliPdf(report) {
   return doc;
 }
 
-function buildServicePdf(report) {
+function buildServicePdf_old(report) {
   const title = 'REPORT DI SERVIZIO';
   const subtitle = `${report.data} | Turno ${turnoLabel(report)} | ${report.orarioTipo}`;
   const doc = makePdf(title, subtitle);
@@ -1008,7 +1008,7 @@ function officialReportText(aggregate, reports, official, autoSintesi, autoEvent
   const attivita = (official.attivitaIspettive || []).filter(a => a.tipo || a.reparto || a.luogo || a.esito || a.note).map((a, idx) => `${idx + 1}. ${a.tipo || '-'} | ${a.reparto || '-'} | ${a.luogo || '-'} | ${a.orario || '-'} | Esito: ${a.esito || '-'} | Violazioni: ${a.violazioni || '-'} | Note: ${a.note || '-'}`).join('\n') || '- Nessuna attività ispettiva indicata';
   return `REPORT UFFICIALE DI TURNO\n\nDATA E TURNO\n${official.data || aggregate.dateLabel} ${official.turno || ''}\n\nBRIEFING OPERATIVO\n${official.briefing || '-'}\n\nA.P.L. ASSENTI\n${official.assenti || '-'}\n\nA.P.L. IN RITARDO\n${official.ritardi || '-'}\n\nNOTE\n${official.noteGenerali || '-'}\n\nSINTESI OPERATIVA\n${autoSintesi}\n${official.eventiManuali ? '\nIntegrazioni: ' + official.eventiManuali : ''}\n\nEVENTI DEGNI DI RILIEVO\n${autoEventi || '- Nessun evento rilevante automatico rilevato'}\n\nANOMALIE RISCONTRATE DURANTE IL TURNO\n${official.anomalie || '-'}\n\nATTIVITÀ ISPETTIVE\n${attivita}\n\nESITI\n${official.esiti || '-'}\n\nCOMUNICAZIONE ALL'E.Q. DI TURNO\n${official.comunicazioneEq || '-'}\n\nNOTA PER IL COMANDANTE\n${official.notaComandante || '-'}\n\nVIOLAZIONI RISCONTRATE\nTotale violazioni: ${aggregate.totaleViolazioni}\n\nFIRMA\n${official.qualifica || ''}\n${official.ufficiale || ''}`;
 }
-function buildOfficialShiftPdf(aggregate, reports, official, autoSintesi, autoEventi) {
+function buildOfficialShiftPdf_old(aggregate, reports, official, autoSintesi, autoEventi) {
   const title = 'REPORT UFFICIALE DI TURNO';
   const subtitle = `${official.data || aggregate.dateLabel} | ${official.turno || ''}`;
   const doc = makePdf(title, subtitle);
