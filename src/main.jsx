@@ -453,66 +453,86 @@ function makePdf(title, subtitle = '') {
   return doc;
 }
 
+function pdfTheme() {
+  return {
+    blue: [13, 43, 87],
+    blue2: [22, 62, 116],
+    grayBg: [246, 248, 251],
+    grayLine: [214, 222, 232],
+    text: [15, 23, 42],
+    muted: [85, 95, 110],
+    orange: [217, 119, 6],
+    red: [185, 28, 28],
+    green: [22, 101, 52]
+  };
+}
+
+function setRGB(doc, method, color) { doc[method](color[0], color[1], color[2]); }
+
 function addHeader(doc, title, subtitle = '') {
-  doc.setFillColor(255, 255, 255);
-  doc.rect(0, 0, 210, 34, 'F');
+  const t = pdfTheme();
+  // Fascia superiore istituzionale pulita e ampia.
+  setRGB(doc, 'setFillColor', t.blue);
+  doc.rect(0, 0, 210, 31, 'F');
   try {
     const img = document.getElementById('pdfLogo');
-    if (img && img.complete) doc.addImage(img, 'PNG', 12, 6, 22, 22);
+    if (img && img.complete) {
+      doc.setFillColor(255, 255, 255);
+      doc.roundedRect(11, 5, 22, 22, 2, 2, 'F');
+      doc.addImage(img, 'PNG', 13.5, 7.5, 17, 17);
+    }
   } catch (e) {}
-  doc.setDrawColor(12, 47, 97);
-  doc.setLineWidth(0.35);
-  doc.line(40, 7, 40, 28);
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(15);
-  doc.setTextColor(12, 47, 97);
-  doc.text('COMUNE DI MONZA', 45, 13);
-  doc.setFontSize(10.5);
-  doc.text('Settore Polizia Locale, Protezione Civile', 45, 20);
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(7.8);
-  doc.setTextColor(40, 48, 60);
-  doc.text('Via Marsala 13 | 20900 Monza', 145, 11);
-  doc.text('Tel. 039 28161', 145, 17);
-  doc.text('polizialocale@comune.monza.it', 145, 23);
-  doc.setDrawColor(12, 47, 97);
-  doc.setLineWidth(0.6);
-  doc.line(12, 32, 198, 32);
-  doc.setFillColor(12, 47, 97);
-  doc.roundedRect(12, 38, 126, 10, 1.8, 1.8, 'F');
   doc.setTextColor(255, 255, 255);
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(12);
-  doc.text(title, 75, 44.5, { align: 'center' });
+  doc.setFontSize(13.2);
+  doc.text('COMUNE DI MONZA', 39, 12.5);
+  doc.setFontSize(9.5);
+  doc.setFont('helvetica', 'normal');
+  doc.text('Settore Polizia Locale, Protezione Civile', 39, 19);
+  doc.setFontSize(7.5);
+  doc.text('Via Marsala 13 | 20900 Monza  ·  Tel. 039 28161  ·  polizialocale@comune.monza.it', 39, 25);
+
+  // Titolo documento: evidente ma sobrio.
+  setRGB(doc, 'setFillColor', t.grayBg);
+  doc.roundedRect(12, 36, 186, 14, 2, 2, 'F');
+  setRGB(doc, 'setDrawColor', t.grayLine);
+  doc.roundedRect(12, 36, 186, 14, 2, 2, 'S');
+  setRGB(doc, 'setFillColor', t.blue);
+  doc.roundedRect(12, 36, 5, 14, 1.8, 1.8, 'F');
+  setRGB(doc, 'setTextColor', t.blue);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(13);
+  doc.text(title, 22, 45);
   if (subtitle) {
-    doc.setTextColor(55, 65, 81);
+    setRGB(doc, 'setTextColor', t.muted);
     doc.setFont('helvetica', 'normal');
-    doc.setFontSize(8.5);
-    doc.text(subtitle, 198, 44.5, { align: 'right' });
+    doc.setFontSize(8.2);
+    doc.text(subtitle, 195, 45, { align: 'right' });
   }
-  doc.setTextColor(0, 0, 0);
+  setRGB(doc, 'setTextColor', t.text);
 }
 
 function addFooter(doc) {
+  const t = pdfTheme();
   const pages = doc.internal.getNumberOfPages();
   for (let i = 1; i <= pages; i++) {
     doc.setPage(i);
-    doc.setDrawColor(12, 47, 97);
+    setRGB(doc, 'setDrawColor', t.grayLine);
     doc.setLineWidth(0.35);
     doc.line(12, 284, 198, 284);
     doc.setFont('helvetica', 'normal');
-    doc.setFontSize(7.4);
-    doc.setTextColor(12, 47, 97);
+    doc.setFontSize(7.2);
+    setRGB(doc, 'setTextColor', t.blue);
     doc.text('Settore Polizia Locale, Protezione Civile', 12, 289);
     doc.text('Via Marsala 13 | 20900 Monza', 12, 293);
-    doc.text('Tel. 039 28161', 86, 291);
+    doc.text('Tel. 039 28161', 88, 291);
     doc.text('polizialocale@comune.monza.it', 127, 291);
-    doc.setFillColor(12, 47, 97);
-    doc.roundedRect(178, 287, 20, 7, 1.2, 1.2, 'F');
+    setRGB(doc, 'setFillColor', t.blue);
+    doc.roundedRect(178, 287, 20, 7, 1.4, 1.4, 'F');
     doc.setTextColor(255, 255, 255);
     doc.setFont('helvetica', 'bold');
     doc.text(`Pag. ${i} di ${pages}`, 188, 291.6, { align: 'center' });
-    doc.setTextColor(0, 0, 0);
+    setRGB(doc, 'setTextColor', t.text);
   }
 }
 
@@ -520,36 +540,82 @@ function ensureSpace(doc, y, needed = 18, title = '', subtitle = '') {
   if (y + needed <= 276) return y;
   doc.addPage();
   addHeader(doc, title, subtitle);
-  return 54;
+  return 56;
 }
 
-function section(doc, label, y, pdfTitle = '', subtitle = '') {
-  y = ensureSpace(doc, y, 13, pdfTitle, subtitle);
-  doc.setFillColor(245, 248, 252);
-  doc.setDrawColor(214, 222, 232);
-  doc.roundedRect(12, y, 186, 9, 1.4, 1.4, 'FD');
-  doc.setFillColor(12, 47, 97);
-  doc.rect(12, y, 3.2, 9, 'F');
-  doc.setTextColor(12, 47, 97);
+function drawPdfIcon(doc, type, x, y, color = [13, 43, 87]) {
+  setRGB(doc, 'setDrawColor', color);
+  setRGB(doc, 'setTextColor', color);
+  doc.setLineWidth(0.55);
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(9.5);
-  doc.text(label.toUpperCase(), 18, y + 6);
-  doc.setTextColor(0, 0, 0);
-  return y + 12;
+  if (type === 'interventi') {
+    doc.roundedRect(x, y + 2.2, 7.5, 3.8, 0.8, 0.8, 'S');
+    doc.line(x + 1.5, y + 2.2, x + 2.7, y);
+    doc.line(x + 5, y, x + 6.2, y + 2.2);
+    doc.circle(x + 1.7, y + 6.4, 0.8, 'S');
+    doc.circle(x + 5.8, y + 6.4, 0.8, 'S');
+  } else if (type === 'violazioni') {
+    doc.rect(x + 1, y, 5.8, 7.5, 'S');
+    doc.line(x + 2, y + 2.2, x + 5.8, y + 2.2);
+    doc.line(x + 2, y + 4, x + 5.8, y + 4);
+    doc.line(x + 2, y + 5.8, x + 4.8, y + 5.8);
+  } else if (type === 'atti') {
+    doc.rect(x + 1.2, y + 0.6, 5.4, 6.8, 'S');
+    doc.line(x + 2.2, y + 2.5, x + 5.6, y + 2.5);
+    doc.line(x + 2.2, y + 4.2, x + 5.6, y + 4.2);
+    doc.line(x + 2.2, y + 5.9, x + 4.6, y + 5.9);
+  } else if (type === 'eventi') {
+    doc.triangle(x + 3.8, y, x + 7.6, y + 7.3, x, y + 7.3, 'S');
+    doc.line(x + 3.8, y + 2.5, x + 3.8, y + 4.8);
+    doc.circle(x + 3.8, y + 6, 0.2, 'F');
+  } else if (type === 'personale') {
+    doc.circle(x + 2.5, y + 2.3, 1.2, 'S');
+    doc.circle(x + 5.8, y + 2.7, 1, 'S');
+    doc.roundedRect(x + 0.7, y + 4.8, 4.2, 2.8, 1.2, 1.2, 'S');
+    doc.roundedRect(x + 4.2, y + 5.1, 3.2, 2.5, 1.1, 1.1, 'S');
+  } else if (type === 'veicolo') {
+    doc.roundedRect(x, y + 2.4, 7.5, 3.6, 0.7, 0.7, 'S');
+    doc.line(x + 1.6, y + 2.4, x + 2.6, y + 0.7);
+    doc.line(x + 5.2, y + 0.7, x + 6.2, y + 2.4);
+    doc.circle(x + 1.8, y + 6.4, 0.7, 'S');
+    doc.circle(x + 5.7, y + 6.4, 0.7, 'S');
+  } else {
+    doc.circle(x + 3.8, y + 3.8, 3.2, 'S');
+    doc.line(x + 3.8, y + 1.8, x + 3.8, y + 5.8);
+    doc.line(x + 1.8, y + 3.8, x + 5.8, y + 3.8);
+  }
+}
+
+function section(doc, label, y, pdfTitle = '', subtitle = '', icon = 'atti') {
+  const t = pdfTheme();
+  y = ensureSpace(doc, y, 14, pdfTitle, subtitle);
+  setRGB(doc, 'setFillColor', t.grayBg);
+  setRGB(doc, 'setDrawColor', t.grayLine);
+  doc.roundedRect(12, y, 186, 10, 1.6, 1.6, 'FD');
+  setRGB(doc, 'setFillColor', t.blue);
+  doc.roundedRect(12, y, 4, 10, 1.4, 1.4, 'F');
+  drawPdfIcon(doc, icon, 20, y + 1.4, t.blue);
+  setRGB(doc, 'setTextColor', t.blue);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(9.3);
+  doc.text(label.toUpperCase(), 31, y + 6.6);
+  setRGB(doc, 'setTextColor', t.text);
+  return y + 13;
 }
 
 function box(doc, y, h, pdfTitle = '', subtitle = '') {
+  const t = pdfTheme();
   y = ensureSpace(doc, y, h + 4, pdfTitle, subtitle);
-  doc.setDrawColor(222, 226, 230);
+  setRGB(doc, 'setDrawColor', t.grayLine);
   doc.setFillColor(255, 255, 255);
-  doc.roundedRect(12, y, 186, h, 1.5, 1.5, 'FD');
+  doc.roundedRect(12, y, 186, h, 1.8, 1.8, 'FD');
   return y;
 }
 
 function kvGrid(doc, items, y, columns = 2, pdfTitle = '', subtitle = '') {
-  const rowH = 11;
+  const rowH = 12;
   const rows = Math.ceil(items.length / columns);
-  y = box(doc, y, rows * rowH + 4, pdfTitle, subtitle) + 7;
+  y = box(doc, y, rows * rowH + 7, pdfTitle, subtitle) + 8;
   const colW = 186 / columns;
   items.forEach((item, idx) => {
     const col = idx % columns;
@@ -557,215 +623,165 @@ function kvGrid(doc, items, y, columns = 2, pdfTitle = '', subtitle = '') {
     const x = 16 + col * colW;
     const yy = y + row * rowH;
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(7.5);
-    doc.setTextColor(80, 86, 94);
-    doc.text(item.label, x, yy);
+    doc.setFontSize(7.4);
+    doc.setTextColor(85, 95, 110);
+    doc.text(String(item.label || ''), x, yy);
     doc.setFont('helvetica', 'normal');
-    doc.setFontSize(9);
-    doc.setTextColor(0, 0, 0);
-    doc.text(String(item.value || '-'), x, yy + 4.5, { maxWidth: colW - 9 });
+    doc.setFontSize(8.7);
+    doc.setTextColor(15, 23, 42);
+    doc.text(doc.splitTextToSize(String(item.value || '-'), colW - 10), x, yy + 4.6, { maxWidth: colW - 10 });
   });
-  return y + rows * rowH + 2;
+  return y + rows * rowH + 4;
+}
+
+function normalizeWidths(widths) {
+  const total = widths.reduce((a, b) => a + b, 0) || 1;
+  return widths.map(w => w * 186 / total);
 }
 
 function simpleTable(doc, headers, rows, y, widths, pdfTitle = '', subtitle = '') {
-  const headerH = 8;
-  const lineH = 5;
-  y = ensureSpace(doc, y, headerH + 8, pdfTitle, subtitle);
+  const t = pdfTheme();
+  widths = normalizeWidths(widths);
+  const headerH = 8.8;
+  const lineH = 4.2;
+  y = ensureSpace(doc, y, headerH + 10, pdfTitle, subtitle);
   let x = 12;
-  doc.setFillColor(235, 239, 244);
-  doc.rect(12, y, 186, headerH, 'F');
+  setRGB(doc, 'setFillColor', t.blue);
+  doc.roundedRect(12, y, 186, headerH, 1.2, 1.2, 'F');
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(7.8);
-  headers.forEach((h, i) => { doc.text(h, x + 2, y + 5.2, { maxWidth: widths[i] - 4 }); x += widths[i]; });
+  doc.setFontSize(6.9);
+  doc.setTextColor(255, 255, 255);
+  headers.forEach((h, i) => { doc.text(doc.splitTextToSize(String(h), widths[i] - 3), x + 1.5, y + 3.8, { maxWidth: widths[i] - 3 }); x += widths[i]; });
   y += headerH;
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(7.6);
-  rows.forEach(row => {
-    const cellLines = row.map((cell, i) => doc.splitTextToSize(String(cell || '-'), widths[i] - 4));
-    const h = Math.max(7, Math.max(...cellLines.map(lines => lines.length)) * lineH + 2);
+  rows.forEach((row, rowIdx) => {
+    doc.setFont('helvetica', rowIdx === rows.length - 1 && String(row[0]).toUpperCase().includes('TOTALE') ? 'bold' : 'normal');
+    doc.setFontSize(6.9);
+    const cellLines = row.map((cell, i) => doc.splitTextToSize(String(cell === 0 ? '0' : (cell || '-')), widths[i] - 3));
+    const h = Math.max(8, Math.max(...cellLines.map(lines => lines.length)) * lineH + 3);
     y = ensureSpace(doc, y, h + 2, pdfTitle, subtitle);
-    doc.setDrawColor(232, 235, 238);
-    doc.rect(12, y, 186, h);
+    if (rowIdx % 2 === 0) setRGB(doc, 'setFillColor', [250, 252, 254]); else doc.setFillColor(255, 255, 255);
+    doc.rect(12, y, 186, h, 'F');
+    setRGB(doc, 'setDrawColor', [230, 235, 241]);
+    doc.rect(12, y, 186, h, 'S');
     let xx = 12;
     cellLines.forEach((lines, i) => {
-      doc.text(lines, xx + 2, y + 5, { maxWidth: widths[i] - 4 });
+      if (i === row.length - 1) {
+        setRGB(doc, 'setTextColor', t.blue);
+        doc.setFont('helvetica', 'bold');
+      } else {
+        setRGB(doc, 'setTextColor', t.text);
+      }
+      const align = i >= 2 ? 'center' : 'left';
+      const tx = align === 'center' ? xx + widths[i] / 2 : xx + 1.5;
+      doc.text(lines, tx, y + 5, { maxWidth: widths[i] - 3, align });
       xx += widths[i];
-      if (i < widths.length - 1) doc.line(xx, y, xx, y + h);
+      if (i < widths.length - 1) {
+        setRGB(doc, 'setDrawColor', [232, 236, 242]);
+        doc.line(xx, y, xx, y + h);
+      }
     });
     y += h;
   });
-  return y + 4;
+  setRGB(doc, 'setTextColor', t.text);
+  return y + 5;
 }
 
-function paragraph(doc, text, y, pdfTitle = '', subtitle = '', maxWidth = 178) {
-  const lines = doc.splitTextToSize(String(text || '-'), maxWidth);
-  y = ensureSpace(doc, y, lines.length * 5 + 8, pdfTitle, subtitle);
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8.5);
-  doc.text(lines, 16, y + 5);
-  return y + lines.length * 5 + 8;
-}
-
-
-function softBox(doc, x, y, w, h, title, body, options = {}) {
-  const fill = options.fill || [255, 255, 255];
-  const border = options.border || [205, 212, 222];
-  const titleColor = options.titleColor || [12, 47, 97];
-  const titleBg = options.titleBg || null;
-  doc.setDrawColor(...border);
-  doc.setFillColor(...fill);
-  doc.roundedRect(x, y, w, h, 1.5, 1.5, 'FD');
-  if (titleBg) {
-    doc.setFillColor(...titleBg);
-    doc.rect(x, y, w, 8, 'F');
-    doc.setTextColor(255, 255, 255);
+function paragraph(doc, text, y, pdfTitle = '', subtitle = '', maxWidth = 178, accent = null) {
+  const t = pdfTheme();
+  const lines = doc.splitTextToSize(String(text || '-'), maxWidth - (accent ? 6 : 0));
+  const h = lines.length * 4.6 + 8;
+  y = ensureSpace(doc, y, h + 2, pdfTitle, subtitle);
+  if (accent) {
+    const color = accent === 'red' ? t.red : accent === 'orange' ? t.orange : t.blue;
+    doc.setFillColor(255, 255, 255);
+    setRGB(doc, 'setDrawColor', [226, 232, 240]);
+    doc.roundedRect(12, y, 186, h, 1.5, 1.5, 'FD');
+    setRGB(doc, 'setFillColor', color);
+    doc.roundedRect(12, y, 3.2, h, 1.2, 1.2, 'F');
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8.3);
+    setRGB(doc, 'setTextColor', t.text);
+    doc.text(lines, 19, y + 6, { maxWidth: maxWidth - 6 });
   } else {
-    doc.setTextColor(...titleColor);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8.3);
+    setRGB(doc, 'setTextColor', t.text);
+    doc.text(lines, 16, y + 5.5, { maxWidth });
   }
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(options.titleSize || 9);
-  doc.text(String(title || '').toUpperCase(), x + 4, y + 6);
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(options.fontSize || 8.2);
-  doc.setTextColor(20, 28, 40);
-  const txt = String(body || '-');
-  const lines = doc.splitTextToSize(txt, w - 8);
-  doc.text(lines.slice(0, Math.max(1, Math.floor((h - 11) / 4.4))), x + 4, y + 12);
-  doc.setTextColor(0, 0, 0);
+  return y + h + 3;
 }
 
-function labeledInfoBox(doc, x, y, w, h, rows) {
-  doc.setDrawColor(225, 231, 239);
-  doc.setFillColor(247, 250, 252);
-  doc.roundedRect(x, y, w, h, 1.5, 1.5, 'FD');
-  rows.forEach((row, idx) => {
-    const yy = y + 8 + idx * 7.2;
+function kpiCards(doc, items, y, pdfTitle = '', subtitle = '') {
+  const t = pdfTheme();
+  y = ensureSpace(doc, y, 33, pdfTitle, subtitle);
+  const gap = 4;
+  const w = (186 - gap * (items.length - 1)) / items.length;
+  items.forEach((item, idx) => {
+    const x = 12 + idx * (w + gap);
+    setRGB(doc, 'setFillColor', t.grayBg);
+    setRGB(doc, 'setDrawColor', t.grayLine);
+    doc.roundedRect(x, y, w, 29, 2.2, 2.2, 'FD');
+    drawPdfIcon(doc, item.icon || 'atti', x + 5, y + 5, t.blue);
+    const valueColor = item.color === 'red' ? t.red : item.color === 'orange' ? t.orange : item.color === 'green' ? t.green : t.blue;
+    setRGB(doc, 'setTextColor', valueColor);
     doc.setFont('helvetica', 'bold');
-    doc.setTextColor(12, 47, 97);
-    doc.setFontSize(8);
-    doc.text(String(row.label || '').toUpperCase() + ':', x + 5, yy);
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(20, 28, 40);
-    doc.setFontSize(8.5);
-    doc.text(String(row.value || '-'), x + 38, yy, { maxWidth: w - 42 });
+    doc.setFontSize(18);
+    doc.text(String(item.value ?? 0), x + w - 6, y + 13, { align: 'right' });
+    setRGB(doc, 'setTextColor', t.muted);
+    doc.setFontSize(7);
+    doc.text(String(item.label || '').toUpperCase(), x + 5, y + 23, { maxWidth: w - 10 });
   });
-  doc.setTextColor(0, 0, 0);
+  setRGB(doc, 'setTextColor', t.text);
+  return y + 35;
 }
-
-function quickSummaryBox(doc, x, y, w, rows, title = 'RIEPILOGO RAPIDO') {
-  const h = 9 + rows.length * 9;
-  doc.setDrawColor(12, 47, 97);
-  doc.setFillColor(255, 255, 255);
-  doc.roundedRect(x, y, w, h, 1.4, 1.4, 'FD');
-  doc.setFillColor(12, 47, 97);
-  doc.roundedRect(x, y, w, 8, 1.4, 1.4, 'F');
-  doc.setTextColor(255, 255, 255);
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(8);
-  doc.text(title, x + w / 2, y + 5.5, { align: 'center' });
-  rows.forEach((r, idx) => {
-    const yy = y + 15 + idx * 9;
-    doc.setTextColor(20, 28, 40);
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(8.4);
-    doc.text(String(r.label || ''), x + 8, yy);
-    doc.setFont('helvetica', 'bold');
-    doc.text(String(r.value ?? '-'), x + w - 8, yy, { align: 'right' });
-    if (idx < rows.length - 1) {
-      doc.setDrawColor(226, 232, 240);
-      doc.line(x + 8, yy + 3, x + w - 8, yy + 3);
-    }
-  });
-  doc.setTextColor(0, 0, 0);
-  return y + h;
-}
-
-function compactOfficialSummary(doc, aggregate, reports, y, title, subtitle) {
-  y = ensureSpace(doc, y, 44, title, subtitle);
-  labeledInfoBox(doc, 12, y, 104, 38, [
-    { label: 'Data', value: subtitle.split('|')[0]?.trim() || aggregate.dateLabel },
-    { label: 'Turno', value: subtitle.split('|')[1]?.trim() || '-' },
-    { label: 'Ufficiale di turno', value: '-' },
-    { label: 'Briefing operativo', value: '-' },
-  ]);
-  quickSummaryBox(doc, 126, y, 72, [
-    { label: 'Report operatori', value: reports.length },
-    { label: 'Interventi totali', value: aggregate.totalInterventi },
-    { label: 'Violazioni totali', value: aggregate.totaleViolazioni },
-    { label: 'Eventi rilevanti', value: relevantInterventions(reports).length },
-  ]);
-  return y + 43;
-}
-
 
 function serviceSummaryBox(doc, report, y, pdfTitle = '', subtitle = '') {
-  y = ensureSpace(doc, y, 30, pdfTitle, subtitle);
   const interventi = (report.interventi || []).length;
   const violazioni = getTotaleViolazioni(report);
   const atti = ['relazioni','annotazioni','sequestriAmministrativi','fermiAmministrativi','sequestriPenali','cnr','altriAttiNumero'].reduce((s, k) => s + n((report.counters || {})[k]), 0);
   const criticita = (report.interventi || []).filter(isInterventoCritico).length + (testoCritico(report.noteUdt) ? 1 : 0);
-  doc.setFillColor(247, 250, 252);
-  doc.setDrawColor(214, 222, 232);
-  doc.roundedRect(12, y, 186, 29, 1.8, 1.8, 'FD');
-  const items = [
-    ['Interventi', interventi],
-    ['Violazioni / provv.', violazioni],
-    ['Atti redatti', atti],
-    ['Criticità', criticita],
-  ];
-  items.forEach((item, idx) => {
-    const x = 20 + idx * 44;
-    if (idx > 0) {
-      doc.setDrawColor(225, 231, 239);
-      doc.line(x - 8, y + 6, x - 8, y + 23);
-    }
-    doc.setTextColor(12, 47, 97);
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(16);
-    doc.text(String(item[1]), x, y + 13);
-    doc.setFontSize(7.6);
-    doc.setTextColor(75, 85, 99);
-    doc.text(item[0].toUpperCase(), x, y + 21);
-  });
-  doc.setTextColor(0, 0, 0);
-  return y + 35;
+  return kpiCards(doc, [
+    { label: 'Interventi', value: interventi, icon: 'interventi' },
+    { label: 'Violazioni', value: violazioni, icon: 'violazioni' },
+    { label: 'Atti redatti', value: atti, icon: 'atti' },
+    { label: 'Criticità', value: criticita, icon: 'eventi', color: criticita > 0 ? 'orange' : undefined },
+  ], y, pdfTitle, subtitle);
 }
 
 function serviceInterventionCard(doc, i, idx, y, pdfTitle = '', subtitle = '') {
+  const t = pdfTheme();
   const critic = isInterventoCritico(i);
-  y = ensureSpace(doc, y, 30, pdfTitle, subtitle);
-  doc.setFillColor(255, 255, 255);
-  doc.setDrawColor(214, 222, 232);
-  doc.roundedRect(12, y, 186, 0.1, 1, 1, 'S');
-  const startY = y;
-  doc.setFillColor(critic ? 254 : 245, critic ? 242 : 248, critic ? 242 : 252);
-  doc.roundedRect(12, y, 186, 10, 1.4, 1.4, 'F');
-  doc.setFillColor(12, 47, 97);
-  doc.roundedRect(15, y + 2.1, 18, 5.8, 1.2, 1.2, 'F');
-  doc.setTextColor(255, 255, 255);
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(7.5);
-  doc.text(`${i.oraInizio || '--'}-${i.oraFine || '--'}`, 24, y + 6.1, { align: 'center' });
-  doc.setTextColor(12, 47, 97);
-  doc.setFontSize(9.2);
-  doc.text(`${idx + 1}. ${i.tipo || 'Intervento'}`, 38, y + 6.3);
-  doc.setFont('helvetica', 'normal');
-  doc.setTextColor(65, 75, 90);
-  const origine = i.origine === 'Altro' ? `Altro: ${i.origineAltro || '-'}` : (i.origine || '-');
-  doc.text(`Origine: ${origine} | Luogo: ${i.luogo || '-'}`, 98, y + 6.3, { maxWidth: 96 });
-  y += 13;
   const scuole = i.tipo === 'Servizio scuole' ? (i.scuole || []).filter(s => s.nome || s.momento || s.orario || s.criticita).map((s, pos) => `Scuola ${pos + 1}: ${s.nome || '-'} (${s.momento || '-'} ${s.orario || '-'}) Criticità: ${s.criticita || '-'}`).join('\n') : '';
   const dettagli = extraDetails(i).replace(/\n/g, ' ').trim();
   const body = `Descrizione: ${i.descrizione || '-'}\nEsito: ${i.esito || '-'}${dettagli ? '\n' + dettagli : ''}${scuole ? '\n' + scuole : ''}\nNote: ${i.note || '-'}`;
-  const lines = doc.splitTextToSize(body, 176);
-  const h = Math.max(14, lines.length * 4.4 + 7);
-  y = ensureSpace(doc, startY, 13 + h, pdfTitle, subtitle) + 13;
-  doc.setTextColor(15, 23, 42);
+  const lines = doc.splitTextToSize(body, 174);
+  const h = Math.max(26, 14 + lines.length * 4.3);
+  y = ensureSpace(doc, y, h + 5, pdfTitle, subtitle);
+
+  // Box intervento: header evidenziato, testo sottostante e nessuna sovrapposizione.
+  doc.setFillColor(255, 255, 255);
+  setRGB(doc, 'setDrawColor', t.grayLine);
+  doc.roundedRect(12, y, 186, h, 1.8, 1.8, 'FD');
+  setRGB(doc, 'setFillColor', critic ? [255, 247, 237] : t.grayBg);
+  doc.roundedRect(12, y, 186, 10, 1.8, 1.8, 'F');
+  setRGB(doc, 'setFillColor', critic ? t.orange : t.blue);
+  doc.roundedRect(15, y + 2.1, 18, 5.8, 1.2, 1.2, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(7.2);
+  doc.text(`${i.oraInizio || '--'}-${i.oraFine || '--'}`, 24, y + 6.1, { align: 'center' });
+  setRGB(doc, 'setTextColor', t.blue);
+  doc.setFontSize(8.8);
+  doc.text(`${idx + 1}. ${i.tipo || 'Intervento'}`, 38, y + 6.3, { maxWidth: 57 });
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8.2);
-  doc.text(lines, 18, y + 3.5);
-  return y + h + 4;
+  setRGB(doc, 'setTextColor', t.muted);
+  const origine = i.origine === 'Altro' ? `Altro: ${i.origineAltro || '-'}` : (i.origine || '-');
+  doc.text(`Origine: ${origine} | Luogo: ${i.luogo || '-'}`, 100, y + 6.3, { maxWidth: 92 });
+  setRGB(doc, 'setTextColor', t.text);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8.1);
+  doc.text(lines, 18, y + 16, { maxWidth: 174 });
+  return y + h + 5;
 }
 
 function buildVerbaliPdf(report) {
@@ -807,63 +823,51 @@ function buildServicePdf(report) {
   const subtitle = `${report.data} | Turno ${turnoLabel(report)} | ${report.orarioTipo}`;
   const doc = makePdf(title, subtitle);
   let y = 54;
-  const c = report.counters || emptyCounters();
-  const attiTot = ['relazioni','annotazioni','sequestriAmministrativi','fermiAmministrativi','sequestriPenali','cnr','altriAttiNumero'].reduce((s, k) => s + n(c[k]), 0);
-  const criticita = (report.interventi || []).filter(isInterventoCritico).length + (testoCritico(report.noteUdt) ? 1 : 0);
 
-  labeledInfoBox(doc, 12, y, 104, 38, [
-    { label: 'Data', value: report.data },
-    { label: 'Turno', value: `${turnoLabel(report)} (${report.orarioTipo || '-'})` },
-    { label: 'Reparto', value: repartoLabel(report) },
-    { label: 'Operatori', value: operatorNames(report).join(', ') || '-' },
-  ]);
-  quickSummaryBox(doc, 126, y, 72, [
-    { label: 'Interventi totali', value: (report.interventi || []).length },
-    { label: 'Violazioni totali', value: getTotaleViolazioni(report) },
-    { label: 'Atti redatti', value: attiTot },
-    { label: 'Criticità', value: criticita },
-  ]);
-  y += 43;
+  y = serviceSummaryBox(doc, report, y, title, subtitle);
 
-  y = ensureSpace(doc, y, 36, title, subtitle);
-  const veicoloText = (report.veicoli || []).length
-    ? (report.veicoli || []).map(v => `${v.sigla || 'Veicolo'} — km ${v.kmInizio || '-'} / ${v.kmFine || '-'} (${km(v)} km). Carburante: ${v.carburante || 'No'}${v.importoCarburante ? ' - importo ' + v.importoCarburante : ''}${v.oraPrelievoCard || v.oraRestituzioneCard ? ' - card C.O. ' + (v.oraPrelievoCard || '--') + '/' + (v.oraRestituzioneCard || '--') : ''}${v.anomaliaVeicolo ? '\nAnomalia/danno: ' + v.anomaliaVeicolo : ''}`).join('\n')
-    : '-';
-  softBox(doc, 12, y, 91, 34, 'Veicoli e chilometraggio', veicoloText, { fill: [255,255,255] });
-  softBox(doc, 107, y, 91, 34, 'Note per UDT', report.noteUdt || '-', { fill: [255,255,255] });
-  y += 39;
+  y = section(doc, 'Dati generali del turno', y, title, subtitle);
+  y = kvGrid(doc, [
+    { label: 'Data servizio', value: report.data },
+    { label: 'Turno', value: turnoLabel(report) },
+    { label: 'Tipologia orario', value: report.orarioTipo },
+    { label: 'Reparto / servizio', value: repartoLabel(report) },
+  ], y, 2, title, subtitle) + 2;
+
+  y = section(doc, 'Operatori', y, title, subtitle);
+  const operatorRows = (report.operatori || []).filter(o => o.nome || o.matricola || o.qualifica).map(o => [o.nome, o.matricola, o.qualifica]);
+  y = simpleTable(doc, ['Nominativo', 'Matricola', 'Qualifica'], operatorRows.length ? operatorRows : [['-', '-', '-']], y, [90, 40, 56], title, subtitle);
+
+  y = section(doc, 'Veicoli, chilometraggio e carburante', y, title, subtitle);
+  const vehicleRows = (report.veicoli || []).map(v => [v.sigla || '-', v.kmInizio || '-', v.kmFine || '-', km(v), v.carburante || 'No', v.importoCarburante || '-', v.oraPrelievoCard || '-', v.oraRestituzioneCard || '-']);
+  y = simpleTable(doc, ['Veicolo', 'Km inizio', 'Km fine', 'Km', 'Carburante', 'Importo', 'Card presa', 'Card resa'], vehicleRows.length ? vehicleRows : [['-', '-', '-', '-', '-', '-', '-', '-']], y, [34, 23, 23, 18, 24, 22, 21, 21], title, subtitle);
+  const anomalieVeicoli = (report.veicoli || []).filter(v => v.anomaliaVeicolo).map(v => `${v.sigla || 'Veicolo'}: ${v.anomaliaVeicolo}`).join('\n');
+  y = kvGrid(doc, [{ label: 'Totale km percorsi', value: getKmTotali(report) }, { label: 'Anomalie / danni veicolo', value: anomalieVeicoli || '-' }], y, 1, title, subtitle) + 2;
 
   y = section(doc, 'Interventi effettuati', y, title, subtitle);
-  if (!(report.interventi || []).length) {
-    y = paragraph(doc, 'Nessun intervento inserito.', y, title, subtitle);
-  }
   (report.interventi || []).forEach((i, idx) => {
     y = serviceInterventionCard(doc, i, idx, y, title, subtitle);
   });
 
-  y = ensureSpace(doc, y, 56, title, subtitle);
-  const yBlocks = y;
-  const attiRows = [
-    ['Relazioni', c.relazioni], ['Annotazioni', c.annotazioni], ['Sequestri amm.', c.sequestriAmministrativi],
-    ['Fermi amm.', c.fermiAmministrativi], ['Sequestri penali', c.sequestriPenali], ['C.N.R.', c.cnr], [`Altri atti ${c.altriAttiDescrizione || ''}`, c.altriAttiNumero]
-  ];
-  softBox(doc, 12, yBlocks, 91, 10, 'Atti redatti', '', { titleBg: [12,47,97] });
-  let yy = yBlocks + 13;
-  yy = simpleTable(doc, ['Tipologia', 'N.'], attiRows, yy, [72, 19], title, subtitle);
+  y = section(doc, 'Atti redatti', y, title, subtitle);
+  const c = report.counters || emptyCounters();
+  y = simpleTable(doc, ['Tipologia', 'N.'], [
+    ['Relazioni di servizio', c.relazioni], ['Annotazioni di servizio', c.annotazioni],
+    ['Sequestri amministrativi', c.sequestriAmministrativi], ['Fermi amministrativi', c.fermiAmministrativi], ['Sequestri penali', c.sequestriPenali], ['C.N.R.', c.cnr], [`Altri atti ${c.altriAttiDescrizione || ''}`, c.altriAttiNumero]
+  ], y, [150, 36], title, subtitle);
 
-  const violRows = [
-    ['Preavvisi CdS', c.preavvisiCds], ['VdC CdS', c.vdcCds], ['Reg. Polizia Urbana', c.regPolizia],
-    ['Reg. Edilizio', c.regEdilizio], ['Reg. Benessere Animali', c.regBenessereAnimali], ['Annonaria / commercio', c.annonaria],
-    [`Altre norme ${c.altreNormeDescrizione || ''}`, c.altreNorme], ['TOTALE', getTotaleViolazioni(report)]
-  ];
-  softBox(doc, 107, yBlocks, 91, 10, 'Violazioni', '', { titleBg: [12,47,97] });
-  let yy2 = yBlocks + 13;
-  yy2 = simpleTable(doc, ['Tipologia', 'N.'], violRows, yy2, [72, 19], title, subtitle);
-  y = Math.max(yy, yy2) + 2;
+  y = section(doc, 'Violazioni', y, title, subtitle);
+  y = simpleTable(doc, ['Tipologia', 'N.'], [
+    ['Preavvisi CdS', c.preavvisiCds], ['VdC CdS', c.vdcCds], ['Regolamento Polizia', c.regPolizia], ['Regolamento Edilizio', c.regEdilizio],
+    ['Regolamento Benessere Animali', c.regBenessereAnimali], ['Annonaria / commercio', c.annonaria], [`Altre norme ${c.altreNormeDescrizione || ''}`, c.altreNorme], ['TOTALE', getTotaleViolazioni(report)]
+  ], y, [150, 36], title, subtitle);
 
   y = section(doc, 'Documenti ritirati', y, title, subtitle);
   const docRows = (report.documentiRitirati || []).filter(d => d.tipo || d.quantita || d.note).map(d => [d.tipo || '-', d.quantita || '-', d.note || '-']);
   y = simpleTable(doc, ['Tipo documento', 'Quantità', 'Note'], docRows.length ? docRows : [['Nessun documento ritirato', '-', '-']], y, [70, 28, 88], title, subtitle);
+
+  y = section(doc, 'Note per UDT / Ufficiale di coordinamento', y, title, subtitle);
+  y = paragraph(doc, report.noteUdt || '-', y, title, subtitle);
 
   y = section(doc, 'Dichiarazione e firme', y, title, subtitle);
   y = paragraph(doc, 'Gli operatori dichiarano che quanto riportato nel presente report corrisponde fedelmente alle attività effettivamente svolte e riscontrate durante il turno di servizio, consapevoli delle proprie responsabilità amministrative e penali anche in considerazione dell’art. 328 C.P.', y, title, subtitle);
@@ -1111,76 +1115,90 @@ function officialReportText(aggregate, reports, official, autoSintesi, autoEvent
   const attivita = (official.attivitaIspettive || []).filter(a => a.tipo || a.reparto || a.luogo || a.esito || a.note).map((a, idx) => `${idx + 1}. ${a.tipo || '-'} | ${a.reparto || '-'} | ${a.luogo || '-'} | ${a.orario || '-'} | Esito: ${a.esito || '-'} | Violazioni: ${a.violazioni || '-'} | Note: ${a.note || '-'}`).join('\n') || '- Nessuna attività ispettiva indicata';
   return `REPORT UFFICIALE DI TURNO\n\nDATA E TURNO\n${official.data || aggregate.dateLabel} ${official.turno || ''}\n\nBRIEFING OPERATIVO\n${official.briefing || '-'}\n\nA.P.L. ASSENTI\n${official.assenti || '-'}\n\nA.P.L. IN RITARDO\n${official.ritardi || '-'}\n\nNOTE\n${official.noteGenerali || '-'}\n\nSINTESI OPERATIVA\n${autoSintesi}\n${official.eventiManuali ? '\nIntegrazioni: ' + official.eventiManuali : ''}\n\nEVENTI DEGNI DI RILIEVO\n${autoEventi || '- Nessun evento rilevante automatico rilevato'}\n\nANOMALIE RISCONTRATE DURANTE IL TURNO\n${official.anomalie || '-'}\n\nATTIVITÀ ISPETTIVE\n${attivita}\n\nESITI\n${official.esiti || '-'}\n\nCOMUNICAZIONE ALL'E.Q. DI TURNO\n${official.comunicazioneEq || '-'}\n\nNOTA PER IL COMANDANTE\n${official.notaComandante || '-'}\n\nVIOLAZIONI RISCONTRATE\nTotale violazioni: ${aggregate.totaleViolazioni}\n\nFIRMA\n${official.qualifica || ''}\n${official.ufficiale || ''}`;
 }
+function countTextItems(text) {
+  const raw = String(text || '').trim();
+  if (!raw || /^nessun[oa]$/i.test(raw) || raw === '-') return 0;
+  return raw.split(/\n|,|;/).map(x => x.trim()).filter(Boolean).length || 1;
+}
+
 function buildOfficialShiftPdf(aggregate, reports, official, autoSintesi, autoEventi) {
   const title = 'REPORT UFFICIALE DI TURNO';
   const subtitle = `${official.data || aggregate.dateLabel} | ${official.turno || ''}`;
   const doc = makePdf(title, subtitle);
-  let y = 54;
+  let y = 56;
 
-  labeledInfoBox(doc, 12, y, 104, 38, [
+  const attiTot = reports.reduce((acc, r) => { const c = r.counters || {}; ['relazioni','annotazioni','sequestriAmministrativi','fermiAmministrativi','sequestriPenali','cnr','altriAttiNumero'].forEach(k => acc[k] = n(acc[k]) + n(c[k])); return acc; }, {});
+  const attiCount = ['relazioni','annotazioni','sequestriAmministrativi','fermiAmministrativi','sequestriPenali','cnr','altriAttiNumero'].reduce((sum, k) => sum + n(attiTot[k]), 0);
+  const eventiCount = relevantInterventions(reports).length + (official.eventiManuali ? 1 : 0);
+
+  y = kpiCards(doc, [
+    { label: 'Report operatori', value: reports.length, icon: 'personale' },
+    { label: 'Interventi', value: aggregate.totalInterventi, icon: 'interventi' },
+    { label: 'Violazioni', value: aggregate.totaleViolazioni, icon: 'violazioni' },
+    { label: 'Eventi rilevanti', value: eventiCount, icon: 'eventi', color: eventiCount > 0 ? 'orange' : undefined },
+  ], y, title, subtitle);
+
+  y = section(doc, 'Data, turno e ufficiale', y, title, subtitle, 'atti');
+  y = kvGrid(doc, [
     { label: 'Data', value: official.data || aggregate.dateLabel },
     { label: 'Turno', value: official.turno || '-' },
     { label: 'Ufficiale di turno', value: official.ufficiale || '-' },
-    { label: 'Briefing operativo', value: official.briefing || '-' },
-  ]);
-  quickSummaryBox(doc, 126, y, 72, [
-    { label: 'Interventi totali', value: aggregate.totalInterventi },
-    { label: 'Violazioni totali', value: aggregate.totaleViolazioni },
-    { label: 'Criticità segnalate', value: relevantInterventions(reports).length },
-    { label: 'Report operatori', value: reports.length },
-  ]);
-  y += 43;
+    { label: 'Qualifica', value: official.qualifica || '-' },
+  ], y, 2, title, subtitle) + 2;
 
-  y = ensureSpace(doc, y, 46, title, subtitle);
-  const personaleBody = `ASSENTI\n${official.assenti || '-'}\n\nIN RITARDO\n${official.ritardi || '-'}`;
-  softBox(doc, 12, y, 91, 40, 'Personale', personaleBody, { fill: [255,255,255] });
-  softBox(doc, 107, y, 91, 40, 'Note generali', official.noteGenerali || '-', { fill: [255,255,255] });
-  y += 46;
+  y = section(doc, 'Personale e briefing operativo', y, title, subtitle, 'personale');
+  y = kpiCards(doc, [
+    { label: 'A.P.L. assenti', value: countTextItems(official.assenti), icon: 'personale', color: countTextItems(official.assenti) ? 'red' : 'green' },
+    { label: 'A.P.L. in ritardo', value: countTextItems(official.ritardi), icon: 'personale', color: countTextItems(official.ritardi) ? 'orange' : 'green' },
+    { label: 'Atti redatti', value: attiCount, icon: 'atti' },
+    { label: 'Km complessivi', value: aggregate.kmTotali, icon: 'veicolo' },
+  ], y, title, subtitle);
+  y = paragraph(doc, `Briefing operativo: ${official.briefing || '-'}\nNote: ${official.noteGenerali || '-'}`, y, title, subtitle, 178, null);
+  y = paragraph(doc, `A.P.L. assenti: ${official.assenti || '-'}\nA.P.L. in ritardo: ${official.ritardi || '-'}`, y, title, subtitle, 178, (countTextItems(official.assenti) || countTextItems(official.ritardi)) ? 'orange' : null);
 
-  y = ensureSpace(doc, y, 62, title, subtitle);
-  const eventiText = `${autoEventi || 'Nessun evento rilevante automatico rilevato.'}${official.eventiManuali ? '\n\nIntegrazioni: ' + official.eventiManuali : ''}`;
-  softBox(doc, 12, y, 91, 56, 'Eventi degni di rilievo', eventiText, { fill: [255,255,255] });
-  softBox(doc, 107, y, 91, 24, 'Anomalie riscontrate durante il turno', official.anomalie || '-', { fill: [255,248,242], border: [220,190,170] });
-  const attivitaRows = (official.attivitaIspettive || []).filter(a => a.tipo || a.reparto || a.luogo || a.esito || a.note);
-  const attivitaText = attivitaRows.length ? attivitaRows.map(a => `${a.tipo || '-'} | ${a.reparto || '-'} | ${a.luogo || '-'} | Esito: ${a.esito || '-'}${a.violazioni ? ' | Violazioni: ' + a.violazioni : ''}`).join('\n') : 'Nessuna attività ispettiva indicata.';
-  softBox(doc, 107, y + 29, 91, 27, 'Attività ispettive', attivitaText, { fill: [255,255,255] });
-  y += 62;
+  y = section(doc, 'Sintesi operativa', y, title, subtitle, 'interventi');
+  y = paragraph(doc, `${autoSintesi}${official.eventiManuali ? "\n\nIntegrazioni dell'ufficiale: " + official.eventiManuali : ''}`, y, title, subtitle, 178, null);
 
-  y = ensureSpace(doc, y, 32, title, subtitle);
-  softBox(doc, 12, y, 59, 26, 'Esiti', official.esiti || '-', { fill: [255,255,255] });
-  softBox(doc, 76, y, 59, 26, "Comunicazione all'E.Q.", official.comunicazioneEq || '-', { fill: [255,255,255] });
-  softBox(doc, 139, y, 59, 26, 'Nota per il Comandante', official.notaComandante || '-', { fill: [255,255,255] });
-  y += 32;
+  y = section(doc, 'Eventi degni di rilievo', y, title, subtitle, 'eventi');
+  y = paragraph(doc, autoEventi || 'Nessun evento rilevante automatico rilevato.', y, title, subtitle, 178, autoEventi ? 'orange' : null);
 
-  y = section(doc, 'Violazioni riscontrate per pattuglia / reparto', y, title, subtitle);
+  y = section(doc, 'Anomalie riscontrate durante il turno', y, title, subtitle, 'eventi');
+  y = paragraph(doc, official.anomalie || '-', y, title, subtitle, 178, official.anomalie ? 'red' : null);
+
+  y = section(doc, 'Attività ispettive', y, title, subtitle, 'violazioni');
+  const attivitaRows = (official.attivitaIspettive || []).filter(a => a.tipo || a.reparto || a.luogo || a.esito || a.note).map(a => [a.tipo || '-', a.reparto || '-', a.luogo || '-', a.orario || '-', a.esito || '-', a.violazioni || '-', a.note || '-']);
+  y = simpleTable(doc, ['Tipo', 'Reparto / pattuglia', 'Luogo', 'Orario', 'Esito', 'Viol.', 'Note'], attivitaRows.length ? attivitaRows : [['Nessuna attività ispettiva indicata', '-', '-', '-', '-', '-', '-']], y, [26, 34, 28, 18, 30, 16, 34], title, subtitle);
+
+  y = section(doc, 'Violazioni riscontrate per pattuglia / reparto', y, title, subtitle, 'violazioni');
   const violationRows = reports.map(r => { const c = r.counters || {}; return [operatorNames(r).join(' / ') || '-', repartoLabel(r), n(c.preavvisiCds), n(c.vdcCds), n(c.regPolizia), n(c.regEdilizio), n(c.regBenessereAnimali), n(c.annonaria), n(c.altreNorme), getTotaleViolazioni(r)]; });
   const tot = reports.reduce((acc, r) => { const c = r.counters || {}; ['preavvisiCds','vdcCds','regPolizia','regEdilizio','regBenessereAnimali','annonaria','altreNorme'].forEach(k => acc[k] = n(acc[k]) + n(c[k])); return acc; }, {});
   if (reports.length) violationRows.push(['TOTALE COMPLESSIVO', '-', n(tot.preavvisiCds), n(tot.vdcCds), n(tot.regPolizia), n(tot.regEdilizio), n(tot.regBenessereAnimali), n(tot.annonaria), n(tot.altreNorme), reports.reduce((sum, r) => sum + getTotaleViolazioni(r), 0)]);
-  y = simpleTable(doc, ['Pattuglia / Operatori', 'Reparto', 'Prev.', 'VdC', 'Reg.PU', 'Edil.', 'Anim.', 'Ann.', 'Altre', 'Tot.'], violationRows.length ? violationRows : [['-', '-', '-', '-', '-', '-', '-', '-', '-', '-']], y, [38, 30, 13, 13, 15, 13, 15, 15, 15, 14], title, subtitle);
+  y = simpleTable(doc, ['Pattuglia / operatori', 'Reparto', 'Prev.', 'VdC', 'Reg. PU', 'Edil.', 'Anim.', 'Ann.', 'Altre', 'Tot.'], violationRows.length ? violationRows : [['-', '-', '-', '-', '-', '-', '-', '-', '-', '-']], y, [44, 36, 13, 13, 16, 13, 15, 15, 15, 14], title, subtitle);
 
-  y = section(doc, 'Atti redatti - riepilogo separato', y, title, subtitle);
-  const attiTot = reports.reduce((acc, r) => { const c = r.counters || {}; ['relazioni','annotazioni','sequestriAmministrativi','fermiAmministrativi','sequestriPenali','cnr','altriAttiNumero'].forEach(k => acc[k] = n(acc[k]) + n(c[k])); return acc; }, {});
+  y = section(doc, 'Atti redatti - riepilogo separato', y, title, subtitle, 'atti');
   y = simpleTable(doc, ['Tipologia atto', 'Totale'], [
-    ['Relazioni di servizio', n(attiTot.relazioni)], ['Annotazioni di servizio', n(attiTot.annotazioni)],
-    ['Sequestri amministrativi', n(attiTot.sequestriAmministrativi)], ['Fermi amministrativi', n(attiTot.fermiAmministrativi)],
-    ['Sequestri penali', n(attiTot.sequestriPenali)], ['C.N.R.', n(attiTot.cnr)], ['Altri atti', n(attiTot.altriAttiNumero)]
+    ['Relazioni di servizio', n(attiTot.relazioni)],
+    ['Annotazioni di servizio', n(attiTot.annotazioni)],
+    ['Sequestri amministrativi', n(attiTot.sequestriAmministrativi)],
+    ['Fermi amministrativi', n(attiTot.fermiAmministrativi)],
+    ['Sequestri penali', n(attiTot.sequestriPenali)],
+    ['C.N.R.', n(attiTot.cnr)],
+    ['Altri atti', n(attiTot.altriAttiNumero)],
+    ['TOTALE ATTI REDATTI', attiCount]
   ], y, [150, 36], title, subtitle);
 
-  y = ensureSpace(doc, y, 22, title, subtitle);
+  y = section(doc, 'Esiti e comunicazioni', y, title, subtitle, 'atti');
+  y = paragraph(doc, `Esiti: ${official.esiti || '-'}\n\nComunicazione all'E.Q. di turno: ${official.comunicazioneEq || '-'}\n\nNota per il Comandante: ${official.notaComandante || '-'}`, y, title, subtitle, 178, null);
+
+  y = ensureSpace(doc, y, 26, title, subtitle);
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8.5);
-  doc.text('FIRMA', 16, y + 4);
+  doc.text('FIRMA:', 16, y + 4);
   doc.text(official.qualifica || '-', 16, y + 12);
-  doc.setFont('helvetica', 'bold');
   doc.text(official.ufficiale || '-', 16, y + 18);
-  doc.setFont('helvetica', 'normal');
-  doc.text('DATA', 118, y + 12);
-  doc.text(official.data || aggregate.dateLabel || '-', 118, y + 18);
-  doc.line(16, y + 21, 75, y + 21);
-  doc.line(118, y + 21, 177, y + 21);
+  doc.line(80, y + 18, 190, y + 18);
   addFooter(doc);
   return doc;
 }
-
 
 createRoot(document.getElementById('root')).render(<App />);
