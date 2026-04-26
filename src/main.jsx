@@ -16,6 +16,9 @@ const REPARTI = [
   'Corso di formazione', 'Altri servizi'
 ];
 
+const REPARTI_CON_ZONA = ['Radiomobile', 'Quartieri', 'Intervento rapido motociclisti'];
+function richiedeZonaServizio(reparto) { return REPARTI_CON_ZONA.includes(reparto); }
+
 const TIPI_INTERVENTO = [
   'Sinistro stradale', 'TSO', 'ASO', 'Posto di controllo', 'Viabilità', 'Servizio scuole',
   'Controllo commerciale / annonaria', 'Controllo edilizio', 'Controllo parchi / aree verdi',
@@ -78,9 +81,9 @@ function Counter({ label, value, onChange }) {
 
 function baseReport() {
   return {
-    schemaVersion: 2,
+    schemaVersion: 3,
     data: today(), turno: '06.00-13.00', altroTurnoInizio: '', altroTurnoFine: '', orarioTipo: 'Ordinario',
-    reparto: 'Radiomobile', altroServizio: '', destinatario: '',
+    reparto: 'Radiomobile', altroServizio: '', zonaServizio: '', destinatario: '',
     operatori: [emptyOperatore(), emptyOperatore()], veicoli: [emptyVeicolo()], interventi: [emptyIntervento()],
     counters: emptyCounters(), documentiRitirati: [], distintaVerbali: [], noteUdt: '', dichiarazione: false, createdAt: new Date().toISOString()
   };
@@ -181,7 +184,7 @@ function OperatorReport({ report, setReport, lastSaved, resetReport }) {
   }
 
   function exportJson() {
-    const payload = { ...report, schemaVersion: 2, exportedAt: new Date().toISOString() };
+    const payload = { ...report, schemaVersion: 3, exportedAt: new Date().toISOString() };
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -211,11 +214,12 @@ function OperatorReport({ report, setReport, lastSaved, resetReport }) {
       <div className="grid">
         <Field label="Data servizio"><Input type="date" value={report.data} onChange={v => update({ data: v })} /></Field>
         <Field label="Turno"><Select value={report.turno} onChange={v => update({ turno: v })}>{TURNI.map(t => <option key={t}>{t}</option>)}</Select></Field>
-        <Field label="Tipologia orario"><Select value={report.orarioTipo} onChange={v => update({ orarioTipo: v })}><option>Ordinario</option><option>Straordinario</option></Select></Field>
+        <Field label="Tipologia orario"><Select value={report.orarioTipo} onChange={v => update({ orarioTipo: v })}><option>Ordinario</option><option>Straordinario</option><option>Conto terzi</option></Select></Field>
         <Field label="Reparto"><Select value={report.reparto} onChange={v => update({ reparto: v })}>{REPARTI.map(r => <option key={r}>{r}</option>)}</Select></Field>
       </div>
       {report.turno === 'Altro orario' && <div className="grid two"><Field label="Ora inizio"><Input value={report.altroTurnoInizio} onChange={v => update({ altroTurnoInizio: v })} placeholder="es. 10.00" /></Field><Field label="Ora fine"><Input value={report.altroTurnoFine} onChange={v => update({ altroTurnoFine: v })} placeholder="es. 17.00" /></Field></div>}
       {report.reparto === 'Altri servizi' && <Field label="Specificare altro servizio"><Input value={report.altroServizio} onChange={v => update({ altroServizio: v })} /></Field>}
+      {richiedeZonaServizio(report.reparto) && <Field label="Zona di servizio"><Input value={report.zonaServizio || ''} onChange={v => update({ zonaServizio: v })} placeholder="es. Zona A, Presidio città, Zona B/C" /></Field>}
     </section>
 
     <section className="card">
@@ -345,8 +349,8 @@ function Dashboard({ reports, setReports }) {
   }
 
   function exportCsv() {
-    const rows = [['Data','Turno','Orario','Reparto','Operatori','Interventi','Violazioni','Km','Note']];
-    reports.forEach(r => rows.push([r.data, turnoLabel(r), r.orarioTipo, repartoLabel(r), operatorNames(r).join('; '), r.interventi?.length || 0, getTotaleViolazioni(r), getKmTotali(r), r.noteUdt || '']));
+    const rows = [['Data','Turno','Orario','Reparto','Zona di servizio','Operatori','Interventi','Violazioni','Km','Note']];
+    reports.forEach(r => rows.push([r.data, turnoLabel(r), r.orarioTipo, repartoLabel(r), r.zonaServizio || '', operatorNames(r).join('; '), r.interventi?.length || 0, getTotaleViolazioni(r), getKmTotali(r), r.noteUdt || '']));
     const csv = rows.map(row => row.map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(';')).join('\n');
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
     const url = URL.createObjectURL(blob);
@@ -373,7 +377,7 @@ function Dashboard({ reports, setReports }) {
 
     <section className="card">
       <h2>Quadro riepilogativo</h2>
-      {reports.length === 0 ? <p className="muted">Nessun report caricato.</p> : <div className="tableWrap"><table><thead><tr><th>Data</th><th>Turno</th><th>Reparto</th><th>Operatori</th><th>Interventi</th><th>Violazioni</th><th>Km</th></tr></thead><tbody>{reports.map((r, idx) => <tr key={idx}><td>{r.data}</td><td>{turnoLabel(r)}<br/><small>{r.orarioTipo}</small></td><td>{repartoLabel(r)}</td><td>{operatorNames(r).join(', ') || '-'}</td><td>{r.interventi?.length || 0}</td><td>{getTotaleViolazioni(r)}</td><td>{getKmTotali(r)}</td></tr>)}</tbody></table></div>}
+      {reports.length === 0 ? <p className="muted">Nessun report caricato.</p> : <div className="tableWrap"><table><thead><tr><th>Data</th><th>Turno</th><th>Reparto</th><th>Zona</th><th>Operatori</th><th>Interventi</th><th>Violazioni</th><th>Km</th></tr></thead><tbody>{reports.map((r, idx) => <tr key={idx}><td>{r.data}</td><td>{turnoLabel(r)}<br/><small>{r.orarioTipo}</small></td><td>{repartoLabel(r)}</td><td>{r.zonaServizio || '-'}</td><td>{operatorNames(r).join(', ') || '-'}</td><td>{r.interventi?.length || 0}</td><td>{getTotaleViolazioni(r)}</td><td>{getKmTotali(r)}</td></tr>)}</tbody></table></div>}
     </section>
 
     <section className="card split">
@@ -778,6 +782,7 @@ function buildVerbaliPdf(report) {
     { label: 'Turno', value: turnoLabel(report) },
     { label: 'Tipologia orario', value: report.orarioTipo || '-' },
     { label: 'Reparto / servizio', value: repartoLabel(report) },
+    ...(report.zonaServizio ? [{ label: 'Zona di servizio', value: report.zonaServizio }] : []),
     { label: 'Operatori', value: operatorNames(report).join(', ') || '-' },
   ], y, 2, title, subtitle) + 2;
 
@@ -813,6 +818,7 @@ function buildServicePdf_old(report) {
     { label: 'Turno', value: turnoLabel(report) },
     { label: 'Tipologia orario', value: report.orarioTipo },
     { label: 'Reparto / servizio', value: repartoLabel(report) },
+    ...(report.zonaServizio ? [{ label: 'Zona di servizio', value: report.zonaServizio }] : []),
   ], y, 2, title, subtitle) + 2;
 
   y = section(doc, 'Operatori', y, title, subtitle);
@@ -966,7 +972,7 @@ function buildExcelData(reports, aggregate, commanderNotes) {
   const criticitaRows = [];
   reports.forEach((r, reportIndex) => {
     const operatori = operatorNames(r).join('; ');
-    reportRows.push({ Data: r.data || '', Turno: turnoLabel(r), 'Tipologia orario': r.orarioTipo || '', 'Reparto / servizio': repartoLabel(r), Operatori: operatori, 'Numero operatori': (r.operatori || []).filter(o => o.nome || o.matricola || o.qualifica).length, 'Interventi totali': (r.interventi || []).length, 'Violazioni': getTotaleViolazioni(r), 'Km percorsi': getKmTotali(r), 'Note UDT': r.noteUdt || '' });
+    reportRows.push({ Data: r.data || '', Turno: turnoLabel(r), 'Tipologia orario': r.orarioTipo || '', 'Reparto / servizio': repartoLabel(r), 'Zona di servizio': r.zonaServizio || '', Operatori: operatori, 'Numero operatori': (r.operatori || []).filter(o => o.nome || o.matricola || o.qualifica).length, 'Interventi totali': (r.interventi || []).length, 'Violazioni': getTotaleViolazioni(r), 'Km percorsi': getKmTotali(r), 'Note UDT': r.noteUdt || '' });
     Object.entries(r.counters || {}).forEach(([key, value]) => { if (typeof value === 'number' && n(value) > 0) countersRows.push({ Data: r.data || '', Turno: turnoLabel(r), Reparto: repartoLabel(r), Voce: LABELS[key] || key, Totale: n(value) }); });
     (r.interventi || []).forEach((i, idx) => {
       const durata = durataMinuti(i.oraInizio, i.oraFine);
@@ -976,9 +982,9 @@ function buildExcelData(reports, aggregate, commanderNotes) {
       const scuole = i.tipo === 'Servizio scuole' ? (i.scuole || []).filter(s => s.nome || s.momento || s.orario || s.criticita).map((s, pos) => `Scuola ${pos + 1}: ${s.nome || '-'} (${s.momento || '-'} ${s.orario || '-'}) Criticità: ${s.criticita || '-'}`).join(' | ') : '';
       const criticita = isInterventoCritico(i) ? 'Sì' : 'No';
       if (durata !== '' && durata > interventoPiuLungo.durata) interventoPiuLungo = { durata, label: `${r.data || ''} ${turnoLabel(r)} - ${i.tipo || '-'} (${durata} min)` };
-      const row = { Data: r.data || '', Turno: turnoLabel(r), 'Tipologia orario': r.orarioTipo || '', 'Reparto / servizio': repartoLabel(r), Operatori: operatori, 'N. report': reportIndex + 1, 'N. intervento': idx + 1, 'Tipo intervento': i.tipo || '', Origine: origine, 'Ora inizio': i.oraInizio || '', 'Ora fine': i.oraFine || '', 'Durata minuti': durata, 'Fascia oraria': fascia, Luogo: i.luogo || '', Descrizione: i.descrizione || '', Esito: i.esito || '', Note: i.note || '', Criticità: criticita, Feriti: i.conFeriti || '', 'Veicoli coinvolti': i.veicoliCoinvolti || '', 'Rilievi effettuati': i.rilievi || '', 'Veicoli controllati': i.veicoliControllati || '', 'Persone controllate': i.personeControllate || '', 'Verbali elevati': i.verbaliElevati || '', 'Fermi / sequestri intervento': i.fermiSequestri || '', 'Motivo viabilità': i.motivoViabilita || '', 'Strade interessate': i.strade || '', 'Scuole presidiate': scuole };
+      const row = { Data: r.data || '', Turno: turnoLabel(r), 'Tipologia orario': r.orarioTipo || '', 'Reparto / servizio': repartoLabel(r), 'Zona di servizio': r.zonaServizio || '', Operatori: operatori, 'N. report': reportIndex + 1, 'N. intervento': idx + 1, 'Tipo intervento': i.tipo || '', Origine: origine, 'Ora inizio': i.oraInizio || '', 'Ora fine': i.oraFine || '', 'Durata minuti': durata, 'Fascia oraria': fascia, Luogo: i.luogo || '', Descrizione: i.descrizione || '', Esito: i.esito || '', Note: i.note || '', Criticità: criticita, Feriti: i.conFeriti || '', 'Veicoli coinvolti': i.veicoliCoinvolti || '', 'Rilievi effettuati': i.rilievi || '', 'Veicoli controllati': i.veicoliControllati || '', 'Persone controllate': i.personeControllate || '', 'Verbali elevati': i.verbaliElevati || '', 'Fermi / sequestri intervento': i.fermiSequestri || '', 'Motivo viabilità': i.motivoViabilita || '', 'Strade interessate': i.strade || '', 'Scuole presidiate': scuole };
       interventiRows.push(row);
-      if (criticita === 'Sì') criticitaRows.push({ Data: row.Data, Turno: row.Turno, Reparto: row['Reparto / servizio'], 'Tipo intervento': row['Tipo intervento'], Orario: `${row['Ora inizio']} - ${row['Ora fine']}`, Luogo: row.Luogo, Motivo: `${row.Descrizione} ${row.Note}`.trim() });
+      if (criticita === 'Sì') criticitaRows.push({ Data: row.Data, Turno: row.Turno, Reparto: row['Reparto / servizio'], Zona: row['Zona di servizio'] || '', 'Tipo intervento': row['Tipo intervento'], Orario: `${row['Ora inizio']} - ${row['Ora fine']}`, Luogo: row.Luogo, Motivo: `${row.Descrizione} ${row.Note}`.trim() });
     });
   });
   const maxTipo = Math.max(1, ...Object.values(aggregate.byTipo || {}).map(n));
@@ -1034,7 +1040,7 @@ function reportText(report) {
     return `${idx + 1}. ${i.tipo} | ${i.origine}${i.origine === 'Altro' ? ': ' + (i.origineAltro || '-') : ''}\n   Orario: ${i.oraInizio || '-'} - ${i.oraFine || '-'} | Luogo: ${i.luogo || '-'}\n   Descrizione: ${i.descrizione || '-'}\n   Esito: ${i.esito || '-'}\n${extraDetails(i)}${scuole ? '\n' + scuole : ''}\n   Note: ${i.note || '-'}`;
   }).join('\n\n') || '- Nessun intervento inserito';
   const c = report.counters || emptyCounters();
-  return `REPORT DI SERVIZIO - POLIZIA LOCALE\n\nDATA: ${report.data}\nTURNO: ${turnoLabel(report)} (${report.orarioTipo})\nREPARTO: ${repartoLabel(report)}\n\nOPERATORI\n${ops}\n\nVEICOLI\n${mezzi || '- Non indicati'}\nTotale km percorsi: ${getKmTotali(report)}\n\nINTERVENTI EFFETTUATI\n${interventi}\n\nATTI REDATTI\nRelazioni: ${c.relazioni}\nAnnotazioni: ${c.annotazioni}\nSequestri amministrativi: ${c.sequestriAmministrativi}\nFermi amministrativi: ${c.fermiAmministrativi}\nSequestri penali: ${c.sequestriPenali}\nCNR: ${c.cnr}\nAltri atti: ${c.altriAttiNumero} ${c.altriAttiDescrizione || ''}\n\nVIOLAZIONI / PROVVEDIMENTI\nPreavvisi CdS: ${c.preavvisiCds}\nVdC CdS: ${c.vdcCds}\nRegolamento Polizia: ${c.regPolizia}\nRegolamento Edilizio: ${c.regEdilizio}\nRegolamento Benessere Animali: ${c.regBenessereAnimali}\nAnnonaria / commercio: ${c.annonaria}\nAltre norme: ${c.altreNorme} ${c.altreNormeDescrizione || ''}\nFermi: ${c.fermi}\nSequestri: ${c.sequestri}\nTOTALE: ${getTotaleViolazioni(report)}\n\nNOTE PER UDT / UFFICIALE DI COORDINAMENTO\n${report.noteUdt || '-'}\n\nDICHIARAZIONE\nGli operatori dichiarano che quanto riportato corrisponde fedelmente alle attività effettivamente svolte e riscontrate durante il turno di servizio.\nConferma dichiarazione: ${report.dichiarazione ? 'SI' : 'NO'}\n`;
+  return `REPORT DI SERVIZIO - POLIZIA LOCALE\n\nDATA: ${report.data}\nTURNO: ${turnoLabel(report)} (${report.orarioTipo})\nREPARTO: ${repartoLabel(report)}${report.zonaServizio ? '\nZONA DI SERVIZIO: ' + report.zonaServizio : ''}\n\nOPERATORI\n${ops}\n\nVEICOLI\n${mezzi || '- Non indicati'}\nTotale km percorsi: ${getKmTotali(report)}\n\nINTERVENTI EFFETTUATI\n${interventi}\n\nATTI REDATTI\nRelazioni: ${c.relazioni}\nAnnotazioni: ${c.annotazioni}\nSequestri amministrativi: ${c.sequestriAmministrativi}\nFermi amministrativi: ${c.fermiAmministrativi}\nSequestri penali: ${c.sequestriPenali}\nCNR: ${c.cnr}\nAltri atti: ${c.altriAttiNumero} ${c.altriAttiDescrizione || ''}\n\nVIOLAZIONI / PROVVEDIMENTI\nPreavvisi CdS: ${c.preavvisiCds}\nVdC CdS: ${c.vdcCds}\nRegolamento Polizia: ${c.regPolizia}\nRegolamento Edilizio: ${c.regEdilizio}\nRegolamento Benessere Animali: ${c.regBenessereAnimali}\nAnnonaria / commercio: ${c.annonaria}\nAltre norme: ${c.altreNorme} ${c.altreNormeDescrizione || ''}\nFermi: ${c.fermi}\nSequestri: ${c.sequestri}\nTOTALE: ${getTotaleViolazioni(report)}\n\nNOTE PER UDT / UFFICIALE DI COORDINAMENTO\n${report.noteUdt || '-'}\n\nDICHIARAZIONE\nGli operatori dichiarano che quanto riportato corrisponde fedelmente alle attività effettivamente svolte e riscontrate durante il turno di servizio.\nConferma dichiarazione: ${report.dichiarazione ? 'SI' : 'NO'}\n`;
 }
 
 function aggregateReports(reports) {
@@ -1265,7 +1271,7 @@ function buildServicePdf(report) {
   drawPanel(doc,78,104,60,48,'Carburante','list',{accent:C.green}); doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.text(`Effettuato: ${v.carburante || 'No'}`,84,122); doc.text(`Importo: ${v.importoCarburante || '-'}`,84,129); doc.text(`Card presa: ${v.oraPrelievoCard || '-'}`,84,136); doc.text(`Card resa: ${v.oraRestituzioneCard || '-'}`,84,143);
   drawPanel(doc,144,104,54,48,'Anomalie veicolo','warn',{accent:C.green}); writeTextInBox(doc, (report.veicoli||[]).filter(x=>x.anomaliaVeicolo).map(x=>`${x.sigla||'Veicolo'}: ${x.anomaliaVeicolo}`).join('\n') || 'Nessuna anomalia segnalata.', 150,122,42,4,8);
   drawPanel(doc,12,160,186,45,'Note di servizio','list',{accent:C.green}); writeTextInBox(doc, report.noteUdt || '-',18,178,174,5,8);
-  drawPanel(doc,12,212,186,46,'Operatori','people',{accent:C.green}); const opLines=(report.operatori||[]).filter(o=>o.nome||o.matricola).map(o=>`${o.nome || '-'} ${o.matricola? '— mtr. '+o.matricola:''} ${o.qualifica? '— '+o.qualifica:''}`).join('\n') || '-'; writeTextInBox(doc, `Reparto: ${repartoLabel(report)}\n${opLines}`,18,230,172,5,8);
+  drawPanel(doc,12,212,186,46,'Operatori','people',{accent:C.green}); const opLines=(report.operatori||[]).filter(o=>o.nome||o.matricola).map(o=>`${o.nome || '-'} ${o.matricola? '— mtr. '+o.matricola:''} ${o.qualifica? '— '+o.qualifica:''}`).join('\n') || '-'; writeTextInBox(doc, `Reparto: ${repartoLabel(report)}${report.zonaServizio ? '\nZona di servizio: ' + report.zonaServizio : ''}\n${opLines}`,18,230,172,5,8);
   footerModern(doc);
   doc.addPage(); drawHeaderModern(doc,'REPORT DI SERVIZIO - DETTAGLIO',subtitle,C.green);
   drawPanel(doc,12,58,88,120,'Interventi effettuati','car',{accent:C.green}); let yy=77; doc.setFontSize(7.7); (report.interventi||[]).slice(0,9).forEach((i,idx)=>{ fillC(doc,C.green); doc.circle(18,yy-1.5,0.9,'F'); setC(doc,C.text); doc.setFont('helvetica','bold'); doc.text(`${i.oraInizio || '--'} ${i.luogo || i.tipo || '-'}`,22,yy,{maxWidth:70}); doc.setFont('helvetica','normal'); const desc=`${i.tipo || ''}${i.esito ? ' — '+i.esito : ''}`; doc.text(doc.splitTextToSize(desc,70).slice(0,2),22,yy+4); yy+=12; }); if (!(report.interventi||[]).length) writeTextInBox(doc,'Nessun intervento inserito.',18,77,75,3,8);
