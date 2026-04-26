@@ -177,8 +177,7 @@ function OperatorReport({ report, setReport, lastSaved, resetReport }) {
   const text = useMemo(() => reportText(report), [report, totalKm, totaleViolazioni]);
 
   function generatePdf() {
-    const doc = buildServicePdf(report);
-    doc.save(`report-turno-${sanitizeFileName(report.data)}-${sanitizeFileName(turnoLabel(report))}.pdf`);
+    printServiceReport(report);
   }
 
   function exportJson() {
@@ -296,7 +295,7 @@ function OperatorReport({ report, setReport, lastSaved, resetReport }) {
       <Field label="Note per UDT / Ufficiale di coordinamento"><Textarea value={report.noteUdt} onChange={v => update({ noteUdt: v })} /></Field>
       <Field label="Email ufficiale destinatario"><Input value={report.destinatario} onChange={v => update({ destinatario: v })} placeholder="es. ufficiale@comune.monza.it" /></Field>
       <label className="check"><input type="checkbox" checked={report.dichiarazione} onChange={e => update({ dichiarazione: e.target.checked })} /> Confermo la dichiarazione finale degli operatori.</label>
-      <div className="actions"><button onClick={generatePdf}>Scarica PDF</button><button onClick={exportJson}>Scarica file dati JSON</button><button className="primary" onClick={sendMail}>Invia email precompilata</button></div>
+      <div className="actions"><button onClick={generatePdf}>Apri report stampabile</button><button onClick={exportJson}>Scarica file dati JSON</button><button className="primary" onClick={sendMail}>Invia email precompilata</button></div>
     </section>
 
   </>;
@@ -420,8 +419,7 @@ function OfficialReport({ reports, setReports, official, setOfficial }) {
   }
 
   function generateOfficialPdf() {
-    const doc = buildOfficialShiftPdf(aggregate, reports, official, autoSintesi, autoEventi);
-    doc.save(`report-ufficiale-turno-${sanitizeFileName(official.data || aggregate.dateLabel)}-${sanitizeFileName(official.turno)}.pdf`);
+    printOfficialReport(aggregate, reports, official, autoSintesi, autoEventi);
   }
 
   return <>
@@ -436,7 +434,7 @@ function OfficialReport({ reports, setReports, official, setOfficial }) {
     <section className="card"><h2>3. Briefing, personale e note</h2><div className="grid two"><Field label="Briefing operativo"><Input value={official.briefing} onChange={v => update({ briefing: v })} placeholder="es. 06.45" /></Field><Field label="Note generali"><Input value={official.noteGenerali} onChange={v => update({ noteGenerali: v })} placeholder="es. Con il personale a disposizione coperte 11 scuole" /></Field></div><div className="grid two"><Field label="A.P.L. assenti"><Textarea value={official.assenti} onChange={v => update({ assenti: v })} /></Field><Field label="A.P.L. in ritardo"><Textarea value={official.ritardi} onChange={v => update({ ritardi: v })} /></Field></div></section>
     <section className="card"><h2>4. Eventi degni di rilievo</h2><p className="muted">Eventi rilevanti individuati automaticamente: sinistri con feriti, TSO/ASO, interventi con parole chiave critiche o lunga durata.</p><pre className="miniPreview">{autoEventi || 'Nessun evento rilevante automatico rilevato.'}</pre></section>
     <section className="card"><h2>5. Anomalie e attività ispettive</h2><Field label="Anomalie riscontrate durante il turno"><Textarea value={official.anomalie} onChange={v => update({ anomalie: v })} /></Field><h3>Attività ispettive</h3>{official.attivitaIspettive.map((a, idx) => <div className="rowCard" key={idx}><div className="grid four"><Field label="Tipo attività"><Input value={a.tipo} onChange={v => updateAttivita(idx, { tipo: v })} placeholder="es. annonaria, ambiente..." /></Field><Field label="Reparto / pattuglia"><Input value={a.reparto} onChange={v => updateAttivita(idx, { reparto: v })} /></Field><Field label="Luogo"><Input value={a.luogo} onChange={v => updateAttivita(idx, { luogo: v })} /></Field><Field label="Orario"><Input value={a.orario} onChange={v => updateAttivita(idx, { orario: v })} /></Field></div><div className="grid three"><Field label="Esito"><Input value={a.esito} onChange={v => updateAttivita(idx, { esito: v })} /></Field><Field label="Violazioni collegate"><Input value={a.violazioni} onChange={v => updateAttivita(idx, { violazioni: v })} /></Field><Field label="Note"><Input value={a.note} onChange={v => updateAttivita(idx, { note: v })} /></Field></div><button className="ghost" onClick={() => removeAttivita(idx)}>Rimuovi attività</button></div>)}<button onClick={addAttivita}>+ Aggiungi attività ispettiva</button></section>
-    <section className="card"><h2>6. Esiti e comunicazioni</h2><Field label="Esiti"><Textarea value={official.esiti} onChange={v => update({ esiti: v })} /></Field><div className="grid two"><Field label="Comunicazione all'E.Q. di turno"><Textarea value={official.comunicazioneEq} onChange={v => update({ comunicazioneEq: v })} /></Field><Field label="Nota per il Comandante"><Textarea value={official.notaComandante} onChange={v => update({ notaComandante: v })} /></Field></div><div className="actions"><button className="primary" onClick={generateOfficialPdf}>Genera PDF Report Ufficiale</button></div></section>
+    <section className="card"><h2>6. Esiti e comunicazioni</h2><Field label="Esiti"><Textarea value={official.esiti} onChange={v => update({ esiti: v })} /></Field><div className="grid two"><Field label="Comunicazione all'E.Q. di turno"><Textarea value={official.comunicazioneEq} onChange={v => update({ comunicazioneEq: v })} /></Field><Field label="Nota per il Comandante"><Textarea value={official.notaComandante} onChange={v => update({ notaComandante: v })} /></Field></div><div className="actions"><button className="primary" onClick={generateOfficialPdf}>Apri report ufficiale stampabile</button></div></section>
   </>;
 }
 
@@ -445,6 +443,96 @@ function Distribution({ title, data, labels = {} }) {
   const entries = Object.entries(data || {}).filter(([, value]) => n(value) > 0).sort((a, b) => n(b[1]) - n(a[1]));
   return <div><h3>{title}</h3>{entries.length === 0 ? <p className="muted">Nessun dato.</p> : <ul className="distList">{entries.map(([key, value]) => <li key={key}><span>{labels[key] || key}</span><strong>{value}</strong></li>)}</ul>}</div>;
 }
+
+
+// ===== REPORT PROFESSIONALI STAMPABILI HTML/CSS =====
+// Questa sezione sostituisce il PDF disegnato a coordinate: apre una pagina HTML stampabile,
+// stabile, allineata e facilmente salvabile in PDF dal browser.
+function esc(value) {
+  return String(value ?? '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[ch]));
+}
+function safeText(value, fallback = '-') { const s = String(value ?? '').trim(); return s || fallback; }
+function splitList(text) { return String(text || '').split(/\n|;/).map(x => x.trim()).filter(Boolean); }
+function statusList(label, count, names, cls) {
+  const items = Array.isArray(names) ? names : splitList(names);
+  return `<div class="status-row"><span>${esc(label)}</span><strong class="${cls}">${esc(count)}</strong></div>${items.length ? `<ul class="compact-list ${cls}">${items.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : ''}`;
+}
+function logoHtml() { return `<img class="brand-logo" src="/POLIZIA.png" alt="Polizia Locale Monza" />`; }
+function iconSvg(type) {
+  const common = 'width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"';
+  const icons = {
+    car: `<svg ${common}><path d="M3 13l2-5a3 3 0 0 1 3-2h8a3 3 0 0 1 3 2l2 5"/><path d="M5 13h14v5H5z"/><circle cx="7.5" cy="18" r="1.5"/><circle cx="16.5" cy="18" r="1.5"/></svg>`,
+    doc: `<svg ${common}><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v5h5"/><path d="M9 13h6"/><path d="M9 17h6"/></svg>`,
+    warn: `<svg ${common}><path d="M12 3l10 18H2z"/><path d="M12 9v5"/><path d="M12 18h.01"/></svg>`,
+    clip: `<svg ${common}><path d="M9 12l6-6a3 3 0 0 1 4 4l-8 8a5 5 0 0 1-7-7l8-8"/></svg>`,
+    users: `<svg ${common}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
+    clipboard: `<svg ${common}><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4a3 3 0 0 1 6 0"/><path d="M9 11h6"/><path d="M9 15h6"/></svg>`,
+    table: `<svg ${common}><path d="M3 4h18v16H3z"/><path d="M3 10h18"/><path d="M9 4v16"/><path d="M15 4v16"/></svg>`,
+    fuel: `<svg ${common}><path d="M4 3h10v18H4z"/><path d="M14 8h2l3 3v7a2 2 0 0 0 4 0v-6"/><path d="M7 7h4"/></svg>`,
+    check: `<svg ${common}><path d="M20 6L9 17l-5-5"/></svg>`,
+    user: `<svg ${common}><circle cx="12" cy="7" r="4"/><path d="M5 21v-2a7 7 0 0 1 14 0v2"/></svg>`
+  };
+  return icons[type] || icons.doc;
+}
+function printShell(title, pagesHtml) {
+  return `<!doctype html><html><head><meta charset="utf-8"><title>${esc(title)}</title><style>
+    :root{--blue:#0d2b57;--line:#cfd8e3;--soft:#f6f8fb;--text:#111827;--muted:#64748b;--orange:#ea7a1a;--red:#dc2626;--green:#087a47;}
+    *{box-sizing:border-box} body{margin:0;background:#e5e7eb;color:var(--text);font-family:Arial,Helvetica,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    .toolbar{position:sticky;top:0;z-index:10;padding:12px;text-align:center;background:#111827;color:#fff;box-shadow:0 2px 10px #0002}.toolbar button{background:#fff;border:0;border-radius:8px;padding:10px 18px;font-weight:700;cursor:pointer}.toolbar span{margin-left:14px;color:#d1d5db;font-size:13px}
+    .page{width:297mm;height:210mm;margin:14px auto;background:white;position:relative;padding:8mm 9mm 9mm;overflow:hidden;box-shadow:0 3px 18px #0002;page-break-after:always;}
+    .header{height:26mm;display:grid;grid-template-columns:25mm 1fr 48mm;gap:8mm;align-items:start;border-bottom:1.6px solid var(--blue);padding-bottom:4mm}.brand-logo{width:22mm;height:22mm;object-fit:contain}.brand h1{font-size:16pt;line-height:1.05;margin:2mm 0 0;color:var(--blue);font-weight:800}.brand h2{font-size:13pt;line-height:1.1;margin:1mm 0;color:var(--blue);font-weight:800}.brand p,.contacts p{margin:1.3mm 0 0;font-size:7.5pt;font-weight:700}.contacts{text-align:left;font-size:7.3pt;line-height:1.25;color:#111827;padding-top:2mm}.titlebar{margin:5mm 0 4mm;height:9mm;background:var(--blue);color:#fff;display:grid;grid-template-columns:1fr auto;align-items:center;padding:0 6mm;font-weight:800;font-size:12pt;letter-spacing:.2px}.titlebar .subtitle{font-size:9pt;font-weight:700}
+    .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:3mm;margin-bottom:4mm}.kpi{height:25mm;border:1px solid var(--line);border-radius:2mm;display:grid;grid-template-columns:13mm 1fr;grid-template-rows:9mm 1fr;align-items:center;padding:3mm;background:#fff}.kpi .ico{grid-row:1/3;color:var(--blue);display:flex;align-items:center;justify-content:center}.kpi .label{font-size:7.2pt;font-weight:800;color:var(--blue);text-transform:uppercase;text-align:center}.kpi .num{font-size:22pt;line-height:1;font-weight:900;color:var(--blue);text-align:center}.kpi .sub{font-size:6.8pt;color:#111;text-align:center;margin-top:1mm}.grid-2{display:grid;grid-template-columns:1fr 1.2fr;gap:5mm}.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5mm}.panel{border:1px solid var(--line);border-radius:1.2mm;background:#fff;overflow:hidden;margin-bottom:4mm}.panel-title{height:7mm;background:var(--blue);color:#fff;font-size:8.2pt;font-weight:800;text-transform:uppercase;display:flex;align-items:center;gap:2mm;padding:0 4mm}.panel-title svg{width:14px;height:14px}.panel-body{padding:4mm;font-size:8.3pt;line-height:1.42}.panel-body.tight{padding:3mm}.status-row{display:grid;grid-template-columns:1fr 16mm;align-items:center;border-bottom:1px solid #e5e7eb;padding:1.6mm 0;font-size:8.2pt}.status-row strong{text-align:center;font-size:10.5pt}.green{color:var(--green)!important}.orange{color:var(--orange)!important}.red{color:var(--red)!important}.blue{color:var(--blue)!important}.compact-list{margin:1mm 0 2mm 5mm;padding:0;font-size:7.3pt}.compact-list li{margin:0.7mm 0}.eventbox{border:1.4px solid #f4a261;background:#fff8f1;border-radius:1.2mm;margin-top:4mm;min-height:18mm;display:grid;grid-template-columns:16mm 1fr;align-items:center;padding:3mm;color:#111827}.eventbox .eventico{color:var(--orange);display:flex;justify-content:center}.eventbox h3{margin:0 0 1.5mm;color:#d95f02;font-size:9pt;text-transform:uppercase}.eventbox p{margin:0;font-size:8.3pt}.table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:7.3pt}.table th{background:var(--blue);color:#fff;padding:2mm 1.4mm;text-align:center;font-size:7pt}.table td{border:1px solid #d7dee8;padding:1.8mm 1.3mm;vertical-align:top;overflow:hidden;word-wrap:break-word}.table tbody tr:nth-child(even) td{background:#f8fafc}.table .num{text-align:center;font-weight:700}.table .total td{background:#0d2b57!important;color:#fff;font-weight:800}.small-list{display:grid;gap:1.5mm}.small-row{display:grid;grid-template-columns:1fr 14mm;gap:3mm}.small-row strong{text-align:right}.footer{position:absolute;left:9mm;right:9mm;bottom:5mm;height:8mm;border-top:1px solid #cbd5e1;display:grid;grid-template-columns:1fr 1fr auto;align-items:center;font-size:6.8pt;color:var(--blue);font-weight:700}.signature{font-family:Georgia,serif;font-style:italic;font-size:13pt;text-align:center;margin-top:4mm}.detail-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:5mm}.detail-grid-2{display:grid;grid-template-columns:.92fr 1.08fr;gap:5mm}.bullet-list{margin:0;padding-left:4mm}.bullet-list li{margin:1.4mm 0}.center{text-align:center}.right{text-align:right}.muted{color:var(--muted)}
+    @media print{body{background:white}.toolbar{display:none}.page{margin:0;box-shadow:none;page-break-after:always}@page{size:A4 landscape;margin:0}}
+  </style></head><body><div class="toolbar"><button onclick="window.print()">Stampa / Salva in PDF</button><span>Imposta orientamento: Orizzontale. Disattiva intestazioni/piè di pagina del browser.</span></div>${pagesHtml}</body></html>`;
+}
+function footerHtml(page, total=2) { return `<div class="footer"><span>Settore Polizia Locale, Protezione Civile</span><span>Via Marsala 13 | 20900 Monza &nbsp;&nbsp; Tel. 039 28161 &nbsp;&nbsp; polizialocale@comune.monza.it</span><span>Pag. ${page} di ${total}</span></div>`; }
+function headerHtml(title, subtitle) { return `<div class="header">${logoHtml()}<div class="brand"><h1>COMUNE DI MONZA</h1><h2>Polizia Locale</h2><p>Settore Polizia Locale e Protezione Civile</p></div><div class="contacts"><p>Via Marsala 13</p><p>20900 Monza</p><p>Tel. 039 28161</p><p>polizialocale@comune.monza.it</p></div></div><div class="titlebar"><span>${esc(title)}</span><span class="subtitle">${esc(subtitle)}</span></div>`; }
+function kpiBox(icon, label, value) { return `<div class="kpi"><div class="ico">${iconSvg(icon)}</div><div class="label">${esc(label)}</div><div><div class="num">${esc(value)}</div><div class="sub">Totali</div></div></div>`; }
+function panel(title, icon, body, extraClass='') { return `<section class="panel ${extraClass}"><div class="panel-title">${iconSvg(icon)}<span>${esc(title)}</span></div><div class="panel-body">${body}</div></section>`; }
+function openPrintWindow(html) { const w = window.open('', '_blank'); if (!w) { alert('Popup bloccato: consenti le finestre popup per stampare il report.'); return; } w.document.open(); w.document.write(html); w.document.close(); setTimeout(() => { try { w.focus(); } catch(e) {} }, 300); }
+function printServiceReport(report) { openPrintWindow(buildServicePrintHtml(report)); }
+function printOfficialReport(aggregate, reports, official, autoSintesi, autoEventi) { openPrintWindow(buildOfficialPrintHtml(aggregate, reports, official, autoSintesi, autoEventi)); }
+function buildServicePrintHtml(report) {
+  const c = report.counters || emptyCounters();
+  const interventions = report.interventi || [];
+  const atti = ['relazioni','annotazioni','sequestriAmministrativi','fermiAmministrativi','sequestriPenali','cnr','altriAttiNumero'].reduce((s,k)=>s+n(c[k]),0);
+  const eventi = interventions.filter(isInterventoCritico).length;
+  const subtitle = `${formatDateIT(report.data)} | ${turnoLabel(report)} | ${report.orarioTipo || '-'}`;
+  const vehiclesUsed = (report.veicoli||[]).filter(v=>v.sigla||v.kmInizio||v.kmFine).length || '-';
+  const vehicleBody = `<div class="small-row"><span>Veicoli impiegati</span><strong>${esc(vehiclesUsed)}</strong></div><div class="small-row"><span>Totale km percorsi</span><strong>${esc(getKmTotali(report))} km</strong></div>`;
+  const carburanteBody = (report.veicoli||[]).some(v=>v.carburante==='Sì') ? (report.veicoli||[]).map(v=>`<div class="small-row"><span>${esc(v.sigla||'Veicolo')}</span><strong>${esc(v.importoCarburante||'-')}</strong></div>`).join('') : '<p>Nessun rifornimento indicato.</p>';
+  const anomalie = (report.veicoli||[]).map(v=>v.anomaliaVeicolo).filter(Boolean).join('; ') || 'Nessuna anomalia segnalata.';
+  const operators = operatorNames(report).join('<br>') || '-';
+  const interventiHtml = interventions.length ? `<ul class="bullet-list">${interventions.slice(0,8).map(i=>`<li><strong>${esc(i.tipo)}</strong>${i.oraInizio?` — ${esc(i.oraInizio)}`:''}<br><span class="muted">${esc(i.luogo || '')}</span> ${esc(i.descrizione || i.esito || '')}</li>`).join('')}</ul>` : '<p>Nessun intervento inserito.</p>';
+  const violazioniRows = [['Codice della Strada', n(c.vdcCds)+n(c.preavvisiCds)], ['Regolamenti comunali', n(c.regPolizia)+n(c.regEdilizio)+n(c.regBenessereAnimali)], ['Annonaria / commercio', n(c.annonaria)], ['Altro', n(c.altreNorme)], ['TOTALE', getTotaleViolazioni(report)]];
+  const violazioniTable = `<table class="table"><thead><tr><th>Tipo violazione</th><th style="width:22mm">Nr.</th></tr></thead><tbody>${violazioniRows.map((r,idx)=>`<tr class="${idx===violazioniRows.length-1?'total':''}"><td>${esc(r[0])}</td><td class="num">${esc(r[1])}</td></tr>`).join('')}</tbody></table>`;
+  const attiBody = `<div class="small-list">${[['Relazioni',c.relazioni],['Annotazioni',c.annotazioni],['Fermi amm.',c.fermiAmministrativi],['Sequestri amm.',c.sequestriAmministrativi],['Sequestri penali',c.sequestriPenali],['C.N.R.',c.cnr],['Altri atti',c.altriAttiNumero]].map(([l,v])=>`<div class="small-row"><span>${esc(l)}</span><strong>${esc(n(v))}</strong></div>`).join('')}</div>`;
+  const docs = report.documentiRitirati || [];
+  const docsBody = docs.length ? `<ul class="bullet-list">${docs.map(d=>`<li>${esc(d.tipo || 'Documento')} — ${esc(d.quantita || 1)} ${d.note?`<br><span class="muted">${esc(d.note)}</span>`:''}</li>`).join('')}</ul>` : '<p>Nessun documento ritirato.</p>';
+  const page1 = `<section class="page">${headerHtml('REPORT DI SERVIZIO', subtitle)}<div class="kpis">${kpiBox('car','Interventi',interventions.length)}${kpiBox('doc','Violazioni',getTotaleViolazioni(report))}${kpiBox('clip','Atti redatti',atti)}${kpiBox('warn','Eventi',eventi)}</div><div class="grid-3">${panel('Veicoli','car',vehicleBody)}${panel('Carburante','fuel',carburanteBody)}${panel('Anomalie veicolo','warn',`<p>${esc(anomalie)}</p>`)}</div><div class="grid-2">${panel('Note di servizio','clipboard',`<p>${esc(report.noteUdt || '-')}</p>`)}${panel('Operatori','users',`<p><strong>Reparto:</strong> ${esc(repartoLabel(report))}</p><p>${operators}</p>`)}</div>${footerHtml(1)}</section>`;
+  const page2 = `<section class="page">${headerHtml('REPORT DI SERVIZIO - DETTAGLIO', subtitle)}<div class="detail-grid">${panel('Interventi effettuati','car',interventiHtml)}${panel('Violazioni contestate','table',violazioniTable,'tight-panel')}</div><div class="detail-grid-2">${panel('Atti redatti','clip',attiBody)}${panel('Osservazioni','clipboard',`<p>${esc(report.osservazioni || report.noteUdt || 'Nessuna osservazione particolare da segnalare.')}</p>`)}</div><div class="detail-grid-2">${panel('Documenti ritirati','doc',docsBody)}${panel('Firma agente','user',`<p><strong>${esc(operatorNames(report)[0] || '-')}</strong></p><div class="signature">Firma</div>`)}</div>${footerHtml(2)}</section>`;
+  return printShell('Report di servizio', page1 + page2);
+}
+function buildOfficialPrintHtml(aggregate, reports, official, autoSintesi, autoEventi) {
+  const date = formatDateIT(official.data || aggregate.dateLabel);
+  const subtitle = `${date} | ${official.turno || '-'}`;
+  const attiObj = attiObjectFromReports(reports);
+  const attiTot = totalAttiFromReports(reports);
+  const eventiCount = reports.reduce((s,r)=>s+(r.interventi||[]).filter(isInterventoCritico).length,0) + countTextItems(official.eventiManuali);
+  const assentiList = splitList(official.assenti);
+  const ritardiList = splitList(official.ritardi);
+  const presenti = reports.length ? new Set(reports.flatMap(r=>operatorNames(r))).size : '-';
+  const personaleBody = `${statusList('Presenti', presenti, [], 'green')}${statusList('Ritardo', ritardiList.length, ritardiList, 'orange')}${statusList('Assenti', assentiList.length, assentiList, 'red')}<div class="status-row"><span>Totale</span><strong class="blue">${esc(presenti === '-' ? '-' : Number(presenti)+ritardiList.length+assentiList.length)}</strong></div>`;
+  const eventiText = [autoEventi, official.eventiManuali, official.anomalie].filter(Boolean).join('\n') || 'Nessun evento rilevante automatico rilevato.';
+  const page1 = `<section class="page">${headerHtml('REPORT UFFICIALE DI TURNO', subtitle)}<div class="kpis">${kpiBox('car','Interventi',aggregate.totalInterventi)}${kpiBox('doc','Verbali',aggregate.totaleViolazioni)}${kpiBox('warn','Eventi',eventiCount)}${kpiBox('clip','Atti redatti',attiTot)}</div><div class="grid-2">${panel('Personale','users',personaleBody)}${panel('Briefing operativo','clipboard',`<p>${esc(official.briefing || '-')}</p>`)}</div><div class="eventbox"><div class="eventico">${iconSvg('warn')}</div><div><h3>Eventi / anomalie degne di rilievo</h3><p>${esc(eventiText)}</p></div></div>${footerHtml(1)}</section>`;
+  const rows = buildViolationRows(reports);
+  const tableRows = rows.length ? rows : [['-','-',0,0,0,0,0,0]];
+  const violTable = `<table class="table"><thead><tr><th style="width:42mm">Pattuglia</th><th style="width:38mm">Reparto</th><th>Prev.</th><th>C.d.S.</th><th>Urbana</th><th>Annonaria</th><th>Altre</th><th>Tot.</th></tr></thead><tbody>${tableRows.map((r,idx)=>`<tr class="${idx===tableRows.length-1 && rows.length?'total':''}">${r.map((c,i)=>`<td class="${i>=2?'num':''}">${esc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+  const attiBody = `<div class="small-list">${[['Fermi amministrativi',attiObj.fermiAmministrativi],['Sequestri amministrativi',attiObj.sequestriAmministrativi],['Sequestri penali',attiObj.sequestriPenali],['Notizie di reato',attiObj.cnr],['TOTALE',attiTot]].map(([l,v])=>`<div class="small-row"><span>${esc(l)}</span><strong>${esc(n(v))}</strong></div>`).join('')}</div>`;
+  const page2 = `<section class="page">${headerHtml('REPORT UFFICIALE DI TURNO - DETTAGLIO', subtitle)}${panel('Violazioni riscontrate','table',violTable)}<div class="detail-grid-2">${panel('Atti redatti','clip',attiBody)}<div>${panel('Esito turno','check',`<p>${esc(official.esiti || '-')}</p>`)}${panel('Comunicazioni E.Q.','doc',`<p>${esc(official.comunicazioneEq || '-')}</p>`)}</div></div><div class="detail-grid-2">${panel('Nota del comandante','clipboard',`<p>${esc(official.notaComandante || '-')}</p>`)}${panel('Responsabile di turno','user',`<p class="center"><strong>${esc(official.qualifica || '-')}</strong></p><p class="center"><strong>${esc(official.ufficiale || '-')}</strong></p><div class="signature">Firma</div>`)}</div>${footerHtml(2)}</section>`;
+  return printShell('Report ufficiale di turno', page1 + page2);
+}
+
 
 function makePdf(title, subtitle = '') {
   const doc = new jsPDF({ unit: 'mm', format: 'a4' });
