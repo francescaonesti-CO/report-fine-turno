@@ -608,6 +608,97 @@ function paragraph(doc, text, y, pdfTitle = '', subtitle = '', maxWidth = 178) {
 }
 
 
+function softBox(doc, x, y, w, h, title, body, options = {}) {
+  const fill = options.fill || [255, 255, 255];
+  const border = options.border || [205, 212, 222];
+  const titleColor = options.titleColor || [12, 47, 97];
+  const titleBg = options.titleBg || null;
+  doc.setDrawColor(...border);
+  doc.setFillColor(...fill);
+  doc.roundedRect(x, y, w, h, 1.5, 1.5, 'FD');
+  if (titleBg) {
+    doc.setFillColor(...titleBg);
+    doc.rect(x, y, w, 8, 'F');
+    doc.setTextColor(255, 255, 255);
+  } else {
+    doc.setTextColor(...titleColor);
+  }
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(options.titleSize || 9);
+  doc.text(String(title || '').toUpperCase(), x + 4, y + 6);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(options.fontSize || 8.2);
+  doc.setTextColor(20, 28, 40);
+  const txt = String(body || '-');
+  const lines = doc.splitTextToSize(txt, w - 8);
+  doc.text(lines.slice(0, Math.max(1, Math.floor((h - 11) / 4.4))), x + 4, y + 12);
+  doc.setTextColor(0, 0, 0);
+}
+
+function labeledInfoBox(doc, x, y, w, h, rows) {
+  doc.setDrawColor(225, 231, 239);
+  doc.setFillColor(247, 250, 252);
+  doc.roundedRect(x, y, w, h, 1.5, 1.5, 'FD');
+  rows.forEach((row, idx) => {
+    const yy = y + 8 + idx * 7.2;
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(12, 47, 97);
+    doc.setFontSize(8);
+    doc.text(String(row.label || '').toUpperCase() + ':', x + 5, yy);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(20, 28, 40);
+    doc.setFontSize(8.5);
+    doc.text(String(row.value || '-'), x + 38, yy, { maxWidth: w - 42 });
+  });
+  doc.setTextColor(0, 0, 0);
+}
+
+function quickSummaryBox(doc, x, y, w, rows, title = 'RIEPILOGO RAPIDO') {
+  const h = 9 + rows.length * 9;
+  doc.setDrawColor(12, 47, 97);
+  doc.setFillColor(255, 255, 255);
+  doc.roundedRect(x, y, w, h, 1.4, 1.4, 'FD');
+  doc.setFillColor(12, 47, 97);
+  doc.roundedRect(x, y, w, 8, 1.4, 1.4, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(8);
+  doc.text(title, x + w / 2, y + 5.5, { align: 'center' });
+  rows.forEach((r, idx) => {
+    const yy = y + 15 + idx * 9;
+    doc.setTextColor(20, 28, 40);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8.4);
+    doc.text(String(r.label || ''), x + 8, yy);
+    doc.setFont('helvetica', 'bold');
+    doc.text(String(r.value ?? '-'), x + w - 8, yy, { align: 'right' });
+    if (idx < rows.length - 1) {
+      doc.setDrawColor(226, 232, 240);
+      doc.line(x + 8, yy + 3, x + w - 8, yy + 3);
+    }
+  });
+  doc.setTextColor(0, 0, 0);
+  return y + h;
+}
+
+function compactOfficialSummary(doc, aggregate, reports, y, title, subtitle) {
+  y = ensureSpace(doc, y, 44, title, subtitle);
+  labeledInfoBox(doc, 12, y, 104, 38, [
+    { label: 'Data', value: subtitle.split('|')[0]?.trim() || aggregate.dateLabel },
+    { label: 'Turno', value: subtitle.split('|')[1]?.trim() || '-' },
+    { label: 'Ufficiale di turno', value: '-' },
+    { label: 'Briefing operativo', value: '-' },
+  ]);
+  quickSummaryBox(doc, 126, y, 72, [
+    { label: 'Report operatori', value: reports.length },
+    { label: 'Interventi totali', value: aggregate.totalInterventi },
+    { label: 'Violazioni totali', value: aggregate.totaleViolazioni },
+    { label: 'Eventi rilevanti', value: relevantInterventions(reports).length },
+  ]);
+  return y + 43;
+}
+
+
 function serviceSummaryBox(doc, report, y, pdfTitle = '', subtitle = '') {
   y = ensureSpace(doc, y, 30, pdfTitle, subtitle);
   const interventi = (report.interventi || []).length;
@@ -716,51 +807,63 @@ function buildServicePdf(report) {
   const subtitle = `${report.data} | Turno ${turnoLabel(report)} | ${report.orarioTipo}`;
   const doc = makePdf(title, subtitle);
   let y = 54;
+  const c = report.counters || emptyCounters();
+  const attiTot = ['relazioni','annotazioni','sequestriAmministrativi','fermiAmministrativi','sequestriPenali','cnr','altriAttiNumero'].reduce((s, k) => s + n(c[k]), 0);
+  const criticita = (report.interventi || []).filter(isInterventoCritico).length + (testoCritico(report.noteUdt) ? 1 : 0);
 
-  y = serviceSummaryBox(doc, report, y, title, subtitle);
+  labeledInfoBox(doc, 12, y, 104, 38, [
+    { label: 'Data', value: report.data },
+    { label: 'Turno', value: `${turnoLabel(report)} (${report.orarioTipo || '-'})` },
+    { label: 'Reparto', value: repartoLabel(report) },
+    { label: 'Operatori', value: operatorNames(report).join(', ') || '-' },
+  ]);
+  quickSummaryBox(doc, 126, y, 72, [
+    { label: 'Interventi totali', value: (report.interventi || []).length },
+    { label: 'Violazioni totali', value: getTotaleViolazioni(report) },
+    { label: 'Atti redatti', value: attiTot },
+    { label: 'Criticità', value: criticita },
+  ]);
+  y += 43;
 
-  y = section(doc, 'Dati generali del turno', y, title, subtitle);
-  y = kvGrid(doc, [
-    { label: 'Data servizio', value: report.data },
-    { label: 'Turno', value: turnoLabel(report) },
-    { label: 'Tipologia orario', value: report.orarioTipo },
-    { label: 'Reparto / servizio', value: repartoLabel(report) },
-  ], y, 2, title, subtitle) + 2;
-
-  y = section(doc, 'Operatori', y, title, subtitle);
-  const operatorRows = (report.operatori || []).filter(o => o.nome || o.matricola || o.qualifica).map(o => [o.nome, o.matricola, o.qualifica]);
-  y = simpleTable(doc, ['Nominativo', 'Matricola', 'Qualifica'], operatorRows.length ? operatorRows : [['-', '-', '-']], y, [90, 40, 56], title, subtitle);
-
-  y = section(doc, 'Veicoli, chilometraggio e carburante', y, title, subtitle);
-  const vehicleRows = (report.veicoli || []).map(v => [v.sigla || '-', v.kmInizio || '-', v.kmFine || '-', km(v), v.carburante || 'No', v.importoCarburante || '-', v.oraPrelievoCard || '-', v.oraRestituzioneCard || '-']);
-  y = simpleTable(doc, ['Veicolo', 'Km inizio', 'Km fine', 'Km', 'Carburante', 'Importo', 'Card presa', 'Card resa'], vehicleRows.length ? vehicleRows : [['-', '-', '-', '-', '-', '-', '-', '-']], y, [34, 23, 23, 18, 24, 22, 21, 21], title, subtitle);
-  const anomalieVeicoli = (report.veicoli || []).filter(v => v.anomaliaVeicolo).map(v => `${v.sigla || 'Veicolo'}: ${v.anomaliaVeicolo}`).join('\n');
-  y = kvGrid(doc, [{ label: 'Totale km percorsi', value: getKmTotali(report) }, { label: 'Anomalie / danni veicolo', value: anomalieVeicoli || '-' }], y, 1, title, subtitle) + 2;
+  y = ensureSpace(doc, y, 36, title, subtitle);
+  const veicoloText = (report.veicoli || []).length
+    ? (report.veicoli || []).map(v => `${v.sigla || 'Veicolo'} — km ${v.kmInizio || '-'} / ${v.kmFine || '-'} (${km(v)} km). Carburante: ${v.carburante || 'No'}${v.importoCarburante ? ' - importo ' + v.importoCarburante : ''}${v.oraPrelievoCard || v.oraRestituzioneCard ? ' - card C.O. ' + (v.oraPrelievoCard || '--') + '/' + (v.oraRestituzioneCard || '--') : ''}${v.anomaliaVeicolo ? '\nAnomalia/danno: ' + v.anomaliaVeicolo : ''}`).join('\n')
+    : '-';
+  softBox(doc, 12, y, 91, 34, 'Veicoli e chilometraggio', veicoloText, { fill: [255,255,255] });
+  softBox(doc, 107, y, 91, 34, 'Note per UDT', report.noteUdt || '-', { fill: [255,255,255] });
+  y += 39;
 
   y = section(doc, 'Interventi effettuati', y, title, subtitle);
+  if (!(report.interventi || []).length) {
+    y = paragraph(doc, 'Nessun intervento inserito.', y, title, subtitle);
+  }
   (report.interventi || []).forEach((i, idx) => {
     y = serviceInterventionCard(doc, i, idx, y, title, subtitle);
   });
 
-  y = section(doc, 'Atti redatti', y, title, subtitle);
-  const c = report.counters || emptyCounters();
-  y = simpleTable(doc, ['Tipologia', 'N.'], [
-    ['Relazioni di servizio', c.relazioni], ['Annotazioni di servizio', c.annotazioni],
-    ['Sequestri amministrativi', c.sequestriAmministrativi], ['Fermi amministrativi', c.fermiAmministrativi], ['Sequestri penali', c.sequestriPenali], ['C.N.R.', c.cnr], [`Altri atti ${c.altriAttiDescrizione || ''}`, c.altriAttiNumero]
-  ], y, [150, 36], title, subtitle);
+  y = ensureSpace(doc, y, 56, title, subtitle);
+  const yBlocks = y;
+  const attiRows = [
+    ['Relazioni', c.relazioni], ['Annotazioni', c.annotazioni], ['Sequestri amm.', c.sequestriAmministrativi],
+    ['Fermi amm.', c.fermiAmministrativi], ['Sequestri penali', c.sequestriPenali], ['C.N.R.', c.cnr], [`Altri atti ${c.altriAttiDescrizione || ''}`, c.altriAttiNumero]
+  ];
+  softBox(doc, 12, yBlocks, 91, 10, 'Atti redatti', '', { titleBg: [12,47,97] });
+  let yy = yBlocks + 13;
+  yy = simpleTable(doc, ['Tipologia', 'N.'], attiRows, yy, [72, 19], title, subtitle);
 
-  y = section(doc, 'Violazioni', y, title, subtitle);
-  y = simpleTable(doc, ['Tipologia', 'N.'], [
-    ['Preavvisi CdS', c.preavvisiCds], ['VdC CdS', c.vdcCds], ['Regolamento Polizia', c.regPolizia], ['Regolamento Edilizio', c.regEdilizio],
-    ['Regolamento Benessere Animali', c.regBenessereAnimali], ['Annonaria / commercio', c.annonaria], [`Altre norme ${c.altreNormeDescrizione || ''}`, c.altreNorme], ['TOTALE', getTotaleViolazioni(report)]
-  ], y, [150, 36], title, subtitle);
+  const violRows = [
+    ['Preavvisi CdS', c.preavvisiCds], ['VdC CdS', c.vdcCds], ['Reg. Polizia Urbana', c.regPolizia],
+    ['Reg. Edilizio', c.regEdilizio], ['Reg. Benessere Animali', c.regBenessereAnimali], ['Annonaria / commercio', c.annonaria],
+    [`Altre norme ${c.altreNormeDescrizione || ''}`, c.altreNorme], ['TOTALE', getTotaleViolazioni(report)]
+  ];
+  softBox(doc, 107, yBlocks, 91, 10, 'Violazioni', '', { titleBg: [12,47,97] });
+  let yy2 = yBlocks + 13;
+  yy2 = simpleTable(doc, ['Tipologia', 'N.'], violRows, yy2, [72, 19], title, subtitle);
+  y = Math.max(yy, yy2) + 2;
 
   y = section(doc, 'Documenti ritirati', y, title, subtitle);
   const docRows = (report.documentiRitirati || []).filter(d => d.tipo || d.quantita || d.note).map(d => [d.tipo || '-', d.quantita || '-', d.note || '-']);
   y = simpleTable(doc, ['Tipo documento', 'Quantità', 'Note'], docRows.length ? docRows : [['Nessun documento ritirato', '-', '-']], y, [70, 28, 88], title, subtitle);
-
-  y = section(doc, 'Note per UDT / Ufficiale di coordinamento', y, title, subtitle);
-  y = paragraph(doc, report.noteUdt || '-', y, title, subtitle);
 
   y = section(doc, 'Dichiarazione e firme', y, title, subtitle);
   y = paragraph(doc, 'Gli operatori dichiarano che quanto riportato nel presente report corrisponde fedelmente alle attività effettivamente svolte e riscontrate durante il turno di servizio, consapevoli delle proprie responsabilità amministrative e penali anche in considerazione dell’art. 328 C.P.', y, title, subtitle);
@@ -1013,32 +1116,71 @@ function buildOfficialShiftPdf(aggregate, reports, official, autoSintesi, autoEv
   const subtitle = `${official.data || aggregate.dateLabel} | ${official.turno || ''}`;
   const doc = makePdf(title, subtitle);
   let y = 54;
-  y = section(doc, 'Data e turno', y, title, subtitle);
-  y = kvGrid(doc, [{ label: 'Data', value: official.data || aggregate.dateLabel }, { label: 'Turno', value: official.turno || '-' }, { label: 'Ufficiale di turno', value: official.ufficiale || '-' }, { label: 'Qualifica', value: official.qualifica || '-' }], y, 2, title, subtitle) + 2;
-  y = section(doc, 'Riepilogo rapido', y, title, subtitle);
-  y = kvGrid(doc, [{ label: 'Report operatori', value: reports.length }, { label: 'Interventi totali', value: aggregate.totalInterventi }, { label: 'Violazioni', value: aggregate.totaleViolazioni }, { label: 'Km complessivi', value: aggregate.kmTotali }], y, 4, title, subtitle) + 2;
-  y = section(doc, 'Briefing operativo', y, title, subtitle); y = paragraph(doc, official.briefing || '-', y, title, subtitle);
-  y = section(doc, 'Personale', y, title, subtitle);
-  y = kvGrid(doc, [{ label: 'A.P.L. assenti', value: official.assenti || '-' }, { label: 'A.P.L. in ritardo', value: official.ritardi || '-' }, { label: 'Note', value: official.noteGenerali || '-' }], y, 1, title, subtitle) + 2;
-  y = section(doc, 'Sintesi operativa', y, title, subtitle); y = paragraph(doc, `${autoSintesi}${official.eventiManuali ? '\n\nIntegrazioni: ' + official.eventiManuali : ''}`, y, title, subtitle);
-  y = section(doc, 'Eventi degni di rilievo', y, title, subtitle); y = paragraph(doc, autoEventi || 'Nessun evento rilevante automatico rilevato.', y, title, subtitle);
-  y = section(doc, 'Anomalie riscontrate durante il turno', y, title, subtitle); y = paragraph(doc, official.anomalie || '-', y, title, subtitle);
-  y = section(doc, 'Attività ispettive', y, title, subtitle);
-  const attivitaRows = (official.attivitaIspettive || []).filter(a => a.tipo || a.reparto || a.luogo || a.esito || a.note).map(a => [a.tipo || '-', a.reparto || '-', a.luogo || '-', a.orario || '-', a.esito || '-', a.violazioni || '-', a.note || '-']);
-  y = simpleTable(doc, ['Tipo', 'Reparto', 'Luogo', 'Orario', 'Esito', 'Viol.', 'Note'], attivitaRows.length ? attivitaRows : [['-', '-', '-', '-', '-', '-', '-']], y, [28, 30, 28, 18, 30, 18, 34], title, subtitle);
-  y = section(doc, 'Esiti', y, title, subtitle); y = paragraph(doc, official.esiti || '-', y, title, subtitle);
-  y = section(doc, "Comunicazione all'E.Q. di turno", y, title, subtitle); y = paragraph(doc, official.comunicazioneEq || '-', y, title, subtitle);
-  y = section(doc, 'Nota per il Comandante', y, title, subtitle); y = paragraph(doc, official.notaComandante || '-', y, title, subtitle);
+
+  labeledInfoBox(doc, 12, y, 104, 38, [
+    { label: 'Data', value: official.data || aggregate.dateLabel },
+    { label: 'Turno', value: official.turno || '-' },
+    { label: 'Ufficiale di turno', value: official.ufficiale || '-' },
+    { label: 'Briefing operativo', value: official.briefing || '-' },
+  ]);
+  quickSummaryBox(doc, 126, y, 72, [
+    { label: 'Interventi totali', value: aggregate.totalInterventi },
+    { label: 'Violazioni totali', value: aggregate.totaleViolazioni },
+    { label: 'Criticità segnalate', value: relevantInterventions(reports).length },
+    { label: 'Report operatori', value: reports.length },
+  ]);
+  y += 43;
+
+  y = ensureSpace(doc, y, 46, title, subtitle);
+  const personaleBody = `ASSENTI\n${official.assenti || '-'}\n\nIN RITARDO\n${official.ritardi || '-'}`;
+  softBox(doc, 12, y, 91, 40, 'Personale', personaleBody, { fill: [255,255,255] });
+  softBox(doc, 107, y, 91, 40, 'Note generali', official.noteGenerali || '-', { fill: [255,255,255] });
+  y += 46;
+
+  y = ensureSpace(doc, y, 62, title, subtitle);
+  const eventiText = `${autoEventi || 'Nessun evento rilevante automatico rilevato.'}${official.eventiManuali ? '\n\nIntegrazioni: ' + official.eventiManuali : ''}`;
+  softBox(doc, 12, y, 91, 56, 'Eventi degni di rilievo', eventiText, { fill: [255,255,255] });
+  softBox(doc, 107, y, 91, 24, 'Anomalie riscontrate durante il turno', official.anomalie || '-', { fill: [255,248,242], border: [220,190,170] });
+  const attivitaRows = (official.attivitaIspettive || []).filter(a => a.tipo || a.reparto || a.luogo || a.esito || a.note);
+  const attivitaText = attivitaRows.length ? attivitaRows.map(a => `${a.tipo || '-'} | ${a.reparto || '-'} | ${a.luogo || '-'} | Esito: ${a.esito || '-'}${a.violazioni ? ' | Violazioni: ' + a.violazioni : ''}`).join('\n') : 'Nessuna attività ispettiva indicata.';
+  softBox(doc, 107, y + 29, 91, 27, 'Attività ispettive', attivitaText, { fill: [255,255,255] });
+  y += 62;
+
+  y = ensureSpace(doc, y, 32, title, subtitle);
+  softBox(doc, 12, y, 59, 26, 'Esiti', official.esiti || '-', { fill: [255,255,255] });
+  softBox(doc, 76, y, 59, 26, "Comunicazione all'E.Q.", official.comunicazioneEq || '-', { fill: [255,255,255] });
+  softBox(doc, 139, y, 59, 26, 'Nota per il Comandante', official.notaComandante || '-', { fill: [255,255,255] });
+  y += 32;
+
   y = section(doc, 'Violazioni riscontrate per pattuglia / reparto', y, title, subtitle);
   const violationRows = reports.map(r => { const c = r.counters || {}; return [operatorNames(r).join(' / ') || '-', repartoLabel(r), n(c.preavvisiCds), n(c.vdcCds), n(c.regPolizia), n(c.regEdilizio), n(c.regBenessereAnimali), n(c.annonaria), n(c.altreNorme), getTotaleViolazioni(r)]; });
   const tot = reports.reduce((acc, r) => { const c = r.counters || {}; ['preavvisiCds','vdcCds','regPolizia','regEdilizio','regBenessereAnimali','annonaria','altreNorme'].forEach(k => acc[k] = n(acc[k]) + n(c[k])); return acc; }, {});
   if (reports.length) violationRows.push(['TOTALE COMPLESSIVO', '-', n(tot.preavvisiCds), n(tot.vdcCds), n(tot.regPolizia), n(tot.regEdilizio), n(tot.regBenessereAnimali), n(tot.annonaria), n(tot.altreNorme), reports.reduce((sum, r) => sum + getTotaleViolazioni(r), 0)]);
-  y = simpleTable(doc, ['Pattuglia / Operatori', 'Reparto', 'Prev.', 'VdC', 'Reg.PU', 'Edil.', 'Anim.', 'Ann.', 'Altre', 'Tot.'], violationRows.length ? violationRows : [['-', '-', '-', '-', '-', '-', '-', '-', '-', '-']], y, [40, 34, 14, 14, 16, 14, 16, 16, 16, 16], title, subtitle);
+  y = simpleTable(doc, ['Pattuglia / Operatori', 'Reparto', 'Prev.', 'VdC', 'Reg.PU', 'Edil.', 'Anim.', 'Ann.', 'Altre', 'Tot.'], violationRows.length ? violationRows : [['-', '-', '-', '-', '-', '-', '-', '-', '-', '-']], y, [38, 30, 13, 13, 15, 13, 15, 15, 15, 14], title, subtitle);
+
   y = section(doc, 'Atti redatti - riepilogo separato', y, title, subtitle);
   const attiTot = reports.reduce((acc, r) => { const c = r.counters || {}; ['relazioni','annotazioni','sequestriAmministrativi','fermiAmministrativi','sequestriPenali','cnr','altriAttiNumero'].forEach(k => acc[k] = n(acc[k]) + n(c[k])); return acc; }, {});
-  y = simpleTable(doc, ['Tipologia atto', 'Totale'], [['Relazioni di servizio', n(attiTot.relazioni)], ['Annotazioni di servizio', n(attiTot.annotazioni)], ['Sequestri amministrativi', n(attiTot.sequestriAmministrativi)], ['Fermi amministrativi', n(attiTot.fermiAmministrativi)], ['Sequestri penali', n(attiTot.sequestriPenali)], ['C.N.R.', n(attiTot.cnr)], ['Altri atti', n(attiTot.altriAttiNumero)]], y, [150, 36], title, subtitle);
-  y = ensureSpace(doc, y, 22, title, subtitle); doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.text('FIRMA:', 16, y + 4); doc.text(official.qualifica || '-', 16, y + 12); doc.text(official.ufficiale || '-', 16, y + 18); doc.line(80, y + 18, 190, y + 18);
-  addFooter(doc); return doc;
+  y = simpleTable(doc, ['Tipologia atto', 'Totale'], [
+    ['Relazioni di servizio', n(attiTot.relazioni)], ['Annotazioni di servizio', n(attiTot.annotazioni)],
+    ['Sequestri amministrativi', n(attiTot.sequestriAmministrativi)], ['Fermi amministrativi', n(attiTot.fermiAmministrativi)],
+    ['Sequestri penali', n(attiTot.sequestriPenali)], ['C.N.R.', n(attiTot.cnr)], ['Altri atti', n(attiTot.altriAttiNumero)]
+  ], y, [150, 36], title, subtitle);
+
+  y = ensureSpace(doc, y, 22, title, subtitle);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8.5);
+  doc.text('FIRMA', 16, y + 4);
+  doc.text(official.qualifica || '-', 16, y + 12);
+  doc.setFont('helvetica', 'bold');
+  doc.text(official.ufficiale || '-', 16, y + 18);
+  doc.setFont('helvetica', 'normal');
+  doc.text('DATA', 118, y + 12);
+  doc.text(official.data || aggregate.dateLabel || '-', 118, y + 18);
+  doc.line(16, y + 21, 75, y + 21);
+  doc.line(118, y + 21, 177, y + 21);
+  addFooter(doc);
+  return doc;
 }
+
 
 createRoot(document.getElementById('root')).render(<App />);
