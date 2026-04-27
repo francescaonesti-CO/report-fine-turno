@@ -20,16 +20,15 @@ const REPARTI_CON_ZONA = ['Radiomobile', 'Quartieri', 'Intervento rapido motocic
 function richiedeZonaServizio(reparto) { return REPARTI_CON_ZONA.includes(reparto); }
 
 const TIPI_INTERVENTO = [
-  'Sinistro stradale', 'TSO', 'ASO', 'Posto di controllo', 'Viabilità', 'Servizio scuole',
+  'Sinistro stradale', 'Codice della strada','TSO', 'ASO', 'Posto di controllo', 'Viabilità', 'Servizio scuole',
   'Controllo commerciale / annonaria', 'Controllo edilizio', 'Controllo parchi / aree verdi',
   'Sicurezza urbana', 'Intervento per animali', 'Abbandono rifiuti', 'Rumori / disturbo quiete',
-  'Supporto ad altro ente', 'Notifica / accertamento', 'Codice della strada', 'Altro'
+  'Supporto ad altro ente', 'Notifica / accertamento', 'Altro'
 ];
 
 const DETTAGLI_CODICE_STRADA = [
   'Controllo soste',
   'Buca su carreggiata',
-  'Sinistro stradale',
   'Veicolo sospetto',
   'Segnaletica danneggiata',
   'Guasto semaforo'
