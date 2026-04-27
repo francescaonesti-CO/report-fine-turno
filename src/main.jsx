@@ -46,7 +46,12 @@ const emptyVerbaleDistinta = () => ({ numero: '', tipo: '', norma: '', importo: 
 const emptyIntervento = () => ({
   tipo: 'Sinistro stradale', origine: 'Centrale Operativa', origineAltro: '', oraInizio: '', oraFine: '', luogo: '', descrizione: '', esito: '', note: '',
   conFeriti: 'Senza feriti', veicoliCoinvolti: '', rilievi: 'No', personeControllate: '', veicoliControllati: '', verbaliElevati: '', fermiSequestri: '',
-  motivoViabilita: '', strade: '', scuole: [emptyScuola()]
+  motivoViabilita: '', strade: '', scuole: [emptyScuola()]dettaglio: '',
+rimozione: 'No',
+motivazione: '',
+richiestoIntervento: 'No',
+feriti: 'No',
+veicoliCoinvoltiNumero: '',
 });
 
 const emptyCounters = () => ({
