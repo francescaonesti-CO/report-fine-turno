@@ -23,8 +23,16 @@ const TIPI_INTERVENTO = [
   'Sinistro stradale', 'TSO', 'ASO', 'Posto di controllo', 'Viabilità', 'Servizio scuole',
   'Controllo commerciale / annonaria', 'Controllo edilizio', 'Controllo parchi / aree verdi',
   'Sicurezza urbana', 'Intervento per animali', 'Abbandono rifiuti', 'Rumori / disturbo quiete',
-  'Supporto ad altro ente', 'Notifica / accertamento', 'Codice della strada',
-'Altro'
+  'Supporto ad altro ente', 'Notifica / accertamento', 'Codice della strada', 'Altro'
+];
+
+const DETTAGLI_CODICE_STRADA = [
+  'Controllo soste',
+  'Buca su carreggiata',
+  'Sinistro stradale',
+  'Veicolo sospetto',
+  'Segnaletica danneggiata',
+  'Guasto semaforo'
 ];
 
 const ORIGINI = ['Centrale Operativa', 'UDT', 'Di iniziativa', 'Altro'];
@@ -46,12 +54,9 @@ const emptyVerbaleDistinta = () => ({ numero: '', tipo: '', norma: '', importo: 
 const emptyIntervento = () => ({
   tipo: 'Sinistro stradale', origine: 'Centrale Operativa', origineAltro: '', oraInizio: '', oraFine: '', luogo: '', descrizione: '', esito: '', note: '',
   conFeriti: 'Senza feriti', veicoliCoinvolti: '', rilievi: 'No', personeControllate: '', veicoliControllati: '', verbaliElevati: '', fermiSequestri: '',
-  motivoViabilita: '', strade: '', scuole: [emptyScuola()],dettaglio: '',
-rimozione: 'No',
-motivazione: '',
-richiestoIntervento: 'No',
-feriti: 'No',
-veicoliCoinvoltiNumero: '',
+  motivoViabilita: '', strade: '', scuole: [emptyScuola()],
+  cdsDettaglio: '', cdsRimozione: 'No', cdsMotivazione: '', cdsRipristino: 'No', cdsFeriti: 'No', cdsVeicoliCoinvolti: '',
+  cdsVerificaEffettuata: 'No', cdsSegnalazione: 'No', cdsPericolo: 'No', cdsInterventoRichiesto: 'No', cdsStatoSemaforo: 'spento'
 });
 
 const emptyCounters = () => ({
@@ -315,52 +320,31 @@ function Intervento({ i, idx, updateIntervento, remove }) {
   const updateScuola = (sidx, patch) => updateIntervento({ scuole: i.scuole.map((s, n) => n === sidx ? { ...s, ...patch } : s) });
   const addScuola = () => { if (i.scuole.length < 3) updateIntervento({ scuole: [...i.scuole, emptyScuola()] }); };
   const removeScuola = (sidx) => updateIntervento({ scuole: i.scuole.filter((_, n) => n !== sidx) });
-  return <div className="intervento"><div className="interventoHead"><h3>Intervento {idx + 1}</h3><button className="ghost" onClick={remove}>Rimuovi</button></div>
-    <div className="grid three"><Field label="Tipo intervento"><Select value={i.tipo} onChange={v => updateIntervento({ tipo: v })}>{TIPI_INTERVENTO.map(t => <option key={t}>{t}</option>)}</Sel</Select></Field>
-
-{i.tipo === 'Codice della strada' && (
-  <div className="grid three">
-    <Field label="Dettaglio intervento">
-      <Select value={i.dettaglio || ''} onChange={v => updateIntervento({ dettaglio: v })}>
-        <option value="">Seleziona</option>
-        <option>Controllo soste</option>
-        <option>Buca su carreggiata</option>
-        <option>Sinistro stradale</option>
-        <option>Veicolo sospetto</option>
-        <option>Segnaletica danneggiata</option>
-        <option>Guasto semaforo</option>
-      </Select>
-    </Field>
-
-    {i.dettaglio === 'Controllo soste' && (
-      <>
-        <Field label="Rimozione veicolo">
-          <Select value={i.rimozione || 'No'} onChange={v => updateIntervento({ rimozione: v })}>
-            <option>No</option>
-            <option>Sì</option>
-          </Select>
-        </Field>
-        <Field label="Motivazione">
-          <Input value={i.motivazione || ''} onChange={v => updateIntervento({ motivazione: v })} />
-        </Field>
-      </>
-    )}
-
-    {i.dettaglio === 'Buca su carreggiata' && (
-      <Field label="Richiesto intervento per ripristino">
-        <Select value={i.richiestoIntervento || 'No'} onChange={v => updateIntervento({ richiestoIntervento: v })}>
-          <option>No</option>
-          <option>Sì</option>
-        </Select>
-      </Field>
-    )}
-  </div>
-)}
-
-<Field label="Origine">ect></Field><Field label="Origine"><Select value={i.origine} onChange={v => updateIntervento({ origine: v })}>{ORIGINI.map(o => <option key={o}>{o}</option>)}</Select></Field><Field label="Luogo"><Input value={i.luogo} onChange={v => updateIntervento({ luogo: v })} /></Field></div>
+  const resetCds = {
+    cdsDettaglio: '', cdsRimozione: 'No', cdsMotivazione: '', cdsRipristino: 'No', cdsFeriti: 'No', cdsVeicoliCoinvolti: '',
+    cdsVerificaEffettuata: 'No', cdsSegnalazione: 'No', cdsPericolo: 'No', cdsInterventoRichiesto: 'No', cdsStatoSemaforo: 'spento'
+  };
+  return <div className="intervento">
+    <div className="interventoHead"><h3>Intervento {idx + 1}</h3><button className="ghost" onClick={remove}>Rimuovi</button></div>
+    <div className="grid three">
+      <Field label="Tipo intervento"><Select value={i.tipo} onChange={v => updateIntervento({ tipo: v, ...(v !== 'Codice della strada' ? resetCds : {}) })}>{TIPI_INTERVENTO.map(t => <option key={t}>{t}</option>)}</Select></Field>
+      <Field label="Origine"><Select value={i.origine} onChange={v => updateIntervento({ origine: v })}>{ORIGINI.map(o => <option key={o}>{o}</option>)}</Select></Field>
+      <Field label="Luogo"><Input value={i.luogo} onChange={v => updateIntervento({ luogo: v })} /></Field>
+    </div>
+    {i.tipo === 'Codice della strada' && <div className="schoolBox"><h4>Dettaglio Codice della strada</h4>
+      <div className="grid three">
+        <Field label="Dettaglio intervento"><Select value={i.cdsDettaglio || ''} onChange={v => updateIntervento({ cdsDettaglio: v })}><option value="">Seleziona</option>{DETTAGLI_CODICE_STRADA.map(d => <option key={d}>{d}</option>)}</Select></Field>
+        {i.cdsDettaglio === 'Controllo soste' && <><Field label="Rimozione veicolo"><Select value={i.cdsRimozione || 'No'} onChange={v => updateIntervento({ cdsRimozione: v })}><option>No</option><option>Sì</option></Select></Field><Field label="Motivazione"><Input value={i.cdsMotivazione || ''} onChange={v => updateIntervento({ cdsMotivazione: v })} placeholder="es. intralcio, passo carrabile, area mercato..." /></Field></>}
+        {i.cdsDettaglio === 'Buca su carreggiata' && <Field label="Richiesto intervento per ripristino"><Select value={i.cdsRipristino || 'No'} onChange={v => updateIntervento({ cdsRipristino: v })}><option>No</option><option>Sì</option></Select></Field>}
+        {i.cdsDettaglio === 'Sinistro stradale' && <><Field label="Feriti"><Select value={i.cdsFeriti || 'No'} onChange={v => updateIntervento({ cdsFeriti: v })}><option>No</option><option>Sì</option></Select></Field><Field label="Veicoli coinvolti"><Input type="number" value={i.cdsVeicoliCoinvolti || ''} onChange={v => updateIntervento({ cdsVeicoliCoinvolti: v })} /></Field></>}
+        {i.cdsDettaglio === 'Veicolo sospetto' && <><Field label="Verifica effettuata"><Select value={i.cdsVerificaEffettuata || 'No'} onChange={v => updateIntervento({ cdsVerificaEffettuata: v })}><option>No</option><option>Sì</option></Select></Field><Field label="Segnalazione"><Select value={i.cdsSegnalazione || 'No'} onChange={v => updateIntervento({ cdsSegnalazione: v })}><option>No</option><option>Sì</option></Select></Field></>}
+        {i.cdsDettaglio === 'Segnaletica danneggiata' && <><Field label="Pericolo"><Select value={i.cdsPericolo || 'No'} onChange={v => updateIntervento({ cdsPericolo: v })}><option>No</option><option>Sì</option></Select></Field><Field label="Intervento richiesto"><Select value={i.cdsInterventoRichiesto || 'No'} onChange={v => updateIntervento({ cdsInterventoRichiesto: v })}><option>No</option><option>Sì</option></Select></Field></>}
+        {i.cdsDettaglio === 'Guasto semaforo' && <><Field label="Stato"><Select value={i.cdsStatoSemaforo || 'spento'} onChange={v => updateIntervento({ cdsStatoSemaforo: v })}><option>spento</option><option>lampeggiante</option></Select></Field><Field label="Intervento richiesto"><Select value={i.cdsInterventoRichiesto || 'No'} onChange={v => updateIntervento({ cdsInterventoRichiesto: v })}><option>No</option><option>Sì</option></Select></Field></>}
+      </div>
+    </div>}
     {i.origine === 'Altro' && <Field label="Specificare da chi è arrivata la disposizione"><Input value={i.origineAltro} onChange={v => updateIntervento({ origineAltro: v })} /></Field>}
     <div className="grid two"><Field label="Ora inizio"><Input value={i.oraInizio} onChange={v => updateIntervento({ oraInizio: v })} placeholder="es. 08.15" /></Field><Field label="Ora fine"><Input value={i.oraFine} onChange={v => updateIntervento({ oraFine: v })} placeholder="es. 09.00" /></Field></div>
-    <Field label="Descrizione"><Textarea value={i.descrizione} onChange={v => updateIntervento({ descrizione: v })} /></Field>
+    <Field label={i.tipo === 'Altro' ? 'Descrizione intervento' : 'Descrizione'}><Textarea value={i.descrizione} onChange={v => updateIntervento({ descrizione: v })} /></Field>
     {i.tipo === 'Sinistro stradale' && <div className="grid three"><Field label="Feriti"><Select value={i.conFeriti} onChange={v => updateIntervento({ conFeriti: v })}><option>Con feriti</option><option>Senza feriti</option></Select></Field><Field label="Veicoli coinvolti"><Input type="number" value={i.veicoliCoinvolti} onChange={v => updateIntervento({ veicoliCoinvolti: v })} /></Field><Field label="Rilievi effettuati"><Select value={i.rilievi} onChange={v => updateIntervento({ rilievi: v })}><option>Sì</option><option>No</option></Select></Field></div>}
     {i.tipo === 'Posto di controllo' && <div className="grid four"><Field label="Veicoli controllati"><Input type="number" value={i.veicoliControllati} onChange={v => updateIntervento({ veicoliControllati: v })} /></Field><Field label="Persone controllate"><Input type="number" value={i.personeControllate} onChange={v => updateIntervento({ personeControllate: v })} /></Field><Field label="Verbali elevati"><Input type="number" value={i.verbaliElevati} onChange={v => updateIntervento({ verbaliElevati: v })} /></Field><Field label="Fermi / sequestri"><Input type="number" value={i.fermiSequestri} onChange={v => updateIntervento({ fermiSequestri: v })} /></Field></div>}
     {i.tipo === 'Viabilità' && <div className="grid two"><Field label="Motivo viabilità"><Input value={i.motivoViabilita} onChange={v => updateIntervento({ motivoViabilita: v })} placeholder="incidente, cantiere, evento..." /></Field><Field label="Strade interessate"><Input value={i.strade} onChange={v => updateIntervento({ strade: v })} /></Field></div>}
@@ -1073,12 +1057,40 @@ function getTotaleViolazioni(report) {
 }
 function operatorNames(report) { return (report.operatori || []).filter(o => o.nome || o.matricola || o.qualifica).map(o => `${o.nome || 'Operatore'}${o.matricola ? ` mtr. ${o.matricola}` : ''}`); }
 function extraDetails(i) {
-  if (i.tipo === 'Sinistro stradale') return `   Dettagli: ${i.conFeriti}; veicoli coinvolti ${i.veicoliCoinvolti || '-'}; rilievi ${i.rilievi}\n`;
-  if (i.tipo === 'Posto di controllo') return `   Controlli: veicoli ${i.veicoliControllati || '0'}; persone ${i.personeControllate || '0'}; verbali ${i.verbaliElevati || '0'}; fermi/sequestri ${i.fermiSequestri || '0'}\n`;
-  if (i.tipo === 'Viabilità') return `   Motivo: ${i.motivoViabilita || '-'}; strade interessate: ${i.strade || '-'}\n`;
+  if (i.tipo === 'Codice della strada') {
+    const dettaglio = i.cdsDettaglio || 'Non specificato';
+    const righe = [`   Dettaglio CdS: ${dettaglio}`];
+    if (dettaglio === 'Controllo soste') {
+      righe.push(`   Rimozione veicolo: ${i.cdsRimozione || 'No'}`);
+      righe.push(`   Motivazione: ${i.cdsMotivazione || '-'}`);
+    }
+    if (dettaglio === 'Buca su carreggiata') righe.push(`   Richiesto intervento per ripristino: ${i.cdsRipristino || 'No'}`);
+    if (dettaglio === 'Sinistro stradale') {
+      righe.push(`   Feriti: ${i.cdsFeriti || 'No'}`);
+      righe.push(`   Veicoli coinvolti: ${i.cdsVeicoliCoinvolti || '-'}`);
+    }
+    if (dettaglio === 'Veicolo sospetto') {
+      righe.push(`   Verifica effettuata: ${i.cdsVerificaEffettuata || 'No'}`);
+      righe.push(`   Segnalazione: ${i.cdsSegnalazione || 'No'}`);
+    }
+    if (dettaglio === 'Segnaletica danneggiata') {
+      righe.push(`   Pericolo: ${i.cdsPericolo || 'No'}`);
+      righe.push(`   Intervento richiesto: ${i.cdsInterventoRichiesto || 'No'}`);
+    }
+    if (dettaglio === 'Guasto semaforo') {
+      righe.push(`   Stato: ${i.cdsStatoSemaforo || '-'}`);
+      righe.push(`   Intervento richiesto: ${i.cdsInterventoRichiesto || 'No'}`);
+    }
+    return righe.join('\n') + '\n';
+  }
+  if (i.tipo === 'Sinistro stradale') return `   Dettagli: ${i.conFeriti}; veicoli coinvolti ${i.veicoliCoinvolti || '-'}; rilievi ${i.rilievi}
+`;
+  if (i.tipo === 'Posto di controllo') return `   Controlli: veicoli ${i.veicoliControllati || '0'}; persone ${i.personeControllate || '0'}; verbali ${i.verbaliElevati || '0'}; fermi/sequestri ${i.fermiSequestri || '0'}
+`;
+  if (i.tipo === 'Viabilità') return `   Motivo: ${i.motivoViabilita || '-'}; strade interessate: ${i.strade || '-'}
+`;
   return '';
 }
-
 function reportText(report) {
   const ops = operatorNames(report).map(x => `- ${x}`).join('\n') || '- Non indicati';
   const mezzi = (report.veicoli || []).map(v => `- ${v.sigla || 'Veicolo'} | Km inizio ${v.kmInizio || '-'} | Km fine ${v.kmFine || '-'} | Km percorsi ${km(v)}`).join('\n');
@@ -1099,7 +1111,8 @@ function aggregateReports(reports) {
     aggregate.kmTotali += getKmTotali(r);
     aggregate.byReparto[repartoLabel(r)] = n(aggregate.byReparto[repartoLabel(r)]) + 1;
     (r.interventi || []).forEach(i => {
-      aggregate.byTipo[i.tipo || 'Non indicato'] = n(aggregate.byTipo[i.tipo || 'Non indicato']) + 1;
+      const tipoAggregato = i.tipo === 'Codice della strada' && i.cdsDettaglio ? `Codice della strada - ${i.cdsDettaglio}` : (i.tipo || 'Non indicato');
+      aggregate.byTipo[tipoAggregato] = n(aggregate.byTipo[tipoAggregato]) + 1;
       const origine = i.origine === 'Altro' ? `Altro: ${i.origineAltro || '-'}` : (i.origine || 'Non indicata');
       aggregate.byOrigine[origine] = n(aggregate.byOrigine[origine]) + 1;
     });
