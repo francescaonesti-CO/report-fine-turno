@@ -23,7 +23,8 @@ const TIPI_INTERVENTO = [
   'Sinistro stradale', 'TSO', 'ASO', 'Posto di controllo', 'Viabilità', 'Servizio scuole',
   'Controllo commerciale / annonaria', 'Controllo edilizio', 'Controllo parchi / aree verdi',
   'Sicurezza urbana', 'Intervento per animali', 'Abbandono rifiuti', 'Rumori / disturbo quiete',
-  'Supporto ad altro ente', 'Notifica / accertamento', 'Altro'
+  'Supporto ad altro ente', 'Notifica / accertamento', 'Codice della strada',
+'Altro'
 ];
 
 const ORIGINI = ['Centrale Operativa', 'UDT', 'Di iniziativa', 'Altro'];
