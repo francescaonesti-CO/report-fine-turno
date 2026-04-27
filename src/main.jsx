@@ -316,7 +316,48 @@ function Intervento({ i, idx, updateIntervento, remove }) {
   const addScuola = () => { if (i.scuole.length < 3) updateIntervento({ scuole: [...i.scuole, emptyScuola()] }); };
   const removeScuola = (sidx) => updateIntervento({ scuole: i.scuole.filter((_, n) => n !== sidx) });
   return <div className="intervento"><div className="interventoHead"><h3>Intervento {idx + 1}</h3><button className="ghost" onClick={remove}>Rimuovi</button></div>
-    <div className="grid three"><Field label="Tipo intervento"><Select value={i.tipo} onChange={v => updateIntervento({ tipo: v })}>{TIPI_INTERVENTO.map(t => <option key={t}>{t}</option>)}</Select></Field><Field label="Origine"><Select value={i.origine} onChange={v => updateIntervento({ origine: v })}>{ORIGINI.map(o => <option key={o}>{o}</option>)}</Select></Field><Field label="Luogo"><Input value={i.luogo} onChange={v => updateIntervento({ luogo: v })} /></Field></div>
+    <div className="grid three"><Field label="Tipo intervento"><Select value={i.tipo} onChange={v => updateIntervento({ tipo: v })}>{TIPI_INTERVENTO.map(t => <option key={t}>{t}</option>)}</Sel</Select></Field>
+
+{i.tipo === 'Codice della strada' && (
+  <div className="grid three">
+    <Field label="Dettaglio intervento">
+      <Select value={i.dettaglio || ''} onChange={v => updateIntervento({ dettaglio: v })}>
+        <option value="">Seleziona</option>
+        <option>Controllo soste</option>
+        <option>Buca su carreggiata</option>
+        <option>Sinistro stradale</option>
+        <option>Veicolo sospetto</option>
+        <option>Segnaletica danneggiata</option>
+        <option>Guasto semaforo</option>
+      </Select>
+    </Field>
+
+    {i.dettaglio === 'Controllo soste' && (
+      <>
+        <Field label="Rimozione veicolo">
+          <Select value={i.rimozione || 'No'} onChange={v => updateIntervento({ rimozione: v })}>
+            <option>No</option>
+            <option>Sì</option>
+          </Select>
+        </Field>
+        <Field label="Motivazione">
+          <Input value={i.motivazione || ''} onChange={v => updateIntervento({ motivazione: v })} />
+        </Field>
+      </>
+    )}
+
+    {i.dettaglio === 'Buca su carreggiata' && (
+      <Field label="Richiesto intervento per ripristino">
+        <Select value={i.richiestoIntervento || 'No'} onChange={v => updateIntervento({ richiestoIntervento: v })}>
+          <option>No</option>
+          <option>Sì</option>
+        </Select>
+      </Field>
+    )}
+  </div>
+)}
+
+<Field label="Origine">ect></Field><Field label="Origine"><Select value={i.origine} onChange={v => updateIntervento({ origine: v })}>{ORIGINI.map(o => <option key={o}>{o}</option>)}</Select></Field><Field label="Luogo"><Input value={i.luogo} onChange={v => updateIntervento({ luogo: v })} /></Field></div>
     {i.origine === 'Altro' && <Field label="Specificare da chi è arrivata la disposizione"><Input value={i.origineAltro} onChange={v => updateIntervento({ origineAltro: v })} /></Field>}
     <div className="grid two"><Field label="Ora inizio"><Input value={i.oraInizio} onChange={v => updateIntervento({ oraInizio: v })} placeholder="es. 08.15" /></Field><Field label="Ora fine"><Input value={i.oraFine} onChange={v => updateIntervento({ oraFine: v })} placeholder="es. 09.00" /></Field></div>
     <Field label="Descrizione"><Textarea value={i.descrizione} onChange={v => updateIntervento({ descrizione: v })} /></Field>
