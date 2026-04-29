@@ -276,9 +276,9 @@ function OperatorReport({ report, setReport, lastSaved, resetReport }) {
         alert('Report salvato, ma errore nel salvataggio degli interventi.');
         return;
       }
-  }
-    
-  alert('Report salvato correttamente nel database.');
+    }
+
+    alert('Report salvato correttamente nel database.');
   } catch (err) {
     console.error(err);
     alert('Errore imprevisto durante il salvataggio.');
