@@ -5,8 +5,16 @@ import * as XLSX from 'xlsx';
 import './style.css';
 import { supabase } from './lib/supabaseClient';
 
-const MONZA_COMMAND_ID = 'ae6f07c1-404f-41a1-9be7-9ff0bc83c325';
-
+const COMMANDS = {
+  monza: {
+    id: 'ae6f07c1-404f-41a1-9be7-9ff0bc83c325',
+    nome: 'Polizia Locale Monza'
+  },
+  seregno: {
+    id: 'INSERISCI_ID_SEREGNO',
+    nome: 'Polizia Locale Seregno'
+  }
+};
 function normalizeTime(value) {
   if (!value) return null;
   const clean = String(value).replace('.', ':').trim();
