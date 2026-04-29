@@ -47,3 +47,4 @@ Quando si inizia un nuovo servizio, usare il pulsante **Nuovo turno / cancella b
 - Output Directory: `dist`
 
 Caricare su GitHub tutti i file della cartella estratta, non lo ZIP.
+Branch di sviluppo per integrazione Supabase.
