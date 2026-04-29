@@ -14,8 +14,8 @@ export default function App() {
   const salvaReport = async () => {
     const { error } = await supabase.from("reports").insert([
       {
-        command_id: "INSERISCI_ID_MONZA",
-        service_date: new Date().toISOString(),
+        command_id: "ae6f07c1-404f-41a1-9be7-9ff0bc83c325",
+        service_date: new Date().toISOString().split("T")[0],
         status: "inviato",
         notes: form.notes,
       },
