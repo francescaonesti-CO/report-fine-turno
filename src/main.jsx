@@ -626,11 +626,6 @@ function buildServicePrintHtml(report) {
   const carburanteBody = (report.veicoli||[]).some(v=>v.carburante==='Sì') ? (report.veicoli||[]).map(v=>`<div class="small-row"><span>${esc(v.sigla||'Veicolo')}</span><strong>${esc(v.importoCarburante||'-')}</strong></div>`).join('') : '<p>Nessun rifornimento indicato.</p>';
   const anomalie = (report.veicoli||[]).map(v=>v.anomaliaVeicolo).filter(Boolean).join('; ') || 'Nessuna anomalia segnalata.';
   const operators = operatorNames(report).join('<br>') || '-';
-  const dichiarazioneFinale = `
-  <div style="margin-top:20px; font-size:12px;">
-    Gli operatori dichiarano che quanto riportato nel presente report corrisponde alle attività effettivamente svolte e riscontrate durante il turno di servizio, consapevoli della proprie responsabilità amministrative e penali anche in considerazione dell'art. 328 C.P.
-  </div>
-`;
   const interventiHtml = interventions.length ? `<ul class="bullet-list">${interventions.slice(0,8).map(i=>`<li><strong>${esc(i.tipo)}</strong>${i.oraInizio?` — ${esc(i.oraInizio)}`:''}<br><span class="muted">${esc(i.luogo || '')}</span> ${esc(i.descrizione || i.esito || '')}</li>`).join('')}</ul>` : '<p>Nessun intervento inserito.</p>';
   const violazioniRows = [['Codice della Strada', n(c.vdcCds)+n(c.preavvisiCds)], ['Regolamenti comunali', n(c.regPolizia)+n(c.regEdilizio)+n(c.regBenessereAnimali)], ['Annonaria / commercio', n(c.annonaria)], ['Altro', n(c.altreNorme)], ['TOTALE', getTotaleViolazioni(report)]];
   const violazioniTable = `<table class="table"><thead><tr><th>Tipo violazione</th><th style="width:22mm">Nr.</th></tr></thead><tbody>${violazioniRows.map((r,idx)=>`<tr class="${idx===violazioniRows.length-1?'total':''}"><td>${esc(r[0])}</td><td class="num">${esc(r[1])}</td></tr>`).join('')}</tbody></table>`;
@@ -639,8 +634,7 @@ function buildServicePrintHtml(report) {
   const docsBody = docs.length ? `<ul class="bullet-list">${docs.map(d=>`<li>${esc(d.tipo || 'Documento')} — ${esc(d.quantita || 1)} ${d.note?`<br><span class="muted">${esc(d.note)}</span>`:''}</li>`).join('')}</ul>` : '<p>Nessun documento ritirato.</p>';
   const page1 = `<section class="page">${headerHtml('REPORT DI SERVIZIO', subtitle)}<div class="kpis">${kpiBox('car','Interventi',interventions.length)}${kpiBox('doc','Violazioni',getTotaleViolazioni(report))}${kpiBox('clip','Atti redatti',atti)}${kpiBox('warn','Eventi',eventi)}</div><div class="grid-3">${panel('Veicoli','car',vehicleBody)}${panel('Carburante','fuel',carburanteBody)}${panel('Anomalie veicolo','warn',`<p>${esc(anomalie)}</p>`)}</div><div class="grid-2">${panel('Note di servizio','clipboard',`<p>${esc(report.noteUdt || '-')}</p>`)}${panel('Operatori','users',`<p><strong>Reparto:</strong> ${esc(repartoLabel(report))}</p><p>${operators}</p>`)}</div>${footerHtml(1)}</section>`;
   const page2 = `<section class="page">${headerHtml('REPORT DI SERVIZIO - DETTAGLIO', subtitle)}<div class="detail-grid">${panel('Interventi effettuati','car',interventiHtml)}${panel('Violazioni contestate','table',violazioniTable,'tight-panel')}</div><div class="detail-grid-2">${panel('Atti redatti','clip',attiBody)}${panel('Osservazioni','clipboard',`<p>${esc(report.osservazioni || report.noteUdt || 'Nessuna osservazione particolare da segnalare.')}</p>`)}</div><div class="detail-grid-2">${panel('Documenti ritirati','doc',docsBody)}${panel('Firma agente','user',`<p><strong>${esc(operatorNames(report)[0] || '-')}</strong></p><div class="signature">Firma</div>`)}</div>${footerHtml(2)}</section>`;
-  return printShell('Report di servizio', page1 + page2 + dichiarazioneFinale);
-}
+return printShell('Report di servizio', page1 + page2);}
 function buildOfficialPrintHtml(aggregate, reports, official, autoSintesi, autoEventi) {
   const date = formatDateIT(official.data || aggregate.dateLabel);
   const subtitle = `${date} | ${official.turno || '-'}`;
