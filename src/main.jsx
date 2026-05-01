@@ -1,121 +1,4 @@
-import jsPDF from 'jspdf';
-import * as XLSX from 'xlsx';
-import './style.css';
-import { supabase } from './lib/supabaseClient';
-
-const MONZA_COMMAND_ID = 'ae6f07c1-404f-41a1-9be7-9ff0bc83c325';
-
-function normalizeTime(value) {
-  if (!value) return null;
-  const clean = String(value).replace('.', ':').trim();
-  const parts = clean.split(':');
-  if (parts.length < 2) return null;
-  return `${parts[0].padStart(2, '0')}:${parts[1].padStart(2, '0')}:00`;
-}
-
-function getShiftTimes(report) {
-  if (report.turno === 'Altro orario') {
-    return {
-      start_time: normalizeTime(report.altroTurnoInizio),
-      end_time: normalizeTime(report.altroTurnoFine),
-    };
-  }
-
-  const [start, end] = String(report.turno || '').split('-');
-
-  return {
-    start_time: normalizeTime(start),
-    end_time: normalizeTime(end),
-  };
-}
-const TURNI = [
-'06.00-13.00', '06.30-13.30', '07.00-14.00', '08.00-15.00', '09.00-16.00',
-'11.00-18.00', '12.00-19.00', '12.30-19.30', '13.00-20.00', '16.59-23.59',
-];
-function OperatorReport({ report, setReport, lastSaved, resetReport }) {
-  const [dbSaving, setDbSaving] = useState(false);
-const update = (patch) => setReport(prev => ({ ...prev, ...patch }));
-const updateArray = (key, index, patch) => setReport(prev => ({ ...prev, [key]: prev[key].map((x, i) => i === index ? { ...x, ...patch } : x) }));
-const addArray = (key, item) => setReport(prev => ({ ...prev, [key]: [...prev[key], item] }));
-function OperatorReport({ report, setReport, lastSaved, resetReport }) {
-a.click();
-URL.revokeObjectURL(url);
-}
-  async function saveToDatabase() {
-  try {
-    setDbSaving(true);
-
-    const times = getShiftTimes(report);
-
-    const { data: savedReport, error: reportError } = await supabase
-      .from('reports')
-      .insert([
-        {
-          command_id: MONZA_COMMAND_ID,
-          service_date: report.data,
-          start_time: times.start_time,
-          end_time: times.end_time,
-          status: 'inviato',
-          notes: JSON.stringify(report),
-        },
-      ])
-      .select()
-      .single();
-
-    if (reportError) {
-      console.error(reportError);
-      alert('Errore durante il salvataggio del report.');
-      return;
-    }
-
-    const interventionsToInsert = (report.interventi || []).map(i => ({
-      report_id: savedReport.id,
-      intervention_time: normalizeTime(i.oraInizio),
-      location: i.luogo || null,
-      description: `${i.tipo || ''} - ${i.descrizione || ''}`.trim(),
-      outcome: i.esito || null,
-      notes: JSON.stringify(i),
-    }));
-
-    if (interventionsToInsert.length > 0) {
-      const { error: interventionsError } = await supabase
-        .from('interventions')
-        .insert(interventionsToInsert);
-
-      if (interventionsError) {
-        console.error(interventionsError);
-        alert('Report salvato, ma errore nel salvataggio degli interventi.');
-        return;
-      }
-    }
-
-    alert('Report salvato correttamente nel database.');
-  } catch (err) {
-    console.error(err);
-    alert('Errore imprevisto durante il salvataggio.');
-  } finally {
-    setDbSaving(false);
-  }
-}
-
-function sendMail() {
-const subject = encodeURIComponent(`Report turno Polizia Locale - ${report.data} - ${turnoLabel(report)}`);
-function OperatorReport({ report, setReport, lastSaved, resetReport }) {
-<Field label="Note per UDT / Ufficiale di coordinamento"><Textarea value={report.noteUdt} onChange={v => update({ noteUdt: v })} /></Field>
-<Field label="Email ufficiale destinatario"><Input value={report.destinatario} onChange={v => update({ destinatario: v })} placeholder="es. ufficiale@comune.monza.it" /></Field>
-<label className="check"><input type="checkbox" checked={report.dichiarazione} onChange={e => update({ dichiarazione: e.target.checked })} /> Confermo la dichiarazione finale degli operatori.</label>
-      <div className="actions"><button onClick={generatePdf}>Apri report stampabile</button><button onClick={exportJson}>Scarica file dati JSON</button><button className="primary" onClick={sendMail}>Invia email precompilata</button></div>
-<div className="actions">
-  <button onClick={generatePdf}>Apri report stampabile</button>
-  <button onClick={exportJson}>Scarica file dati JSON</button>
-  <button onClick={saveToDatabase} disabled={dbSaving}>
-    {dbSaving ? 'Salvataggio...' : 'Salva su database'}
-  </button>
-  <button className="primary" onClick={sendMail}>Invia email precompilata</button>
-</div>
-</section>
-
-</>;import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import jsPDF from 'jspdf';
 import * as XLSX from 'xlsx';
@@ -508,6 +391,7 @@ function OperatorReport({ report, setReport, lastSaved, resetReport }) {
       <h2>9. Note e invio</h2>
       <Field label="Note per UDT / Ufficiale di coordinamento"><Textarea value={report.noteUdt} onChange={v => update({ noteUdt: v })} /></Field>
       <Field label="Email ufficiale destinatario"><Input value={report.destinatario} onChange={v => update({ destinatario: v })} placeholder="es. ufficiale@comune.monza.it" /></Field>
+      <label className="check"><input type="checkbox" checked={report.dichiarazione} onChange={e => update({ dichiarazione: e.target.checked })} /> Confermo la dichiarazione finale degli operatori.</label>
 <div className="actions">
   <button onClick={generatePdf}>Apri report stampabile</button>
   <button onClick={exportJson}>Scarica file dati JSON</button>
@@ -751,7 +635,8 @@ function buildServicePrintHtml(report) {
   const docsBody = docs.length ? `<ul class="bullet-list">${docs.map(d=>`<li>${esc(d.tipo || 'Documento')} — ${esc(d.quantita || 1)} ${d.note?`<br><span class="muted">${esc(d.note)}</span>`:''}</li>`).join('')}</ul>` : '<p>Nessun documento ritirato.</p>';
   const page1 = `<section class="page">${headerHtml('REPORT DI SERVIZIO', subtitle)}<div class="kpis">${kpiBox('car','Interventi',interventions.length)}${kpiBox('doc','Violazioni',getTotaleViolazioni(report))}${kpiBox('clip','Atti redatti',atti)}${kpiBox('warn','Eventi',eventi)}</div><div class="grid-3">${panel('Veicoli','car',vehicleBody)}${panel('Carburante','fuel',carburanteBody)}${panel('Anomalie veicolo','warn',`<p>${esc(anomalie)}</p>`)}</div><div class="grid-2">${panel('Note di servizio','clipboard',`<p>${esc(report.noteUdt || '-')}</p>`)}${panel('Operatori','users',`<p><strong>Reparto:</strong> ${esc(repartoLabel(report))}</p><p>${operators}</p>`)}</div>${footerHtml(1)}</section>`;
   const page2 = `<section class="page">${headerHtml('REPORT DI SERVIZIO - DETTAGLIO', subtitle)}<div class="detail-grid">${panel('Interventi effettuati','car',interventiHtml)}${panel('Violazioni contestate','table',violazioniTable,'tight-panel')}</div><div class="detail-grid-2">${panel('Atti redatti','clip',attiBody)}${panel('Osservazioni','clipboard',`<p>${esc(report.osservazioni || report.noteUdt || 'Nessuna osservazione particolare da segnalare.')}</p>`)}</div><div class="detail-grid-2">${panel('Documenti ritirati','doc',docsBody)}${panel('Firma agente','user',`<p><strong>${esc(operatorNames(report)[0] || '-')}</strong></p><div class="signature">Firma</div>`)}</div>${footerHtml(2)}</section>`;
-return printShell('Report di servizio', page1 + page2);}
+  return printShell('Report di servizio', page1 + page2);
+}
 function buildOfficialPrintHtml(aggregate, reports, official, autoSintesi, autoEventi) {
   const date = formatDateIT(official.data || aggregate.dateLabel);
   const subtitle = `${date} | ${official.turno || '-'}`;
