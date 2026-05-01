@@ -31,15 +31,13 @@ function getShiftTimes(report) {
 const TURNI = [
 '06.00-13.00', '06.30-13.30', '07.00-14.00', '08.00-15.00', '09.00-16.00',
 '11.00-18.00', '12.00-19.00', '12.30-19.30', '13.00-20.00', '16.59-23.59',
-@@ -180,6 +206,7 @@ function App() {
-}
-
+];
 function OperatorReport({ report, setReport, lastSaved, resetReport }) {
   const [dbSaving, setDbSaving] = useState(false);
 const update = (patch) => setReport(prev => ({ ...prev, ...patch }));
 const updateArray = (key, index, patch) => setReport(prev => ({ ...prev, [key]: prev[key].map((x, i) => i === index ? { ...x, ...patch } : x) }));
 const addArray = (key, item) => setReport(prev => ({ ...prev, [key]: [...prev[key], item] }));
-@@ -203,6 +230,62 @@ function OperatorReport({ report, setReport, lastSaved, resetReport }) {
+function OperatorReport({ report, setReport, lastSaved, resetReport }) {
 a.click();
 URL.revokeObjectURL(url);
 }
@@ -102,7 +100,7 @@ URL.revokeObjectURL(url);
 
 function sendMail() {
 const subject = encodeURIComponent(`Report turno Polizia Locale - ${report.data} - ${turnoLabel(report)}`);
-@@ -309,7 +392,14 @@ function OperatorReport({ report, setReport, lastSaved, resetReport }) {
+function OperatorReport({ report, setReport, lastSaved, resetReport }) {
 <Field label="Note per UDT / Ufficiale di coordinamento"><Textarea value={report.noteUdt} onChange={v => update({ noteUdt: v })} /></Field>
 <Field label="Email ufficiale destinatario"><Input value={report.destinatario} onChange={v => update({ destinatario: v })} placeholder="es. ufficiale@comune.monza.it" /></Field>
 <label className="check"><input type="checkbox" checked={report.dichiarazione} onChange={e => update({ dichiarazione: e.target.checked })} /> Confermo la dichiarazione finale degli operatori.</label>
