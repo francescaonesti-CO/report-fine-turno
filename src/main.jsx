@@ -1366,24 +1366,27 @@ function officialEventsText(reports) {
   return relevantInterventions(reports).map(({ report, intervento, durata }) => {
     const op = operatorNames(report).join(', ') || repartoLabel(report);
     const extra = durata ? ` Durata indicativa: ${durata} minuti.` : '';
+
     let extraBus = '';
 
-if (intervento.tipo === 'Controllo autobus') {
-  const n = intervento.autobusControllati || '-';
-  const idoneo = intervento.autobusVeicoloIdoneo || '-';
+    if (intervento.tipo === 'Controllo autobus') {
+      const n = intervento.autobusControllati || '-';
+      const idoneo = intervento.autobusVeicoloIdoneo || '-';
 
-  extraBus = ` Autobus controllati: ${n}. Veicolo idoneo: ${idoneo}.`;
-}
+      extraBus = ` Autobus controllati: ${n}. Veicolo idoneo: ${idoneo}.`;
+    }
+
     let extraAbbandono = '';
 
-if (intervento.tipo === 'Verifica veicolo in stato di abbandono') {
-  const verifica = intervento.abbandonoVerificato || '-';
-  const esitoAbbandono = intervento.abbandonoEsito || '-';
+    if (intervento.tipo === 'Verifica veicolo in stato di abbandono') {
+      const verifica = intervento.abbandonoVerificato || '-';
+      const esitoAbbandono = intervento.abbandonoEsito || '-';
 
-  extraAbbandono = ` Verifica effettuata: ${verifica}. Esito: ${esitoAbbandono}.`;
-}
-   return `- Ore ${intervento.oraInizio || '--'}: ${intervento.tipo || 'intervento'} in ${intervento.luogo || 'luogo non indicato'}, pattuglia/reparto ${op}. ${intervento.descrizione || ''} Esito: ${intervento.esito || '-'}${extra}${extraBus}`;${extraAbbandono};
-}).join('\n');
+      extraAbbandono = ` Verifica effettuata: ${verifica}. Esito: ${esitoAbbandono}.`;
+    }
+
+    return `- Ore ${intervento.oraInizio || '--'}: ${intervento.tipo || 'intervento'} in ${intervento.luogo || 'luogo non indicato'}, pattuglia/reparto ${op}. ${intervento.descrizione || ''} Esito: ${intervento.esito || '-'}${extra}${extraBus}${extraAbbandono}`;
+  }).join('\n');
 }
 function officialReportText(aggregate, reports, official, autoSintesi, autoEventi) {
   const attivita = (official.attivitaIspettive || []).filter(a => a.tipo || a.reparto || a.luogo || a.esito || a.note).map((a, idx) => `${idx + 1}. ${a.tipo || '-'} | ${a.reparto || '-'} | ${a.luogo || '-'} | ${a.orario || '-'} | Esito: ${a.esito || '-'} | Violazioni: ${a.violazioni || '-'} | Note: ${a.note || '-'}`).join('\n') || '- Nessuna attività ispettiva indicata';
