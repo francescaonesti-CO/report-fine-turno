@@ -513,6 +513,35 @@ function Intervento({ i, idx, updateIntervento, remove }) {
     </div>
   </div>
 )}
+    {i.tipo === 'Verifica veicolo in stato di abbandono' && (
+  <div className="schoolBox">
+    <h4>Verifica stato di abbandono</h4>
+
+    <div className="grid two">
+      <Field label="Verifica effettuata">
+        <Select
+          value={i.abbandonoVerificato || ''}
+          onChange={v => updateIntervento({ abbandonoVerificato: v })}
+        >
+          <option value="">Seleziona</option>
+          <option value="Si">Sì</option>
+          <option value="No">No</option>
+        </Select>
+      </Field>
+
+      <Field label="Esito">
+        <Select
+          value={i.abbandonoEsito || ''}
+          onChange={v => updateIntervento({ abbandonoEsito: v })}
+        >
+          <option value="">Seleziona</option>
+          <option value="Veicolo in stato di abbandono">In stato di abbandono</option>
+          <option value="Veicolo non in stato di abbandono">Non in stato di abbandono</option>
+        </Select>
+      </Field>
+    </div>
+  </div>
+)}
     {i.tipo === 'Codice della strada' && <div className="schoolBox"><h4>Dettaglio Codice della strada</h4>
       <div className="grid three">
         <Field label="Dettaglio intervento"><Select value={i.cdsDettaglio || ''} onChange={v => updateIntervento({ cdsDettaglio: v })}><option value="">Seleziona</option>{DETTAGLI_CODICE_STRADA.map(d => <option key={d}>{d}</option>)}</Select></Field>
