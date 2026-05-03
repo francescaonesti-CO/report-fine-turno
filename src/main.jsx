@@ -487,6 +487,32 @@ function Intervento({ i, idx, updateIntervento, remove }) {
       <Field label="Origine"><Select value={i.origine} onChange={v => updateIntervento({ origine: v })}>{ORIGINI.map(o => <option key={o}>{o}</option>)}</Select></Field>
       <Field label="Luogo"><Input value={i.luogo} onChange={v => updateIntervento({ luogo: v })} /></Field>
     </div>
+    {i.tipo === 'Controllo autobus' && (
+  <div className="schoolBox">
+    <h4>Dettaglio controllo autobus</h4>
+
+    <div className="grid two">
+      <Field label="Autobus controllati">
+        <Input
+          type="number"
+          value={i.autobusControllati || ''}
+          onChange={v => updateIntervento({ autobusControllati: v })}
+        />
+      </Field>
+
+      <Field label="Veicolo idoneo">
+        <Select
+          value={i.autobusVeicoloIdoneo || ''}
+          onChange={v => updateIntervento({ autobusVeicoloIdoneo: v })}
+        >
+          <option value="">Seleziona</option>
+          <option value="Si">Sì</option>
+          <option value="No">No</option>
+        </Select>
+      </Field>
+    </div>
+  </div>
+)}
     {i.tipo === 'Codice della strada' && <div className="schoolBox"><h4>Dettaglio Codice della strada</h4>
       <div className="grid three">
         <Field label="Dettaglio intervento"><Select value={i.cdsDettaglio || ''} onChange={v => updateIntervento({ cdsDettaglio: v })}><option value="">Seleziona</option>{DETTAGLI_CODICE_STRADA.map(d => <option key={d}>{d}</option>)}</Select></Field>
