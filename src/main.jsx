@@ -117,7 +117,7 @@ const emptyIntervento = () => ({
   motivoViabilita: '', strade: '', scuole: [emptyScuola()],
   cdsDettaglio: '', cdsRimozione: 'No', cdsMotivazione: '', cdsRipristino: 'No', cdsFeriti: 'No', cdsVeicoliCoinvolti: '',
   cdsVerificaEffettuata: 'No', cdsSegnalazione: 'No', cdsPericolo: 'No', cdsInterventoRichiesto: 'No', cdsStatoSemaforo: 'spento', autobusControllati: '',
-autobusVeicoloIdoneo: ''
+autobusVeicoloIdoneo: '', abbandonoVerificato: '', abbandonoEsito: ''
 });
 
 const emptyCounters = () => ({
