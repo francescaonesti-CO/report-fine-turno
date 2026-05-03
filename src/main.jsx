@@ -1586,7 +1586,8 @@ function buildServicePdf(report) {
   doc.text(testo, 22, yy);
 
   yy += 5;
-}); fillC(doc,C.green); doc.circle(18,yy-1.5,0.9,'F'); setC(doc,C.text); doc.setFont('helvetica','bold'); doc.text(`${i.oraInizio || '--'} ${i.luogo || i.tipo || '-'}`,22,yy,{maxWidth:70}); doc.setFont('helvetica','normal'); const desc=`${i.tipo || ''}${i.esito ? ' — '+i.esito : ''}`; doc.text(doc.splitTextToSize(desc,70).slice(0,2),22,yy+4); yy+=12; }); if (!(report.interventi||[]).length) writeTextInBox(doc,'Nessun intervento inserito.',18,77,75,3,8);
+}); 
+  if (!(report.interventi||[]).length) writeTextInBox(doc,'Nessun intervento inserito.',18,77,75,3,8);
   drawPanel(doc,108,58,90,58,'Violazioni contestate','doc',{accent:C.green}); drawModernTable(doc,114,75,78,['Tipo violazione','Nr.'],[['Codice della Strada',n(c.preavvisiCds)+n(c.vdcCds)],['Regolamenti comunali',n(c.regPolizia)+n(c.regEdilizio)+n(c.regBenessereAnimali)],['Annonaria / commercio',n(c.annonaria)],['Altro',n(c.altreNorme)],['TOTALE',violazioni]],[58,20],{totalLast:true});
   drawPanel(doc,108,125,90,48,'Atti redatti','clip',{accent:C.green}); const serviceAtti=[['Relazioni',c.relazioni],['Annotazioni',c.annotazioni],['Fermi amministrativi',c.fermiAmministrativi],['Sequestri amministrativi',c.sequestriAmministrativi],['Sequestri penali',c.sequestriPenali],['C.N.R.',c.cnr]].filter(r=>n(r[1])>0); doc.setFontSize(8); (serviceAtti.length?serviceAtti:[['Nessun atto redatto',0]]).slice(0,5).forEach((r,i)=>{ setC(doc,C.text); doc.setFont('helvetica','normal'); doc.text(r[0],114,143+i*6.5); doc.setFont('helvetica','bold'); doc.text(String(r[1]),191,143+i*6.5,{align:'right'}); });
   drawPanel(doc,12,188,112,40,'Osservazioni','list',{accent:C.green}); writeTextInBox(doc, report.noteUdt || 'Nessuna osservazione particolare da segnalare.',18,206,100,4,8);
