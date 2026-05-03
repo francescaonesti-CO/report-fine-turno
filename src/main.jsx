@@ -54,12 +54,39 @@ const REPARTI_CON_ZONA = ['Radiomobile', 'Quartieri', 'Intervento rapido motocic
 function richiedeZonaServizio(reparto) { return REPARTI_CON_ZONA.includes(reparto); }
 
 const TIPI_INTERVENTO = [
-  'Sinistro stradale', 'Codice della strada','TSO', 'ASO', 'Posto di controllo', 'Viabilità', 'Servizio scuole',
-  'Controllo commerciale / annonaria', 'Controllo edilizio', 'Controllo parchi / aree verdi',
-  'Sicurezza urbana', 'Intervento per animali', 'Abbandono rifiuti', 'Rumori / disturbo quiete',
-  'Supporto ad altro ente', 'Notifica / accertamento', 'Altro'
-];
+  // Attività principali
+  'Codice della strada',
+  'Sinistro stradale',
+  'Posto di controllo',
+  'Viabilità',
 
+  // Attività programmate / ricorrenti
+  'Servizio scuole',
+  'Controllo autobus',
+  'Sicurezza urbana',
+
+  // Controlli specialistici
+  'Controllo commerciale / annonaria',
+  'Controllo edilizio',
+  'Controllo parchi / aree verdi',
+
+  // Interventi specifici
+  'Abbandono rifiuti',
+  'Rumori / disturbo quiete',
+  'Intervento per animali',
+  'Verifica veicolo in stato di abbandono',
+
+  // Atti / supporto
+  'Notifica / accertamento',
+  'Supporto ad altro ente',
+
+  // Sanitari
+  'TSO',
+  'ASO',
+
+  // Chiusura
+  'Altro'
+];
 const DETTAGLI_CODICE_STRADA = [
   'Controllo soste',
   'Buca su carreggiata',
@@ -89,7 +116,8 @@ const emptyIntervento = () => ({
   conFeriti: 'Senza feriti', veicoliCoinvolti: '', rilievi: 'No', personeControllate: '', veicoliControllati: '', verbaliElevati: '', fermiSequestri: '',
   motivoViabilita: '', strade: '', scuole: [emptyScuola()],
   cdsDettaglio: '', cdsRimozione: 'No', cdsMotivazione: '', cdsRipristino: 'No', cdsFeriti: 'No', cdsVeicoliCoinvolti: '',
-  cdsVerificaEffettuata: 'No', cdsSegnalazione: 'No', cdsPericolo: 'No', cdsInterventoRichiesto: 'No', cdsStatoSemaforo: 'spento'
+  cdsVerificaEffettuata: 'No', cdsSegnalazione: 'No', cdsPericolo: 'No', cdsInterventoRichiesto: 'No', cdsStatoSemaforo: 'spento', autobusControllati: '',
+autobusVeicoloIdoneo: ''
 });
 
 const emptyCounters = () => ({
