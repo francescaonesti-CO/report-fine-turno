@@ -303,6 +303,8 @@ function OperatorReport({ report, setReport, lastSaved, resetReport, command }) 
 
     const times = getShiftTimes(report);
 
+    console.log('COMMAND:', command)
+console.log('COMMAND DATA:', COMMANDS[command])
     const { data: savedReport, error: reportError } = await supabase
       .from('reports')
       .insert([
