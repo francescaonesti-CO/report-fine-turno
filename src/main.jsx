@@ -410,7 +410,7 @@ function OperatorReport({ report, setReport, lastSaved, resetReport }) {
 >
   Rimuovi
 </button>
-      </div>))}
+      </div>)}
       <button onClick={() => addArray('veicoli', emptyVeicolo())}>+ Aggiungi veicolo</button>
     </section>
 
