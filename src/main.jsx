@@ -247,7 +247,7 @@ function LoginScreen({ onLogin, command, setCommand }) {
 
   <button className="primary" type="submit">Accedi</button>
 
-</form><</section></main>;
+</form></section></main>;
 }
 
 function App() {
