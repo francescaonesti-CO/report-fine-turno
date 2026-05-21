@@ -756,14 +756,16 @@ function printShell(title, pagesHtml) {
 .detail-grid-2 .panel{
   margin-bottom:10px;
 }
-    @media print{body{background:white}.toolbar{display:none}.page{margin:0;box-shadow:none;page-break-after:always}@page{size:A4 landscape;margin:0}}
+    @media print{body{background:white}.toolbar{display:none}.page{margin:0;box-shadow:none;page-break-after:always;padding-top:10mm!important;padding-bottom:12mm!important}@page{size:A4 portrait;margin:10mm}}
   @media print{
   .page{
-    height:auto!important;
-    min-height:auto!important;
-    overflow:visible!important;
-    page-break-after:always;
-  }
+  height:auto!important;
+  min-height:auto!important;
+  overflow:visible!important;
+  page-break-after:always;
+  padding-top:10mm!important;
+  padding-bottom:12mm!important;
+}
 
   .panel{
     height:auto!important;
