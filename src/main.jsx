@@ -347,9 +347,9 @@ function OperatorReport({ report, setReport, lastSaved, resetReport }) {
 
     alert('Report salvato correttamente nel database.');
   } catch (err) {
-    console.error(err);
-    alert('Errore imprevisto durante il salvataggio.');
-  } finally {
+  console.error('Errore imprevisto salvataggio:', err);
+  alert(`Errore imprevisto durante il salvataggio: ${err.message || err}`);
+} finally {
     setDbSaving(false);
   }
 }
