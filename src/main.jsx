@@ -728,7 +728,90 @@ function printShell(title, pagesHtml) {
     .page{width:297mm;height:210mm;margin:14px auto;background:white;position:relative;padding:8mm 9mm 9mm;overflow:hidden;box-shadow:0 3px 18px #0002;page-break-after:always;}
     .header{height:26mm;display:grid;grid-template-columns:25mm 1fr 48mm;gap:8mm;align-items:start;border-bottom:1.6px solid var(--blue);padding-bottom:4mm}.brand-logo{width:22mm;height:22mm;object-fit:contain}.brand h1{font-size:16pt;line-height:1.05;margin:2mm 0 0;color:var(--blue);font-weight:800}.brand h2{font-size:13pt;line-height:1.1;margin:1mm 0;color:var(--blue);font-weight:800}.brand p,.contacts p{margin:1.3mm 0 0;font-size:7.5pt;font-weight:700}.contacts{text-align:left;font-size:7.3pt;line-height:1.25;color:#111827;padding-top:2mm}.titlebar{margin:5mm 0 4mm;height:9mm;background:var(--blue);color:#fff;display:grid;grid-template-columns:1fr auto;align-items:center;padding:0 6mm;font-weight:800;font-size:12pt;letter-spacing:.2px}.titlebar .subtitle{font-size:9pt;font-weight:700}
     .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:3mm;margin-bottom:4mm}.kpi{height:25mm;border:1px solid var(--line);border-radius:2mm;display:grid;grid-template-columns:13mm 1fr;grid-template-rows:9mm 1fr;align-items:center;padding:3mm;background:#fff}.kpi .ico{grid-row:1/3;color:var(--blue);display:flex;align-items:center;justify-content:center}.kpi .label{font-size:7.2pt;font-weight:800;color:var(--blue);text-transform:uppercase;text-align:center}.kpi .num{font-size:22pt;line-height:1;font-weight:900;color:var(--blue);text-align:center}.kpi .sub{font-size:6.8pt;color:#111;text-align:center;margin-top:1mm}.grid-2{display:grid;grid-template-columns:1fr 1.2fr;gap:5mm}.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5mm}.panel{border:1px solid var(--line);border-radius:1.2mm;background:#fff;overflow:hidden;margin-bottom:4mm}.panel-title{height:7mm;background:var(--blue);color:#fff;font-size:8.2pt;font-weight:800;text-transform:uppercase;display:flex;align-items:center;gap:2mm;padding:0 4mm}.panel-title svg{width:14px;height:14px}.panel-body{padding:4mm;font-size:8.3pt;line-height:1.42}.panel-body.tight{padding:3mm}.status-row{display:grid;grid-template-columns:1fr 16mm;align-items:center;border-bottom:1px solid #e5e7eb;padding:1.6mm 0;font-size:8.2pt}.status-row strong{text-align:center;font-size:10.5pt}.green{color:var(--green)!important}.orange{color:var(--orange)!important}.red{color:var(--red)!important}.blue{color:var(--blue)!important}.compact-list{margin:1mm 0 2mm 5mm;padding:0;font-size:7.3pt}.compact-list li{margin:0.7mm 0}.eventbox{border:1.4px solid #f4a261;background:#fff8f1;border-radius:1.2mm;margin-top:4mm;min-height:18mm;display:grid;grid-template-columns:16mm 1fr;align-items:center;padding:3mm;color:#111827}.eventbox .eventico{color:var(--orange);display:flex;justify-content:center}.eventbox h3{margin:0 0 1.5mm;color:#d95f02;font-size:9pt;text-transform:uppercase}.eventbox p{margin:0;font-size:8.3pt}.table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:7.3pt}.table th{background:var(--blue);color:#fff;padding:2mm 1.4mm;text-align:center;font-size:7pt}.table td{border:1px solid #d7dee8;padding:1.8mm 1.3mm;vertical-align:top;overflow:hidden;word-wrap:break-word}.table tbody tr:nth-child(even) td{background:#f8fafc}.table .num{text-align:center;font-weight:700}.table .total td{background:#0d2b57!important;color:#fff;font-weight:800}.small-list{display:grid;gap:1.5mm}.small-row{display:grid;grid-template-columns:1fr 14mm;gap:3mm}.small-row strong{text-align:right}.footer{position:absolute;left:9mm;right:9mm;bottom:5mm;height:8mm;border-top:1px solid #cbd5e1;display:grid;grid-template-columns:1fr 1fr auto;align-items:center;font-size:6.8pt;color:var(--blue);font-weight:700}.signature{font-family:Georgia,serif;font-style:italic;font-size:13pt;text-align:center;margin-top:4mm}.detail-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:5mm}.detail-grid-2{display:grid;grid-template-columns:.92fr 1.08fr;gap:5mm}.bullet-list{margin:0;padding-left:4mm}.bullet-list li{margin:1.4mm 0}.center{text-align:center}.right{text-align:right}.muted{color:var(--muted)}
+    .page{
+  height:auto!important;
+  min-height:auto!important;
+  overflow:visible!important;
+}
+
+.panel{
+  height:auto!important;
+  min-height:0!important;
+  max-height:none!important;
+  overflow:visible!important;
+}
+
+.panel-body{
+  height:auto!important;
+  max-height:none!important;
+  overflow:visible!important;
+}
+
+.detail-grid,
+.detail-grid-2{
+  display:block!important;
+}
+
+.detail-grid .panel,
+.detail-grid-2 .panel{
+  margin-bottom:10px;
+}
     @media print{body{background:white}.toolbar{display:none}.page{margin:0;box-shadow:none;page-break-after:always}@page{size:A4 landscape;margin:0}}
+  @media print{
+  .page{
+    height:auto!important;
+    min-height:auto!important;
+    overflow:visible!important;
+    page-break-after:always;
+  }
+
+  .panel{
+    height:auto!important;
+    min-height:0!important;
+    max-height:none!important;
+    overflow:visible!important;
+    break-inside:avoid;
+    page-break-inside:avoid;
+  }
+
+  .panel-body{
+    height:auto!important;
+    max-height:none!important;
+    overflow:visible!important;
+  }
+
+  .detail-grid,
+  .detail-grid-2{
+    display:block!important;
+  }
+
+  .detail-grid .panel,
+  .detail-grid-2 .panel{
+    margin-bottom:10px;
+  }
+
+  .bullet-list,
+  .small-list,
+  .table{
+    break-inside:avoid;
+    page-break-inside:avoid;
+  }
+
+  .declaration{
+    margin-top:8px;
+    padding:8px 10px;
+    border-top:1px solid #d8dce2;
+    font-size:9.5px;
+    line-height:1.35;
+    font-weight:600;
+    text-align:justify;
+  }
+
+  .compact{
+    margin:0;
+    line-height:1.25;
+  }
+}
   </style></head><body><div class="toolbar"><button onclick="window.print()">Stampa / Salva in PDF</button><span>Imposta orientamento: Orizzontale. Disattiva intestazioni/piè di pagina del browser.</span></div>${pagesHtml}</body></html>`;
 }
 function footerHtml(page, total=2) { return `<div class="footer"><span>Settore Polizia Locale, Protezione Civile</span><span>Via Marsala 13 | 20900 Monza &nbsp;&nbsp; Tel. 039 28161 &nbsp;&nbsp; polizialocale@comune.monza.it</span><span>Pag. ${page} di ${total}</span></div>`; }
