@@ -319,10 +319,10 @@ function OperatorReport({ report, setReport, lastSaved, resetReport }) {
       .single();
 
     if (reportError) {
-      console.error(reportError);
-      alert('Errore durante il salvataggio del report.');
-      return;
-    }
+  console.error('Errore Supabase:', reportError);
+  alert(`Errore durante il salvataggio: ${reportError.message}`);
+  return;
+}
 
     const interventionsToInsert = (report.interventi || []).map(i => ({
       report_id: savedReport.id,
