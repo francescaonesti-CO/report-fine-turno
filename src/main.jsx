@@ -797,16 +797,16 @@ function printShell(title, pagesHtml) {
     page-break-inside:avoid;
   }
 
-  .declaration{
-    margin-top:8px;
-    padding:8px 10px;
-    border-top:1px solid #d8dce2;
-    font-size:9.5px;
-    line-height:1.35;
-    font-weight:600;
-    text-align:justify;
-  }
-
+  ..declaration{
+  margin-top:14px;
+  padding-top:8px;
+  border-top:1px solid #d8dce2;
+  font-size:8px;
+  line-height:1.25;
+  font-weight:500;
+  color:#666;
+  text-align:justify;
+}
   .compact{
     margin:0;
     line-height:1.25;
