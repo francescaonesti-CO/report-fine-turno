@@ -384,12 +384,7 @@ function OperatorReport({ report, setReport, lastSaved, resetReport }) {
 
     <section className="card">
       <h2>2. Operatori</h2>
-      {report.operatori.map((op, idx) => <div className="rowCard" key={idx}><div className="grid three"><Field label="Nome e cognome"><Input value={op.nome} onChange={v => updateArray('operatori', idx, { nome: v })} /></Field><Field label="Matricola"><Input value={op.matricola} onChange={v => updateArray('operatori', idx, { matricola: v })} /></Field><Field label="Qualifica"><Input value={op.qualifica} onChange={v => updateArray('operatori', idx, { qualifica: v })} /></Field></div><button
-  className="ghost removeBtn"
-  onClick={() => removeArray('operatori', idx)}
->
-  Rimuovi
-</button>
+      {report.operatori.map((op, idx) => <div className="rowCard" key={idx}><div className="grid three"><Field label="Nome e cognome"><Input value={op.nome} onChange={v => updateArray('operatori', idx, { nome: v })} /></Field><Field label="Matricola"><Input value={op.matricola} onChange={v => updateArray('operatori', idx, { matricola: v })} /></Field><Field label="Qualifica"><Input value={op.qualifica} onChange={v => updateArray('operatori', idx, { qualifica: v })} /></Field></div><button className="ghost removeBtn" onClick={() => removeArray('operatori', idx)}>Rimuovi</button></div>)}
       <button onClick={() => addArray('operatori', emptyOperatore())}>+ Aggiungi operatore</button>
     </section>
 
@@ -415,7 +410,7 @@ function OperatorReport({ report, setReport, lastSaved, resetReport }) {
 >
   Rimuovi
 </button>
-      </div>)}
+      </div>))}
       <button onClick={() => addArray('veicoli', emptyVeicolo())}>+ Aggiungi veicolo</button>
     </section>
 
