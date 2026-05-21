@@ -99,3 +99,10 @@ small { color: #667085; }
   margin: 0;
   font-weight: 700;
 }
+.removeBtn {
+  margin-top: 14px;
+  padding: 8px 14px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 700;
+}
