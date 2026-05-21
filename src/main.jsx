@@ -384,7 +384,12 @@ function OperatorReport({ report, setReport, lastSaved, resetReport }) {
 
     <section className="card">
       <h2>2. Operatori</h2>
-      {report.operatori.map((op, idx) => <div className="rowCard" key={idx}><div className="grid three"><Field label="Nome e cognome"><Input value={op.nome} onChange={v => updateArray('operatori', idx, { nome: v })} /></Field><Field label="Matricola"><Input value={op.matricola} onChange={v => updateArray('operatori', idx, { matricola: v })} /></Field><Field label="Qualifica"><Input value={op.qualifica} onChange={v => updateArray('operatori', idx, { qualifica: v })} /></Field></div><button className="ghost" onClick={() => removeArray('operatori', idx)}>Rimuovi</button></div>)}
+      {report.operatori.map((op, idx) => <div className="rowCard" key={idx}><div className="grid three"><Field label="Nome e cognome"><Input value={op.nome} onChange={v => updateArray('operatori', idx, { nome: v })} /></Field><Field label="Matricola"><Input value={op.matricola} onChange={v => updateArray('operatori', idx, { matricola: v })} /></Field><Field label="Qualifica"><Input value={op.qualifica} onChange={v => updateArray('operatori', idx, { qualifica: v })} /></Field></div><button
+  className="ghost removeBtn"
+  onClick={() => removeArray('operatori', idx)}
+>
+  Rimuovi
+</button>
       <button onClick={() => addArray('operatori', emptyOperatore())}>+ Aggiungi operatore</button>
     </section>
 
@@ -404,7 +409,12 @@ function OperatorReport({ report, setReport, lastSaved, resetReport }) {
           <Field label="Restituzione card alle ore"><Input value={v.oraRestituzioneCard || ''} onChange={x => updateArray('veicoli', idx, { oraRestituzioneCard: x })} placeholder="es. 12.55" /></Field>
         </div>
         <Field label="Segnalazione anomalie o danni veicolo"><Textarea value={v.anomaliaVeicolo || ''} onChange={x => updateArray('veicoli', idx, { anomaliaVeicolo: x })} placeholder="Descrivere eventuali anomalie, danni, malfunzionamenti o necessità di manutenzione." /></Field>
-        <button className="ghost" onClick={() => removeArray('veicoli', idx)}>Rimuovi</button>
+        <button
+  className="ghost removeBtn"
+  onClick={() => removeArray('veicoli', idx)}
+>
+  Rimuovi
+</button>
       </div>)}
       <button onClick={() => addArray('veicoli', emptyVeicolo())}>+ Aggiungi veicolo</button>
     </section>
