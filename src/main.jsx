@@ -247,7 +247,7 @@ function LoginScreen({ onLogin, command, setCommand }) {
 
   <button className="primary" type="submit">Accedi</button>
 
-</form><p className="muted">Protezione base tramite matricola personale. Per l'uso istituzionale definitivo sarà necessaria validazione IT/DPO.</p></section></main>;
+</form><</section></main>;
 }
 
 function App() {
