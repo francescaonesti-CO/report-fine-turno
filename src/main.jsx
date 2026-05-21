@@ -489,7 +489,11 @@ function Intervento({ i, idx, updateIntervento, remove }) {
     <div className="grid three">
       <Field label="Tipo intervento"><Select value={i.tipo} onChange={v => updateIntervento({ tipo: v, ...(v !== 'Codice della strada' ? resetCds : {}) })}>{TIPI_INTERVENTO.map(t => <option key={t}>{t}</option>)}</Select></Field>
       <Field label="Origine"><Select value={i.origine} onChange={v => updateIntervento({ origine: v })}>{ORIGINI.map(o => <option key={o}>{o}</option>)}</Select></Field>
-      <Field label="Luogo"><Input value={i.luogo} onChange={v => updateIntervento({ luogo: v })} /></Field>
+      {i.tipo !== 'Servizio scuole' && (
+  <Field label="Luogo">
+    <Input value={i.luogo} onChange={v => updateIntervento({ luogo: v })} />
+  </Field>
+)}
     </div>
     {i.tipo === 'Controllo autobus' && (
   <div className="schoolBox">
@@ -558,8 +562,12 @@ function Intervento({ i, idx, updateIntervento, remove }) {
       </div>
     </div>}
     {i.origine === 'Altro' && <Field label="Specificare da chi è arrivata la disposizione"><Input value={i.origineAltro} onChange={v => updateIntervento({ origineAltro: v })} /></Field>}
+    {i.tipo !== 'Servizio scuole' && (
+  <>
     <div className="grid two"><Field label="Ora inizio"><Input value={i.oraInizio} onChange={v => updateIntervento({ oraInizio: v })} placeholder="es. 08.15" /></Field><Field label="Ora fine"><Input value={i.oraFine} onChange={v => updateIntervento({ oraFine: v })} placeholder="es. 09.00" /></Field></div>
     <Field label={i.tipo === 'Altro' ? 'Descrizione intervento' : 'Descrizione'}><Textarea value={i.descrizione} onChange={v => updateIntervento({ descrizione: v })} /></Field>
+      </>
+)}
     {i.tipo === 'Sinistro stradale' && <div className="grid three"><Field label="Feriti"><Select value={i.conFeriti} onChange={v => updateIntervento({ conFeriti: v })}><option>Con feriti</option><option>Senza feriti</option></Select></Field><Field label="Veicoli coinvolti"><Input type="number" value={i.veicoliCoinvolti} onChange={v => updateIntervento({ veicoliCoinvolti: v })} /></Field><Field label="Rilievi effettuati"><Select value={i.rilievi} onChange={v => updateIntervento({ rilievi: v })}><option>Sì</option><option>No</option></Select></Field></div>}
     {i.tipo === 'Posto di controllo' && <div className="grid four"><Field label="Veicoli controllati"><Input type="number" value={i.veicoliControllati} onChange={v => updateIntervento({ veicoliControllati: v })} /></Field><Field label="Persone controllate"><Input type="number" value={i.personeControllate} onChange={v => updateIntervento({ personeControllate: v })} /></Field><Field label="Verbali elevati"><Input type="number" value={i.verbaliElevati} onChange={v => updateIntervento({ verbaliElevati: v })} /></Field><Field label="Fermi / sequestri"><Input type="number" value={i.fermiSequestri} onChange={v => updateIntervento({ fermiSequestri: v })} /></Field></div>}
     {i.tipo === 'Viabilità' && <div className="grid two"><Field label="Motivo viabilità"><Input value={i.motivoViabilita} onChange={v => updateIntervento({ motivoViabilita: v })} placeholder="incidente, cantiere, evento..." /></Field><Field label="Strade interessate"><Input value={i.strade} onChange={v => updateIntervento({ strade: v })} /></Field></div>}
