@@ -634,7 +634,6 @@ function Intervento({ i, idx, updateIntervento, remove }) {
 </div>
 </div>
 );
-}
 
 function Dashboard({ reports, setReports }) {
   const [commanderNotes, setCommanderNotes] = useState('');
