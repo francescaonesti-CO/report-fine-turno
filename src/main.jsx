@@ -1619,9 +1619,29 @@ function exportExcelAvanzato(reports, aggregate, commanderNotes) {
   const wsReadme = XLSX.utils.aoa_to_sheet(data.readmeRows); applyWorksheetLayout(wsReadme, [24,100]); XLSX.utils.book_append_sheet(wb, wsReadme, 'README');
   XLSX.writeFile(wb, `report-aggregato-analisi-${sanitizeFileName(aggregate.dateLabel)}.xlsx`, { compression: true });
 }
+function normalizeReportData(report) {
+  if (!report) return {};
+
+  if (typeof report.notes === 'string') {
+    try {
+      const parsed = JSON.parse(report.notes);
+      return {
+        ...parsed,
+        id: report.id,
+        service_date: report.service_date,
+        shift_name: report.shift_name,
+      };
+    } catch {
+      return report;
+    }
+  }
+
+  return report;
+}
 function getKmTotali(report) { return (report.veicoli || []).reduce((sum, v) => sum + km(v), 0); }
 function getTotaleViolazioni(report) {
-  const c = report.counters || {};
+  const r = normalizeReportData(report);
+  const c = r.counters || {};
   return ['preavvisiCds','vdcCds','regPolizia','regEdilizio','regBenessereAnimali','annonaria','altreNorme'].reduce((s, k) => s + n(c[k]), 0);
 }
 function operatorNames(report) { return (report.operatori || []).filter(o => o.nome || o.matricola || o.qualifica).map(o => `${o.nome || 'Operatore'}${o.matricola ? ` mtr. ${o.matricola}` : ''}`); }
