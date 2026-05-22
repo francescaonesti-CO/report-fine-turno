@@ -849,7 +849,7 @@ return <>
 >
   Rimuovi attività
 </button></div>)}<button onClick={addAttivita}>+ Aggiungi attività ispettiva</button></section>
-   <section className="card">
+ <section className="card">
   <h2>6. Esiti e comunicazioni</h2>
 
   <Field label="Esiti">
@@ -887,7 +887,6 @@ return <>
 
 </>;
 }
-
 function Metric({ label, value }) { return <div className="metric"><strong>{value}</strong><span>{label}</span></div>; }
 function Distribution({ title, data, labels = {} }) {
   const entries = Object.entries(data || {}).filter(([, value]) => n(value) > 0).sort((a, b) => n(b[1]) - n(a[1]));
