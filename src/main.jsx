@@ -743,9 +743,20 @@ function Intervento({ i, idx, updateIntervento, remove }) {
 }
     
 function OfficialReport({ reports, setReports, official, setOfficial }) {
-  const aggregate = useMemo(() => aggregateReports(reports), [reports]);
-  const autoSintesi = useMemo(() => officialSynthesis(aggregate, reports), [aggregate, reports]);
-  const autoEventi = useMemo(() => officialEventsText(reports), [reports]);
+  const [filterDate, setFilterDate] = useState('');
+  const [filterTurno, setFilterTurno] = useState('');
+
+  const filteredReports = useMemo(() => {
+    return (reports || []).filter(r => {
+      const matchDate = !filterDate || r.service_date === filterDate || r.data === filterDate;
+      const matchTurno = !filterTurno || r.turno === filterTurno || r.shift_name === filterTurno;
+      return matchDate && matchTurno;
+    });
+  }, [reports, filterDate, filterTurno]);
+
+  const aggregate = useMemo(() => aggregateReports(filteredReports), [filteredReports]);
+  const autoSintesi = useMemo(() => officialSynthesis(aggregate, filteredReports), [aggregate, filteredReports]);
+const autoEventi = useMemo(() => officialEventsText(filteredReports), [filteredReports]);
   const update = (patch) => setOfficial(prev => ({ ...prev, ...patch }));
   const updateAttivita = (idx, patch) => setOfficial(prev => ({ ...prev, attivitaIspettive: prev.attivitaIspettive.map((x, i) => i === idx ? { ...x, ...patch } : x) }));
   const addAttivita = () => setOfficial(prev => ({ ...prev, attivitaIspettive: [...prev.attivitaIspettive, emptyAttivitaIspettiva()] }));
