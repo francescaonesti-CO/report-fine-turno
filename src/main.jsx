@@ -783,7 +783,6 @@ const autoEventi = useMemo(() => officialEventsText(filteredReports), [filteredR
   }
 
   return <>
-return <>
   <section className="card notice">
     <h2>Dashboard ufficiale UDT</h2>
 
