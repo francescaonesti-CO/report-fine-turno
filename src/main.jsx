@@ -612,7 +612,8 @@ function Intervento({ i, idx, updateIntervento, remove }) {
     {i.tipo === 'Servizio scuole' && <div className="schoolBox"><h4>Scuole presidiate</h4>{i.scuole.map((s, sidx) => <div className="rowCard" key={sidx}><div className="grid four"><Field label={`Scuola ${sidx + 1}`}><Input value={s.nome} onChange={v => updateScuola(sidx, { nome: v })} /></Field><Field label="Ingresso / uscita"><Select value={s.momento} onChange={v => updateScuola(sidx, { momento: v })}><option value="">Seleziona</option><option>Ingresso</option><option>Uscita</option><option>Ingresso e uscita</option></Select></Field><Field label="Orario"><Input value={s.orario} onChange={v => updateScuola(sidx, { orario: v })} /></Field><Field label="Criticità"><Input value={s.criticita} onChange={v => updateScuola(sidx, { criticita: v })} /></Field></div>{i.scuole.length > 1 && <button className="ghost" onClick={() => removeScuola(sidx)}>Rimuovi scuola</button>}</div>)}{i.scuole.length < 3 && <button onClick={addScuola}>+ Aggiungi scuola</button>}</div>}
     <div className="grid two"><Field label="Esito"><Input value={i.esito} onChange={v => updateIntervento({ esito: v })} /></Field><Field label="Note"><Input value={i.note} onChange={v => updateIntervento({ note: v })} /></Field></div>
   </div>;
-
+}
+    
 function Dashboard({ reports, setReports }) {
   const [commanderNotes, setCommanderNotes] = useState('');
   const aggregate = useMemo(() => aggregateReports(reports), [reports]);
