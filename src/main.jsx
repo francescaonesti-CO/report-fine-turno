@@ -849,8 +849,43 @@ return <>
 >
   Rimuovi attività
 </button></div>)}<button onClick={addAttivita}>+ Aggiungi attività ispettiva</button></section>
-    <section className="card"><h2>6. Esiti e comunicazioni</h2><Field label="Esiti"><Textarea value={official.esiti} onChange={v => update({ esiti: v })} /></Field><div className="grid two"><Field label="Comunicazione all'E.Q. di turno"><Textarea value={official.comunicazioneEq} onChange={v => update({ comunicazioneEq: v })} /></Field><Field label="Nota per il Comandante"><Textarea value={official.notaComandante} onChange={v => update({ notaComandante: v })} /></Field></div><div className="actions"><button className="primary" onClick={generateOfficialPdf}>Apri report ufficiale stampabile</button></div></section>
-  </>;
+   <section className="card">
+  <h2>6. Esiti e comunicazioni</h2>
+
+  <Field label="Esiti">
+    <Textarea
+      value={official.esiti}
+      onChange={v => update({ esiti: v })}
+    />
+  </Field>
+
+  <div className="grid two">
+    <Field label="Comunicazione all'E.Q. di turno">
+      <Textarea
+        value={official.comunicazioneEq}
+        onChange={v => update({ comunicazioneEq: v })}
+      />
+    </Field>
+
+    <Field label="Nota per il Comandante">
+      <Textarea
+        value={official.notaComandante}
+        onChange={v => update({ notaComandante: v })}
+      />
+    </Field>
+  </div>
+
+  <div className="actions">
+    <button
+      className="primary"
+      onClick={generateOfficialPdf}
+    >
+      Apri report ufficiale stampabile
+    </button>
+  </div>
+</section>
+
+</>;
 }
 
 function Metric({ label, value }) { return <div className="metric"><strong>{value}</strong><span>{label}</span></div>; }
