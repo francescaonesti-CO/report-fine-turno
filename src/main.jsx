@@ -779,8 +779,8 @@ const autoEventi = useMemo(() => officialEventsText(filteredReports), [filteredR
   }
 
   function generateOfficialPdf() {
-    printOfficialReport(aggregate, reports, official, autoSintesi, autoEventi);
-  }
+  printOfficialReport(aggregate, filteredReports, official, autoSintesi, autoEventi);
+}
 
   return <>
   <section className="card notice">
