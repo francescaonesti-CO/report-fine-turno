@@ -632,9 +632,10 @@ function Intervento({ i, idx, updateIntervento, remove }) {
     <Input value={i.note} onChange={v => updateIntervento({ note: v })} />
   </Field>
 </div>
-</div>;
+</div>
+);
 }
-    
+
 function Dashboard({ reports, setReports }) {
   const [commanderNotes, setCommanderNotes] = useState('');
   const aggregate = useMemo(() => aggregateReports(reports), [reports]);
