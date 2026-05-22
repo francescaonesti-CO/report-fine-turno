@@ -259,7 +259,7 @@ return (
 </section>
 </section>
 );
-
+}
 function App() {
   const [command, setCommand] = useState('monza');
   const [auth, setAuth] = useState(() => { try { return JSON.parse(window.localStorage.getItem('reportPL_auth') || 'null'); } catch { return null; } });
