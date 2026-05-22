@@ -609,9 +609,30 @@ function Intervento({ i, idx, updateIntervento, remove }) {
     {i.tipo === 'Sinistro stradale' && <div className="grid three"><Field label="Feriti"><Select value={i.conFeriti} onChange={v => updateIntervento({ conFeriti: v })}><option>Con feriti</option><option>Senza feriti</option></Select></Field><Field label="Veicoli coinvolti"><Input type="number" value={i.veicoliCoinvolti} onChange={v => updateIntervento({ veicoliCoinvolti: v })} /></Field><Field label="Rilievi effettuati"><Select value={i.rilievi} onChange={v => updateIntervento({ rilievi: v })}><option>Sì</option><option>No</option></Select></Field></div>}
     {i.tipo === 'Posto di controllo' && <div className="grid four"><Field label="Veicoli controllati"><Input type="number" value={i.veicoliControllati} onChange={v => updateIntervento({ veicoliControllati: v })} /></Field><Field label="Persone controllate"><Input type="number" value={i.personeControllate} onChange={v => updateIntervento({ personeControllate: v })} /></Field><Field label="Verbali elevati"><Input type="number" value={i.verbaliElevati} onChange={v => updateIntervento({ verbaliElevati: v })} /></Field><Field label="Fermi / sequestri"><Input type="number" value={i.fermiSequestri} onChange={v => updateIntervento({ fermiSequestri: v })} /></Field></div>}
     {i.tipo === 'Viabilità' && <div className="grid two"><Field label="Motivo viabilità"><Input value={i.motivoViabilita} onChange={v => updateIntervento({ motivoViabilita: v })} placeholder="incidente, cantiere, evento..." /></Field><Field label="Strade interessate"><Input value={i.strade} onChange={v => updateIntervento({ strade: v })} /></Field></div>}
-    {i.tipo === 'Servizio scuole' && <div className="schoolBox"><h4>Scuole presidiate</h4>{i.scuole.map((s, sidx) => <div className="rowCard" key={sidx}><div className="grid four"><Field label={`Scuola ${sidx + 1}`}><Input value={s.nome} onChange={v => updateScuola(sidx, { nome: v })} /></Field><Field label="Ingresso / uscita"><Select value={s.momento} onChange={v => updateScuola(sidx, { momento: v })}><option value="">Seleziona</option><option>Ingresso</option><option>Uscita</option><option>Ingresso e uscita</option></Select></Field><Field label="Orario"><Input value={s.orario} onChange={v => updateScuola(sidx, { orario: v })} /></Field><Field label="Criticità"><Input value={s.criticita} onChange={v => updateScuola(sidx, { criticita: v })} /></Field></div>{i.scuole.length > 1 && <button className="ghost" onClick={() => removeScuola(sidx)}>Rimuovi scuola</button>}</div>)}{i.scuole.length < 3 && <button onClick={addScuola}>+ Aggiungi scuola</button>}</div>}
-    <div className="grid two"><Field label="Esito"><Input value={i.esito} onChange={v => updateIntervento({ esito: v })} /></Field><Field label="Note"><Input value={i.note} onChange={v => updateIntervento({ note: v })} /></Field></div>
-  </div>;
+   {i.tipo === 'Servizio scuole' && (
+  <div className="schoolBox">
+    <h4>Scuole presidiate</h4>
+    {i.scuole.map((s, sidx) => (
+      <div className="rowCard" key={sidx}>
+        <div className="grid four">
+          <Field label={`Scuola ${sidx + 1}`}>
+            <Input value={s.nome} onChange={v => updateScuola(sidx, { nome: v })} />
+          </Field>
+        </div>
+      </div>
+    ))}
+  </div>
+)}
+
+<div className="grid two">
+  <Field label="Esito">
+    <Input value={i.esito} onChange={v => updateIntervento({ esito: v })} />
+  </Field>
+  <Field label="Note">
+    <Input value={i.note} onChange={v => updateIntervento({ note: v })} />
+  </Field>
+</div>
+</div>;
 }
     
 function Dashboard({ reports, setReports }) {
