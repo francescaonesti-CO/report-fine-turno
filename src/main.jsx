@@ -783,13 +783,60 @@ const autoEventi = useMemo(() => officialEventsText(filteredReports), [filteredR
   }
 
   return <>
-    <section className="card notice">
-  <h2>Dashboard ufficiale UDT</h2>
-  <p>La Dashboard acquisisce automaticamente i report operatori salvati nel sistema. L'ufficiale verifica la sintesi generata, integra briefing, personale, attività ispettive, anomalie e note per il Comandante.</p>
-  <div className="actions">
-    <button className="ghost" onClick={() => window.location.reload()}>Aggiorna dati</button>
-  </div>
-</section>
+return <>
+  <section className="card notice">
+    <h2>Dashboard ufficiale UDT</h2>
+
+    <p>
+      La Dashboard acquisisce automaticamente i report operatori salvati nel sistema.
+      L'ufficiale verifica la sintesi generata, integra briefing, personale,
+      attività ispettive, anomalie e note per il Comandante.
+    </p>
+
+    <div className="actions">
+      <button
+        className="ghost"
+        onClick={() => window.location.reload()}
+      >
+        Aggiorna dati
+      </button>
+    </div>
+  </section>
+
+  <section className="card">
+    <h2>Filtri Dashboard</h2>
+
+    <div className="grid two">
+      <Field label="Data servizio">
+        <Input
+          type="date"
+          value={filterDate}
+          onChange={v => setFilterDate(v)}
+        />
+      </Field>
+
+      <Field label="Turno">
+        <Input
+          value={filterTurno}
+          onChange={v => setFilterTurno(v)}
+          placeholder="es. 06.00-13.00"
+        />
+      </Field>
+    </div>
+
+    <div className="actions">
+      <button
+        type="button"
+        className="ghost"
+        onClick={() => {
+          setFilterDate('');
+          setFilterTurno('');
+        }}
+      >
+        Reset filtri
+      </button>
+    </div>
+  </section>
     <section className="metrics"><Metric label="Report operatori" value={reports.length} /><Metric label="Interventi" value={aggregate.totalInterventi} /><Metric label="Violazioni" value={aggregate.totaleViolazioni} /><Metric label="Km" value={aggregate.kmTotali} /></section>
     <section className="card"><h2>1. Dati report ufficiale</h2><div className="grid four"><Field label="Data"><Input type="date" value={official.data} onChange={v => update({ data: v })} /></Field><Field label="Turno"><Input value={official.turno} onChange={v => update({ turno: v })} placeholder="es. 1° turno" /></Field><Field label="Ufficiale di turno"><Input value={official.ufficiale} onChange={v => update({ ufficiale: v })} /></Field><Field label="Qualifica"><Input value={official.qualifica} onChange={v => update({ qualifica: v })} placeholder="es. Commissario Capo" /></Field></div></section>
     <section className="card"><h2>2. Sintesi automatica</h2><p className="muted">Questa sintesi nasce dai report operatori caricati. Nel PDF viene riportata come quadro iniziale.</p><pre className="miniPreview">{autoSintesi}</pre><Field label="Integrazioni dell'ufficiale alla sintesi"><Textarea value={official.eventiManuali} onChange={v => update({ eventiManuali: v })} placeholder="Inserire eventuali elementi aggiuntivi non presenti nei report operatori..." /></Field></section>
