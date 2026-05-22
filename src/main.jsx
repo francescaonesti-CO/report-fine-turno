@@ -415,8 +415,14 @@ console.log('COMMAND DATA:', COMMANDS[command])
 
     <section className="card">
       <h2>2. Operatori</h2>
-      {report.operatori.map((op, idx) => <div className="rowCard" key={idx}><div className="grid three"><Field label="Nome e cognome"><Input value={op.nome} onChange={v => updateArray('operatori', idx, { nome: v })} /></Field><Field label="Matricola"><Input value={op.matricola} onChange={v => updateArray('operatori', idx, { matricola: v })} /></Field><Field label="Qualifica"><Input value={op.qualifica} onChange={v => updateArray('operatori', idx, { qualifica: v })} /></Field></div><button className="ghost removeBtn" onClick={() => removeArray('operatori', idx)}>Rimuovi</button></div>)}
-      <button onClick={() => addArray('operatori', emptyOperatore())}>+ Aggiungi operatore</button>
+      {report.operatori.map((op, idx) => <div className="rowCard" key={idx}><div className="grid three"><Field label="Nome e cognome"><Input value={op.nome} onChange={v => updateArray('operatori', idx, { nome: v })} /></Field><Field label="Matricola"><Input value={op.matricola} onChange={v => updateArray('operatori', idx, { matricola: v })} /></Field><Field label="Qualifica"><Input value={op.qualifica} onChange={v => updateArray('operatori', idx, { qualifica: v })} /></Field></div><button
+  type="button"
+  className="ghost removeBtn"
+  onClick={() => removeArray('operatori', idx)}
+>
+  Rimuovi
+</button></div>)}
+      <button type="button" onClick={() => addArray('operatori', emptyOperatore())}>+ Aggiungi operatore</button>
     </section>
 
     <section className="card">
@@ -436,19 +442,20 @@ console.log('COMMAND DATA:', COMMANDS[command])
         </div>
         <Field label="Segnalazione anomalie o danni veicolo"><Textarea value={v.anomaliaVeicolo || ''} onChange={x => updateArray('veicoli', idx, { anomaliaVeicolo: x })} placeholder="Descrivere eventuali anomalie, danni, malfunzionamenti o necessità di manutenzione." /></Field>
         <button
+  type="button"
   className="ghost removeBtn"
   onClick={() => removeArray('veicoli', idx)}
 >
   Rimuovi
 </button>
       </div>)}
-      <button onClick={() => addArray('veicoli', emptyVeicolo())}>+ Aggiungi veicolo</button>
+     <button type="button" onClick={() => addArray('veicoli', emptyVeicolo())}>+ Aggiungi veicolo</button>
     </section>
 
     <section className="card">
       <h2>4. Interventi effettuati</h2>
       {report.interventi.map((i, idx) => <Intervento key={idx} i={i} idx={idx} updateIntervento={(patch) => updateArray('interventi', idx, patch)} remove={() => removeArray('interventi', idx)} />)}
-      <button onClick={() => addArray('interventi', emptyIntervento())}>+ Aggiungi intervento</button>
+      <button type="button" onClick={() => addArray('interventi', emptyIntervento())}>+ Aggiungi intervento</button>
     </section>
 
     <section className="card">
@@ -516,7 +523,7 @@ function Intervento({ i, idx, updateIntervento, remove }) {
     cdsVerificaEffettuata: 'No', cdsSegnalazione: 'No', cdsPericolo: 'No', cdsInterventoRichiesto: 'No', cdsStatoSemaforo: 'spento'
   };
   return <div className="intervento">
-    <div className="interventoHead"><h3>Intervento {idx + 1}</h3><button className="ghost" onClick={remove}>Rimuovi</button></div>
+    <div className="interventoHead"><h3>Intervento {idx + 1}</h3><button type="button" className="ghost removeBtn" onClick={remove}>Rimuovi</button>
     <div className="grid three">
       <Field label="Tipo intervento"><Select value={i.tipo} onChange={v => updateIntervento({ tipo: v, ...(v !== 'Codice della strada' ? resetCds : {}) })}>{TIPI_INTERVENTO.map(t => <option key={t}>{t}</option>)}</Select></Field>
       <Field label="Origine"><Select value={i.origine} onChange={v => updateIntervento({ origine: v })}>{ORIGINI.map(o => <option key={o}>{o}</option>)}</Select></Field>
@@ -724,7 +731,13 @@ function OfficialReport({ reports, setReports, official, setOfficial }) {
     <section className="card"><h2>2. Sintesi automatica</h2><p className="muted">Questa sintesi nasce dai report operatori caricati. Nel PDF viene riportata come quadro iniziale.</p><pre className="miniPreview">{autoSintesi}</pre><Field label="Integrazioni dell'ufficiale alla sintesi"><Textarea value={official.eventiManuali} onChange={v => update({ eventiManuali: v })} placeholder="Inserire eventuali elementi aggiuntivi non presenti nei report operatori..." /></Field></section>
     <section className="card"><h2>3. Briefing, personale e note</h2><div className="grid two"><Field label="Briefing operativo"><Input value={official.briefing} onChange={v => update({ briefing: v })} placeholder="es. 06.45" /></Field><Field label="Note generali"><Input value={official.noteGenerali} onChange={v => update({ noteGenerali: v })} placeholder="es. Con il personale a disposizione coperte 11 scuole" /></Field></div><div className="grid two"><Field label="A.P.L. assenti"><Textarea value={official.assenti} onChange={v => update({ assenti: v })} /></Field><Field label="A.P.L. in ritardo"><Textarea value={official.ritardi} onChange={v => update({ ritardi: v })} /></Field></div></section>
     <section className="card"><h2>4. Eventi degni di rilievo</h2><p className="muted">Eventi rilevanti individuati automaticamente: sinistri con feriti, TSO/ASO, interventi con parole chiave critiche o lunga durata.</p><pre className="miniPreview">{autoEventi || 'Nessun evento rilevante automatico rilevato.'}</pre></section>
-    <section className="card"><h2>5. Anomalie e attività ispettive</h2><Field label="Anomalie riscontrate durante il turno"><Textarea value={official.anomalie} onChange={v => update({ anomalie: v })} /></Field><h3>Attività ispettive</h3>{official.attivitaIspettive.map((a, idx) => <div className="rowCard" key={idx}><div className="grid four"><Field label="Tipo attività"><Input value={a.tipo} onChange={v => updateAttivita(idx, { tipo: v })} placeholder="es. annonaria, ambiente..." /></Field><Field label="Reparto / pattuglia"><Input value={a.reparto} onChange={v => updateAttivita(idx, { reparto: v })} /></Field><Field label="Luogo"><Input value={a.luogo} onChange={v => updateAttivita(idx, { luogo: v })} /></Field><Field label="Orario"><Input value={a.orario} onChange={v => updateAttivita(idx, { orario: v })} /></Field></div><div className="grid three"><Field label="Esito"><Input value={a.esito} onChange={v => updateAttivita(idx, { esito: v })} /></Field><Field label="Violazioni collegate"><Input value={a.violazioni} onChange={v => updateAttivita(idx, { violazioni: v })} /></Field><Field label="Note"><Input value={a.note} onChange={v => updateAttivita(idx, { note: v })} /></Field></div><button className="ghost" onClick={() => removeAttivita(idx)}>Rimuovi attività</button></div>)}<button onClick={addAttivita}>+ Aggiungi attività ispettiva</button></section>
+    <section className="card"><h2>5. Anomalie e attività ispettive</h2><Field label="Anomalie riscontrate durante il turno"><Textarea value={official.anomalie} onChange={v => update({ anomalie: v })} /></Field><h3>Attività ispettive</h3>{official.attivitaIspettive.map((a, idx) => <div className="rowCard" key={idx}><div className="grid four"><Field label="Tipo attività"><Input value={a.tipo} onChange={v => updateAttivita(idx, { tipo: v })} placeholder="es. annonaria, ambiente..." /></Field><Field label="Reparto / pattuglia"><Input value={a.reparto} onChange={v => updateAttivita(idx, { reparto: v })} /></Field><Field label="Luogo"><Input value={a.luogo} onChange={v => updateAttivita(idx, { luogo: v })} /></Field><Field label="Orario"><Input value={a.orario} onChange={v => updateAttivita(idx, { orario: v })} /></Field></div><div className="grid three"><Field label="Esito"><Input value={a.esito} onChange={v => updateAttivita(idx, { esito: v })} /></Field><Field label="Violazioni collegate"><Input value={a.violazioni} onChange={v => updateAttivita(idx, { violazioni: v })} /></Field><Field label="Note"><Input value={a.note} onChange={v => updateAttivita(idx, { note: v })} /></Field></div><button
+  type="button"
+  className="ghost"
+  onClick={() => removeAttivita(idx)}
+>
+  Rimuovi attività
+</button></div>)}<button onClick={addAttivita}>+ Aggiungi attività ispettiva</button></section>
     <section className="card"><h2>6. Esiti e comunicazioni</h2><Field label="Esiti"><Textarea value={official.esiti} onChange={v => update({ esiti: v })} /></Field><div className="grid two"><Field label="Comunicazione all'E.Q. di turno"><Textarea value={official.comunicazioneEq} onChange={v => update({ comunicazioneEq: v })} /></Field><Field label="Nota per il Comandante"><Textarea value={official.notaComandante} onChange={v => update({ notaComandante: v })} /></Field></div><div className="actions"><button className="primary" onClick={generateOfficialPdf}>Apri report ufficiale stampabile</button></div></section>
   </>;
 }
