@@ -515,128 +515,232 @@ console.log('COMMAND DATA:', COMMANDS[command])
 }
 
 function Intervento({ i, idx, updateIntervento, remove }) {
-  const updateScuola = (sidx, patch) => updateIntervento({ scuole: i.scuole.map((s, n) => n === sidx ? { ...s, ...patch } : s) });
-  const addScuola = () => { if (i.scuole.length < 3) updateIntervento({ scuole: [...i.scuole, emptyScuola()] }); };
-  const removeScuola = (sidx) => updateIntervento({ scuole: i.scuole.filter((_, n) => n !== sidx) });
+  const updateScuola = (sidx, patch) =>
+    updateIntervento({
+      scuole: i.scuole.map((s, n) => n === sidx ? { ...s, ...patch } : s)
+    });
+
   const resetCds = {
-    cdsDettaglio: '', cdsRimozione: 'No', cdsMotivazione: '', cdsRipristino: 'No', cdsFeriti: 'No', cdsVeicoliCoinvolti: '',
-    cdsVerificaEffettuata: 'No', cdsSegnalazione: 'No', cdsPericolo: 'No', cdsInterventoRichiesto: 'No', cdsStatoSemaforo: 'spento'
+    cdsDettaglio: '',
+    cdsRimozione: 'No',
+    cdsMotivazione: '',
+    cdsRipristino: 'No',
+    cdsFeriti: 'No',
+    cdsVeicoliCoinvolti: '',
+    cdsVerificaEffettuata: 'No',
+    cdsSegnalazione: 'No',
+    cdsPericolo: 'No',
+    cdsInterventoRichiesto: 'No',
+    cdsStatoSemaforo: 'spento'
   };
+
   return (
-  <div className="intervento">
-    <div className="interventoHead"><h3>Intervento {idx + 1}</h3><button type="button" className="ghost removeBtn" onClick={remove}>Rimuovi</button>
-    <div className="grid three">
-      <Field label="Tipo intervento"><Select value={i.tipo} onChange={v => updateIntervento({ tipo: v, ...(v !== 'Codice della strada' ? resetCds : {}) })}>{TIPI_INTERVENTO.map(t => <option key={t}>{t}</option>)}</Select></Field>
-      <Field label="Origine"><Select value={i.origine} onChange={v => updateIntervento({ origine: v })}>{ORIGINI.map(o => <option key={o}>{o}</option>)}</Select></Field>
-      {i.tipo !== 'Servizio scuole' && (
-  <Field label="Luogo">
-    <Input value={i.luogo} onChange={v => updateIntervento({ luogo: v })} />
-  </Field>
-)}
-    </div>
-    {i.tipo === 'Controllo autobus' && (
-  <div className="schoolBox">
-    <h4>Dettaglio controllo autobus</h4>
-
-    <div className="grid two">
-      <Field label="Autobus controllati">
-        <Input
-          type="number"
-          value={i.autobusControllati || ''}
-          onChange={v => updateIntervento({ autobusControllati: v })}
-        />
-      </Field>
-
-      <Field label="Veicolo idoneo">
-        <Select
-          value={i.autobusVeicoloIdoneo || ''}
-          onChange={v => updateIntervento({ autobusVeicoloIdoneo: v })}
-        >
-          <option value="">Seleziona</option>
-          <option value="Si">Sì</option>
-          <option value="No">No</option>
-        </Select>
-      </Field>
-    </div>
-  </div>
-)}
-    {i.tipo === 'Verifica veicolo in stato di abbandono' && (
-  <div className="schoolBox">
-    <h4>Verifica stato di abbandono</h4>
-
-    <div className="grid two">
-      <Field label="Verifica effettuata">
-        <Select
-          value={i.abbandonoVerificato || ''}
-          onChange={v => updateIntervento({ abbandonoVerificato: v })}
-        >
-          <option value="">Seleziona</option>
-          <option value="Si">Sì</option>
-          <option value="No">No</option>
-        </Select>
-      </Field>
-
-      <Field label="Esito">
-        <Select
-          value={i.abbandonoEsito || ''}
-          onChange={v => updateIntervento({ abbandonoEsito: v })}
-        >
-          <option value="">Seleziona</option>
-          <option value="Veicolo in stato di abbandono">In stato di abbandono</option>
-          <option value="Veicolo non in stato di abbandono">Non in stato di abbandono</option>
-        </Select>
-      </Field>
-    </div>
-  </div>
-)}
-    {i.tipo === 'Codice della strada' && <div className="schoolBox"><h4>Dettaglio Codice della strada</h4>
-      <div className="grid three">
-        <Field label="Dettaglio intervento"><Select value={i.cdsDettaglio || ''} onChange={v => updateIntervento({ cdsDettaglio: v })}><option value="">Seleziona</option>{DETTAGLI_CODICE_STRADA.map(d => <option key={d}>{d}</option>)}</Select></Field>
-        {i.cdsDettaglio === 'Controllo soste' && <><Field label="Rimozione veicolo"><Select value={i.cdsRimozione || 'No'} onChange={v => updateIntervento({ cdsRimozione: v })}><option>No</option><option>Sì</option></Select></Field><Field label="Motivazione"><Input value={i.cdsMotivazione || ''} onChange={v => updateIntervento({ cdsMotivazione: v })} placeholder="es. intralcio, passo carrabile, area mercato..." /></Field></>}
-        {i.cdsDettaglio === 'Buca su carreggiata' && <Field label="Richiesto intervento per ripristino"><Select value={i.cdsRipristino || 'No'} onChange={v => updateIntervento({ cdsRipristino: v })}><option>No</option><option>Sì</option></Select></Field>}
-        {i.cdsDettaglio === 'Sinistro stradale' && <><Field label="Feriti"><Select value={i.cdsFeriti || 'No'} onChange={v => updateIntervento({ cdsFeriti: v })}><option>No</option><option>Sì</option></Select></Field><Field label="Veicoli coinvolti"><Input type="number" value={i.cdsVeicoliCoinvolti || ''} onChange={v => updateIntervento({ cdsVeicoliCoinvolti: v })} /></Field></>}
-        {i.cdsDettaglio === 'Veicolo sospetto' && <><Field label="Verifica effettuata"><Select value={i.cdsVerificaEffettuata || 'No'} onChange={v => updateIntervento({ cdsVerificaEffettuata: v })}><option>No</option><option>Sì</option></Select></Field><Field label="Segnalazione"><Select value={i.cdsSegnalazione || 'No'} onChange={v => updateIntervento({ cdsSegnalazione: v })}><option>No</option><option>Sì</option></Select></Field></>}
-        {i.cdsDettaglio === 'Segnaletica danneggiata' && <><Field label="Pericolo"><Select value={i.cdsPericolo || 'No'} onChange={v => updateIntervento({ cdsPericolo: v })}><option>No</option><option>Sì</option></Select></Field><Field label="Intervento richiesto"><Select value={i.cdsInterventoRichiesto || 'No'} onChange={v => updateIntervento({ cdsInterventoRichiesto: v })}><option>No</option><option>Sì</option></Select></Field></>}
-        {i.cdsDettaglio === 'Guasto semaforo' && <><Field label="Stato"><Select value={i.cdsStatoSemaforo || 'spento'} onChange={v => updateIntervento({ cdsStatoSemaforo: v })}><option>spento</option><option>lampeggiante</option></Select></Field><Field label="Intervento richiesto"><Select value={i.cdsInterventoRichiesto || 'No'} onChange={v => updateIntervento({ cdsInterventoRichiesto: v })}><option>No</option><option>Sì</option></Select></Field></>}
+    <div className="intervento">
+      <div className="interventoHead">
+        <h3>Intervento {idx + 1}</h3>
+        <button type="button" className="ghost removeBtn" onClick={remove}>Rimuovi</button>
       </div>
-    </div>}
-    {i.origine === 'Altro' && <Field label="Specificare da chi è arrivata la disposizione"><Input value={i.origineAltro} onChange={v => updateIntervento({ origineAltro: v })} /></Field>}
-    {i.tipo !== 'Servizio scuole' && (
-  <>
-    <div className="grid two"><Field label="Ora inizio"><Input value={i.oraInizio} onChange={v => updateIntervento({ oraInizio: v })} placeholder="es. 08.15" /></Field><Field label="Ora fine"><Input value={i.oraFine} onChange={v => updateIntervento({ oraFine: v })} placeholder="es. 09.00" /></Field></div>
-    <Field label={i.tipo === 'Altro' ? 'Descrizione intervento' : 'Descrizione'}><Textarea value={i.descrizione} onChange={v => updateIntervento({ descrizione: v })} /></Field>
-      </>
-)}
-    {i.tipo === 'Sinistro stradale' && <div className="grid three"><Field label="Feriti"><Select value={i.conFeriti} onChange={v => updateIntervento({ conFeriti: v })}><option>Con feriti</option><option>Senza feriti</option></Select></Field><Field label="Veicoli coinvolti"><Input type="number" value={i.veicoliCoinvolti} onChange={v => updateIntervento({ veicoliCoinvolti: v })} /></Field><Field label="Rilievi effettuati"><Select value={i.rilievi} onChange={v => updateIntervento({ rilievi: v })}><option>Sì</option><option>No</option></Select></Field></div>}
-    {i.tipo === 'Posto di controllo' && <div className="grid four"><Field label="Veicoli controllati"><Input type="number" value={i.veicoliControllati} onChange={v => updateIntervento({ veicoliControllati: v })} /></Field><Field label="Persone controllate"><Input type="number" value={i.personeControllate} onChange={v => updateIntervento({ personeControllate: v })} /></Field><Field label="Verbali elevati"><Input type="number" value={i.verbaliElevati} onChange={v => updateIntervento({ verbaliElevati: v })} /></Field><Field label="Fermi / sequestri"><Input type="number" value={i.fermiSequestri} onChange={v => updateIntervento({ fermiSequestri: v })} /></Field></div>}
-    {i.tipo === 'Viabilità' && <div className="grid two"><Field label="Motivo viabilità"><Input value={i.motivoViabilita} onChange={v => updateIntervento({ motivoViabilita: v })} placeholder="incidente, cantiere, evento..." /></Field><Field label="Strade interessate"><Input value={i.strade} onChange={v => updateIntervento({ strade: v })} /></Field></div>}
-   {i.tipo === 'Servizio scuole' && (
-  <div className="schoolBox">
-    <h4>Scuole presidiate</h4>
-    {i.scuole.map((s, sidx) => (
-      <div className="rowCard" key={sidx}>
-        <div className="grid four">
-          <Field label={`Scuola ${sidx + 1}`}>
-            <Input value={s.nome} onChange={v => updateScuola(sidx, { nome: v })} />
+
+      <div className="grid three">
+        <Field label="Tipo intervento">
+          <Select value={i.tipo} onChange={v => updateIntervento({ tipo: v, ...(v !== 'Codice della strada' ? resetCds : {}) })}>
+            {TIPI_INTERVENTO.map(t => <option key={t}>{t}</option>)}
+          </Select>
+        </Field>
+
+        <Field label="Origine">
+          <Select value={i.origine} onChange={v => updateIntervento({ origine: v })}>
+            {ORIGINI.map(o => <option key={o}>{o}</option>)}
+          </Select>
+        </Field>
+
+        {i.tipo !== 'Servizio scuole' && (
+          <Field label="Luogo">
+            <Input value={i.luogo} onChange={v => updateIntervento({ luogo: v })} />
+          </Field>
+        )}
+      </div>
+
+      {i.tipo === 'Controllo autobus' && (
+        <div className="schoolBox">
+          <h4>Dettaglio controllo autobus</h4>
+          <div className="grid two">
+            <Field label="Autobus controllati">
+              <Input type="number" value={i.autobusControllati || ''} onChange={v => updateIntervento({ autobusControllati: v })} />
+            </Field>
+            <Field label="Veicolo idoneo">
+              <Select value={i.autobusVeicoloIdoneo || ''} onChange={v => updateIntervento({ autobusVeicoloIdoneo: v })}>
+                <option value="">Seleziona</option>
+                <option value="Si">Sì</option>
+                <option value="No">No</option>
+              </Select>
+            </Field>
+          </div>
+        </div>
+      )}
+
+      {i.tipo === 'Verifica veicolo in stato di abbandono' && (
+        <div className="schoolBox">
+          <h4>Verifica stato di abbandono</h4>
+          <div className="grid two">
+            <Field label="Verifica effettuata">
+              <Select value={i.abbandonoVerificato || ''} onChange={v => updateIntervento({ abbandonoVerificato: v })}>
+                <option value="">Seleziona</option>
+                <option value="Si">Sì</option>
+                <option value="No">No</option>
+              </Select>
+            </Field>
+            <Field label="Esito">
+              <Select value={i.abbandonoEsito || ''} onChange={v => updateIntervento({ abbandonoEsito: v })}>
+                <option value="">Seleziona</option>
+                <option value="Veicolo in stato di abbandono">In stato di abbandono</option>
+                <option value="Veicolo non in stato di abbandono">Non in stato di abbandono</option>
+              </Select>
+            </Field>
+          </div>
+        </div>
+      )}
+
+      {i.tipo === 'Codice della strada' && (
+        <div className="schoolBox">
+          <h4>Dettaglio Codice della strada</h4>
+          <div className="grid three">
+            <Field label="Dettaglio intervento">
+              <Select value={i.cdsDettaglio || ''} onChange={v => updateIntervento({ cdsDettaglio: v })}>
+                <option value="">Seleziona</option>
+                {DETTAGLI_CODICE_STRADA.map(d => <option key={d}>{d}</option>)}
+              </Select>
+            </Field>
+
+            {i.cdsDettaglio === 'Controllo soste' && (
+              <>
+                <Field label="Rimozione veicolo">
+                  <Select value={i.cdsRimozione || 'No'} onChange={v => updateIntervento({ cdsRimozione: v })}>
+                    <option>No</option>
+                    <option>Sì</option>
+                  </Select>
+                </Field>
+                <Field label="Motivazione">
+                  <Input value={i.cdsMotivazione || ''} onChange={v => updateIntervento({ cdsMotivazione: v })} placeholder="es. intralcio, passo carrabile, area mercato..." />
+                </Field>
+              </>
+            )}
+
+            {i.cdsDettaglio === 'Buca su carreggiata' && (
+              <Field label="Richiesto intervento per ripristino">
+                <Select value={i.cdsRipristino || 'No'} onChange={v => updateIntervento({ cdsRipristino: v })}>
+                  <option>No</option>
+                  <option>Sì</option>
+                </Select>
+              </Field>
+            )}
+
+            {i.cdsDettaglio === 'Sinistro stradale' && (
+              <>
+                <Field label="Feriti">
+                  <Select value={i.cdsFeriti || 'No'} onChange={v => updateIntervento({ cdsFeriti: v })}>
+                    <option>No</option>
+                    <option>Sì</option>
+                  </Select>
+                </Field>
+                <Field label="Veicoli coinvolti">
+                  <Input type="number" value={i.cdsVeicoliCoinvolti || ''} onChange={v => updateIntervento({ cdsVeicoliCoinvolti: v })} />
+                </Field>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {i.origine === 'Altro' && (
+        <Field label="Specificare da chi è arrivata la disposizione">
+          <Input value={i.origineAltro} onChange={v => updateIntervento({ origineAltro: v })} />
+        </Field>
+      )}
+
+      {i.tipo !== 'Servizio scuole' && (
+        <>
+          <div className="grid two">
+            <Field label="Ora inizio">
+              <Input value={i.oraInizio} onChange={v => updateIntervento({ oraInizio: v })} placeholder="es. 08.15" />
+            </Field>
+            <Field label="Ora fine">
+              <Input value={i.oraFine} onChange={v => updateIntervento({ oraFine: v })} placeholder="es. 09.00" />
+            </Field>
+          </div>
+
+          <Field label={i.tipo === 'Altro' ? 'Descrizione intervento' : 'Descrizione'}>
+            <Textarea value={i.descrizione} onChange={v => updateIntervento({ descrizione: v })} />
+          </Field>
+        </>
+      )}
+
+      {i.tipo === 'Sinistro stradale' && (
+        <div className="grid three">
+          <Field label="Feriti">
+            <Select value={i.conFeriti} onChange={v => updateIntervento({ conFeriti: v })}>
+              <option>Con feriti</option>
+              <option>Senza feriti</option>
+            </Select>
+          </Field>
+          <Field label="Veicoli coinvolti">
+            <Input type="number" value={i.veicoliCoinvolti} onChange={v => updateIntervento({ veicoliCoinvolti: v })} />
+          </Field>
+          <Field label="Rilievi effettuati">
+            <Select value={i.rilievi} onChange={v => updateIntervento({ rilievi: v })}>
+              <option>Sì</option>
+              <option>No</option>
+            </Select>
           </Field>
         </div>
-      </div>
-    ))}
-  </div>
-)}
+      )}
 
-<div className="grid two">
-  <Field label="Esito">
-    <Input value={i.esito} onChange={v => updateIntervento({ esito: v })} />
-  </Field>
-  <Field label="Note">
-    <Input value={i.note} onChange={v => updateIntervento({ note: v })} />
-  </Field>
-</div>
-</div>
-);
+      {i.tipo === 'Posto di controllo' && (
+        <div className="grid four">
+          <Field label="Veicoli controllati"><Input type="number" value={i.veicoliControllati} onChange={v => updateIntervento({ veicoliControllati: v })} /></Field>
+          <Field label="Persone controllate"><Input type="number" value={i.personeControllate} onChange={v => updateIntervento({ personeControllate: v })} /></Field>
+          <Field label="Verbali elevati"><Input type="number" value={i.verbaliElevati} onChange={v => updateIntervento({ verbaliElevati: v })} /></Field>
+          <Field label="Fermi / sequestri"><Input type="number" value={i.fermiSequestri} onChange={v => updateIntervento({ fermiSequestri: v })} /></Field>
+        </div>
+      )}
+
+      {i.tipo === 'Viabilità' && (
+        <div className="grid two">
+          <Field label="Motivo viabilità">
+            <Input value={i.motivoViabilita} onChange={v => updateIntervento({ motivoViabilita: v })} placeholder="incidente, cantiere, evento..." />
+          </Field>
+          <Field label="Strade interessate">
+            <Input value={i.strade} onChange={v => updateIntervento({ strade: v })} />
+          </Field>
+        </div>
+      )}
+
+      {i.tipo === 'Servizio scuole' && (
+        <div className="schoolBox">
+          <h4>Scuole presidiate</h4>
+          {i.scuole.map((s, sidx) => (
+            <div className="rowCard" key={sidx}>
+              <div className="grid four">
+                <Field label={`Scuola ${sidx + 1}`}>
+                  <Input value={s.nome} onChange={v => updateScuola(sidx, { nome: v })} />
+                </Field>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div className="grid two">
+        <Field label="Esito">
+          <Input value={i.esito} onChange={v => updateIntervento({ esito: v })} />
+        </Field>
+        <Field label="Note">
+          <Input value={i.note} onChange={v => updateIntervento({ note: v })} />
+        </Field>
+      </div>
+    </div>
+  );
 }
-function Dashboard({ reports, setReports }) {
   const [commanderNotes, setCommanderNotes] = useState('');
   const aggregate = useMemo(() => aggregateReports(reports), [reports]);
   const text = useMemo(() => commanderReportText(aggregate, reports, commanderNotes), [aggregate, reports, commanderNotes]);
