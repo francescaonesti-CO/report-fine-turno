@@ -315,7 +315,7 @@ return <main><img id="pdfLogo" src="/POLIZIA.png" alt="Logo Polizia Locale" styl
 
   function generatePdf() {
     printServiceReport(report);
-
+}
   function exportJson() {
     const payload = { ...report, schemaVersion: 3, exportedAt: new Date().toISOString() };
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
