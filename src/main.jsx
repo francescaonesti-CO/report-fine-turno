@@ -266,10 +266,32 @@ function App() {
 const [mode, setMode] = useState(() => (auth?.ruolo === 'ufficiale' || auth?.ruolo === 'admin') ? 'ufficiale' : 'operatore');  const [report, setReport] = useState(loadReportDraft);
   const [lastSaved, setLastSaved] = useState('');
   const [importedReports, setImportedReports] = useState([]);
+  useEffect(() => {
+  async function loadReportsFromSupabase() {
+    const { data, error } = await supabase
+      .from('reports')
+      .select(`
+        *,
+        interventions (*)
+      `)
+      .order('service_date', { ascending: false });
+
+    if (error) {
+      console.error('Errore caricamento report Supabase:', error);
+      return;
+    }
+
+    setImportedReports(data || []);
+  }
+
+  if (auth?.ruolo === 'ufficiale' || auth?.ruolo === 'admin') {
+    loadReportsFromSupabase();
+  }
+}, [auth]);
   const [officialReport, setOfficialReport] = useState(baseOfficialReport());
   useEffect(() => { if (!auth?.persona) return; const persona = auth.persona; const nominativo = fullNamePersona(persona); setReport(prev => { const ops = Array.isArray(prev.operatori) ? [...prev.operatori] : []; const has = ops.some(o => String(o.matricola) === persona.matricola); const blank = ops.findIndex(o => !o.nome && !o.matricola && !o.qualifica); if (!has) { const op = { nome: nominativo, matricola: persona.matricola, qualifica: persona.qualifica }; if (blank >= 0) ops[blank] = op; else ops.unshift(op); } return { ...prev, operatori: ops.length ? ops : [{ nome: nominativo, matricola: persona.matricola, qualifica: persona.qualifica }] }; }); if (auth?.ruolo === 'admin' || isUfficiale(persona)) setOfficialReport(prev => ({ ...prev, ufficiale: prev.ufficiale || nominativo, qualifica: prev.qualifica || persona.qualifica })); }, [auth]);
   useEffect(() => { saveReportDraft(report); setLastSaved(new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })); }, [report]);
-  function handleLogin(nextAuth) { window.localStorage.setItem('reportPL_auth', JSON.stringify(nextAuth)); setAuth(nextAuth); setMode((nextAuth.ruolo === 'ufficiale' || nextAuth.ruolo === 'admin') ? 'dashboard' : 'operatore'); }
+  function handleLogin(nextAuth) { window.localStorage.setItem('reportPL_auth', JSON.stringify(nextAuth)); setAuth(nextAuth); setMode((nextAuth.ruolo === 'ufficiale' || nextAuth.ruolo === 'admin') ? 'ufficiale' : 'operatore'); }
   function logout() { window.localStorage.removeItem('reportPL_auth'); setAuth(null); setMode('operatore'); }
   function resetOperatorReport() { const ok = window.confirm('Vuoi iniziare un nuovo report? La bozza salvata su questo dispositivo verrà cancellata. Prima di procedere, scarica PDF e JSON se il turno è concluso.'); if (!ok) return; clearReportDraft(); const fresh = baseReport(); if (auth?.persona) fresh.operatori = [{ nome: fullNamePersona(auth.persona), matricola: auth.persona.matricola, qualifica: auth.persona.qualifica }]; setReport(fresh); }
   if (!auth) return <LoginScreen
