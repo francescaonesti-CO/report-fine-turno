@@ -252,8 +252,7 @@ return <main><img id="pdfLogo" src="/POLIZIA.png" alt="Logo Polizia Locale" styl
 function App() {
   const [command, setCommand] = useState('monza');
   const [auth, setAuth] = useState(() => { try { return JSON.parse(window.localStorage.getItem('reportPL_auth') || 'null'); } catch { return null; } });
-  const [mode, setMode] = useState(() => (auth?.ruolo === 'ufficiale' || auth?.ruolo === 'admin') ? 'dashboard' : 'operatore');
-  const [report, setReport] = useState(loadReportDraft);
+const [mode, setMode] = useState(() => (auth?.ruolo === 'ufficiale' || auth?.ruolo === 'admin') ? 'ufficiale' : 'operatore');  const [report, setReport] = useState(loadReportDraft);
   const [lastSaved, setLastSaved] = useState('');
   const [importedReports, setImportedReports] = useState([]);
   const [officialReport, setOfficialReport] = useState(baseOfficialReport());
@@ -268,8 +267,7 @@ function App() {
   setCommand={setCommand}
 />;
   const ufficiale = auth.ruolo === 'ufficiale' || auth.ruolo === 'admin';
-return <main><img id="pdfLogo" src="/POLIZIA.png" alt="Logo Polizia Locale" style={{ display: 'none' }} /><header className="official-header"><div className="official-brand"><img src="/POLIZIA.png" alt="Logo Polizia Locale" /><div><p className="official-command">COMANDO DI POLIZIA LOCALE</p><p className="official-city">Città di Monza</p><p className="official-address">Via Marsala, 9 - Monza (MB)</p></div></div><div className="official-title"><h1>REPORT UFFICIALE DI SERVIZIO</h1><p>Sintesi attività di Polizia Locale</p></div><div className="official-meta"><p>REPORT N.</p><strong>2026/000045</strong><p>DATA</p><strong>{new Date().toLocaleDateString("it-IT")}</strong></div></header><nav className="tabs"><button className={mode === 'operatore' ? 'active' : ''} onClick={() => setMode('operatore')}>Report operatore</button>{ufficiale && <button className={mode === 'ufficiale' ? 'active' : ''} onClick={() => setMode('ufficiale')}>Dashboard ufficiale</button>}<button className="ghost" onClick={logout}>Esci</button></nav>{mode === 'operatore' && <OperatorReport report={report} setReport={setReport} lastSaved={lastSaved} resetReport={resetOperatorReport} command={command}/>}{mode === 'ufficiale' && ufficiale && <OfficialReport reports={importedReports} setReports={setImportedReports} official={officialReport} setOfficial={setOfficialReport} />}</main>;}
-
+return <main><img id="pdfLogo" src="/POLIZIA.png" alt="Logo Polizia Locale" style={{ display: 'none' }} /><header className="hero"><div><p className="eyebrow">Polizia Locale</p><h1>Report Turno</h1><p>Accesso: <strong>{fullNamePersona(auth.persona)}</strong> — {auth.persona.qualifica}</p></div><nav className="tabs"><button className={mode === 'operatore' ? 'active' : ''} onClick={() => setMode('operatore')}>Report operatore</button>{ufficiale && <button className={mode === 'ufficiale' ? 'active' : ''} onClick={() => setMode('ufficiale')}>Dashboard ufficiale</button>}<button className="ghost" onClick={logout}>Esci</button></nav></header>{mode === 'operatore' && <OperatorReport report={report} setReport={setReport} lastSaved={lastSaved} resetReport={resetOperatorReport} command={command}/>}{mode === 'ufficiale' && ufficiale && <OfficialReport reports={importedReports} setReports={setImportedReports} official={officialReport} setOfficial={setOfficialReport} />}</main>;
 function OperatorReport({ report, setReport, lastSaved, resetReport, command }) { 
   const [dbSaving, setDbSaving] = useState(false);
   const update = (patch) => setReport(prev => ({ ...prev, ...patch }));
