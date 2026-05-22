@@ -518,40 +518,60 @@ function Dashboard({ reports, setReports }) {
 }
 
 function OfficialReport({ reports, setReports, official, setOfficial }) {
-  const aggregate = useMemo(() => aggregateReports(reports), [reports]);
-  const autoSintesi = useMemo(() => officialSynthesis(aggregate, reports), [aggregate, reports]);
-  const autoEventi = useMemo(() => officialEventsText(reports), [reports]);
-  const update = (patch) => setOfficial(prev => ({ ...prev, ...patch }));
-  const updateAttivita = (idx, patch) => setOfficial(prev => ({ ...prev, attivitaIspettive: prev.attivitaIspettive.map((x, i) => i === idx ? { ...x, ...patch } : x) }));
-  const addAttivita = () => setOfficial(prev => ({ ...prev, attivitaIspettive: [...prev.attivitaIspettive, emptyAttivitaIspettiva()] }));
-  const removeAttivita = (idx) => setOfficial(prev => ({ ...prev, attivitaIspettive: prev.attivitaIspettive.filter((_, i) => i !== idx) }));
+  const [filterDate, setFilterDate] = useState('');
+  const [filterTurno, setFilterTurno] = useState('');
 
-  async function importFiles(e) {
-    const files = Array.from(e.target.files || []);
-    const parsed = [];
-    for (const file of files) {
-      try {
-        const raw = await file.text();
-        const data = JSON.parse(raw);
-        if (data && data.interventi && data.counters) parsed.push(data);
-      } catch (err) {
-        alert(`File non leggibile: ${file.name}`);
-      }
-    }
-    setReports(prev => [...prev, ...parsed]);
-    e.target.value = '';
-  }
+  const filteredReports = useMemo(() => {
+    return (reports || []).filter(r => {
+      const matchDate = !filterDate || r.service_date === filterDate || r.data === filterDate;
+      const matchTurno = !filterTurno || r.turno === filterTurno || r.shift_name === filterTurno;
+      return matchDate && matchTurno;
+    });
+  }, [reports, filterDate, filterTurno]);
+
+  const aggregate = useMemo(() => aggregateReports(filteredReports), [filteredReports]);
+  const autoSintesi = useMemo(() => officialSynthesis(aggregate, filteredReports), [aggregate, filteredReports]);
+  const autoEventi = useMemo(() => officialEventsText(filteredReports), [filteredReports]);
+
+  const update = (patch) => setOfficial(prev => ({ ...prev, ...patch }));
+  const updateAttivita = (idx, patch) => setOfficial(prev => ({
+    ...prev,
+    attivitaIspettive: prev.attivitaIspettive.map((x, i) => i === idx ? { ...x, ...patch } : x)
+  }));
+  const addAttivita = () => setOfficial(prev => ({
+    ...prev,
+    attivitaIspettive: [...prev.attivitaIspettive, emptyAttivitaIspettiva()]
+  }));
+  const removeAttivita = (idx) => setOfficial(prev => ({
+    ...prev,
+    attivitaIspettive: prev.attivitaIspettive.filter((_, i) => i !== idx)
+  }));
 
   function generateOfficialPdf() {
-    printOfficialReport(aggregate, reports, official, autoSintesi, autoEventi);
+    printOfficialReport(aggregate, filteredReports, official, autoSintesi, autoEventi);
   }
 
   return <>
     <section className="card notice">
-      <h2>Report ufficiale UDT</h2>
-      <p>Modalità quasi automatica: carica i JSON degli operatori, verifica la sintesi generata, integra briefing, personale, attività ispettive, anomalie e note per il Comandante.</p>
-      <div className="actions"><label className="fileButton">Carica JSON operatori<input type="file" accept="application/json,.json" multiple onChange={importFiles} /></label><button className="ghost" onClick={() => setReports([])}>Svuota dati caricati</button></div>
-    </section>
+  <p>La Dashboard acquisisce automaticamente i report operatori salvati nel database. L'ufficiale può filtrare i dati e generare il report finale per il Comandante.</p>
+</section>
+
+<section className="card">
+  <h2>Filtri Dashboard</h2>
+  <div className="grid two">
+    <Field label="Data servizio">
+      <Input type="date" value={filterDate} onChange={v => setFilterDate(v)} />
+    </Field>
+    <Field label="Turno">
+      <Input value={filterTurno} onChange={v => setFilterTurno(v)} placeholder="es. 06.00-13.00" />
+    </Field>
+  </div>
+  <div className="actions">
+    <button type="button" className="ghost" onClick={() => { setFilterDate(''); setFilterTurno(''); }}>
+      Reset filtri
+    </button>
+  </div>
+</section>
     <section className="metrics"><Metric label="Report operatori" value={reports.length} /><Metric label="Interventi" value={aggregate.totalInterventi} /><Metric label="Violazioni" value={aggregate.totaleViolazioni} /><Metric label="Km" value={aggregate.kmTotali} /></section>
     <section className="card"><h2>1. Dati report ufficiale</h2><div className="grid four"><Field label="Data"><Input type="date" value={official.data} onChange={v => update({ data: v })} /></Field><Field label="Turno"><Input value={official.turno} onChange={v => update({ turno: v })} placeholder="es. 1° turno" /></Field><Field label="Ufficiale di turno"><Input value={official.ufficiale} onChange={v => update({ ufficiale: v })} /></Field><Field label="Qualifica"><Input value={official.qualifica} onChange={v => update({ qualifica: v })} placeholder="es. Commissario Capo" /></Field></div></section>
     <section className="card"><h2>2. Sintesi automatica</h2><p className="muted">Questa sintesi nasce dai report operatori caricati. Nel PDF viene riportata come quadro iniziale.</p><pre className="miniPreview">{autoSintesi}</pre><Field label="Integrazioni dell'ufficiale alla sintesi"><Textarea value={official.eventiManuali} onChange={v => update({ eventiManuali: v })} placeholder="Inserire eventuali elementi aggiuntivi non presenti nei report operatori..." /></Field></section>
