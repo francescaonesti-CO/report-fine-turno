@@ -757,6 +757,35 @@ function OfficialReport({ reports, setReports, official, setOfficial }) {
   const aggregate = useMemo(() => aggregateReports(filteredReports), [filteredReports]);
   const autoSintesi = useMemo(() => officialSynthesis(aggregate, filteredReports), [aggregate, filteredReports]);
 const autoEventi = useMemo(() => officialEventsText(filteredReports), [filteredReports]);
+  const operatorSummary = useMemo(() => {
+  const rows = [];
+
+  filteredReports.forEach(r => {
+    let payload = r;
+
+    try {
+      if (typeof r.notes === 'string') {
+        payload = JSON.parse(r.notes);
+      }
+    } catch {
+      payload = r;
+    }
+
+    (payload.operatori || []).forEach(op => {
+      if (op.nome || op.matricola || op.qualifica) {
+        rows.push({
+          nome: op.nome || '-',
+          matricola: op.matricola || '-',
+          qualifica: op.qualifica || '-',
+          reparto: payload.reparto || '-',
+          turno: payload.turno || r.shift_name || '-'
+        });
+      }
+    });
+  });
+
+  return rows;
+}, [filteredReports]);
   const update = (patch) => setOfficial(prev => ({ ...prev, ...patch }));
   const updateAttivita = (idx, patch) => setOfficial(prev => ({ ...prev, attivitaIspettive: prev.attivitaIspettive.map((x, i) => i === idx ? { ...x, ...patch } : x) }));
   const addAttivita = () => setOfficial(prev => ({ ...prev, attivitaIspettive: [...prev.attivitaIspettive, emptyAttivitaIspettiva()] }));
@@ -837,6 +866,41 @@ const autoEventi = useMemo(() => officialEventsText(filteredReports), [filteredR
     </div>
   </section>
     <section className="metrics"><Metric label="Report operatori" value={filteredReports.length} /><Metric label="Interventi" value={aggregate.totalInterventi} /><Metric label="Violazioni" value={aggregate.totaleViolazioni} /><Metric label="Km" value={aggregate.kmTotali} /></section>
+    <section className="card">
+  <h2>Operatori presenti nei report filtrati</h2>
+
+  {operatorSummary.length === 0 ? (
+    <p className="muted">
+      Nessun operatore presente nei report filtrati.
+    </p>
+  ) : (
+    <div className="tableWrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Operatore</th>
+            <th>Matricola</th>
+            <th>Qualifica</th>
+            <th>Reparto</th>
+            <th>Turno</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {operatorSummary.map((op, idx) => (
+            <tr key={idx}>
+              <td>{op.nome}</td>
+              <td>{op.matricola}</td>
+              <td>{op.qualifica}</td>
+              <td>{op.reparto}</td>
+              <td>{op.turno}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )}
+</section>
     <section className="card"><h2>1. Dati report ufficiale</h2><div className="grid four"><Field label="Data"><Input type="date" value={official.data} onChange={v => update({ data: v })} /></Field><Field label="Turno"><Input value={official.turno} onChange={v => update({ turno: v })} placeholder="es. 1° turno" /></Field><Field label="Ufficiale di turno"><Input value={official.ufficiale} onChange={v => update({ ufficiale: v })} /></Field><Field label="Qualifica"><Input value={official.qualifica} onChange={v => update({ qualifica: v })} placeholder="es. Commissario Capo" /></Field></div></section>
     <section className="card"><h2>2. Sintesi automatica</h2><p className="muted">Questa sintesi nasce dai report operatori caricati. Nel PDF viene riportata come quadro iniziale.</p><pre className="miniPreview">{autoSintesi}</pre><Field label="Integrazioni dell'ufficiale alla sintesi"><Textarea value={official.eventiManuali} onChange={v => update({ eventiManuali: v })} placeholder="Inserire eventuali elementi aggiuntivi non presenti nei report operatori..." /></Field></section>
     <section className="card"><h2>3. Briefing, personale e note</h2><div className="grid two"><Field label="Briefing operativo"><Input value={official.briefing} onChange={v => update({ briefing: v })} placeholder="es. 06.45" /></Field><Field label="Note generali"><Input value={official.noteGenerali} onChange={v => update({ noteGenerali: v })} placeholder="es. Con il personale a disposizione coperte 11 scuole" /></Field></div><div className="grid two"><Field label="A.P.L. assenti"><Textarea value={official.assenti} onChange={v => update({ assenti: v })} /></Field><Field label="A.P.L. in ritardo"><Textarea value={official.ritardi} onChange={v => update({ ritardi: v })} /></Field></div></section>
