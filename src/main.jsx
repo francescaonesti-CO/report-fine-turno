@@ -1709,5 +1709,6 @@ function buildServicePdf(report) {
   footerModern(doc); return doc;
 }
 
-
+}
+  
 createRoot(document.getElementById('root')).render(<App />);
