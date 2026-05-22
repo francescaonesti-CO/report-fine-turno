@@ -9,7 +9,7 @@ const COMMANDS = {
   monza: {
     id: 'ae6f07c1-404f-41a1-9be7-9ff0bc83c325',
     nome: 'Polizia Locale Monza'
-  },
+  },return <main>
   seregno: {
     id: 'INSERISCI_ID_SEREGNO',
     nome: 'Polizia Locale Seregno'
@@ -219,8 +219,7 @@ function LoginScreen({ onLogin, command, setCommand }) {
     if (!persona) { setError('Matricola non riconosciuta. Verificare il numero inserito.'); return; }
     onLogin({ persona, ruolo: matricola.trim() === '9654' ? 'admin' : (isUfficiale(persona) ? 'ufficiale' : 'operatore') });
   }
-  return <main><img id="pdfLogo" src="/POLIZIA.png" alt="Logo Polizia Locale" style={{ display: 'none' }} />
-    <section className="loginCard"><div className="loginBrand"><img src="/POLIZIA.png" alt="Polizia Locale" /><div><p className="eyebrow">Comune di Monza</p><h1>Report Turno</h1><p>Accesso riservato al personale di Polizia Locale.</p></div></div>
+return <main><img id="pdfLogo" src="/POLIZIA.png" alt="Logo Polizia Locale" style={{ display: 'none' }} /><header className="hero"><div><p className="eyebrow">Polizia Locale</p><h1>Report Turno</h1><p>Accesso: <strong>{fullNamePersona(auth.persona)}</strong> — {auth.persona.qualifica}</p></div><nav className="tabs"><button className={mode === 'operatore' ? 'active' : ''} onClick={() => setMode('operatore')}>Report operatore</button>{ufficiale && <button className={mode === 'ufficiale' ? 'active' : ''} onClick={() => setMode('ufficiale')}>Dashboard ufficiale</button>}<button className="ghost" onClick={logout}>Esci</button></nav></header>{mode === 'operatore' && <OperatorReport report={report} setReport={setReport} lastSaved={lastSaved} resetReport={resetOperatorReport} command={command}/>}{mode === 'ufficiale' && ufficiale && <OfficialReport reports={importedReports} setReports={setImportedReports} official={officialReport} setOfficial={setOfficialReport} />}</main>;    <section className="loginCard"><div className="loginBrand"><img src="/POLIZIA.png" alt="Polizia Locale" /><div><p className="eyebrow">Comune di Monza</p><h1>Report Turno</h1><p>Accesso riservato al personale di Polizia Locale.</p></div></div>
     <form onSubmit={submit} className="loginForm">
 
   <div style={{ marginBottom: 12 }}>
