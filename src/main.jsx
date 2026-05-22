@@ -522,7 +522,8 @@ function Intervento({ i, idx, updateIntervento, remove }) {
     cdsDettaglio: '', cdsRimozione: 'No', cdsMotivazione: '', cdsRipristino: 'No', cdsFeriti: 'No', cdsVeicoliCoinvolti: '',
     cdsVerificaEffettuata: 'No', cdsSegnalazione: 'No', cdsPericolo: 'No', cdsInterventoRichiesto: 'No', cdsStatoSemaforo: 'spento'
   };
-  return <div className="intervento">
+  return (
+  <div className="intervento">
     <div className="interventoHead"><h3>Intervento {idx + 1}</h3><button type="button" className="ghost removeBtn" onClick={remove}>Rimuovi</button>
     <div className="grid three">
       <Field label="Tipo intervento"><Select value={i.tipo} onChange={v => updateIntervento({ tipo: v, ...(v !== 'Codice della strada' ? resetCds : {}) })}>{TIPI_INTERVENTO.map(t => <option key={t}>{t}</option>)}</Select></Field>
