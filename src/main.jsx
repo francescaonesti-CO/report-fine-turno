@@ -716,31 +716,66 @@ function Intervento({ i, idx, updateIntervento, remove }) {
       )}
 
       {i.tipo === 'Servizio scuole' && (
-        <div className="schoolBox">
-          <h4>Scuole presidiate</h4>
-          {i.scuole.map((s, sidx) => (
-            <div className="rowCard" key={sidx}>
-              <div className="grid four">
-                <Field label={`Scuola ${sidx + 1}`}>
-                  <Input value={s.nome} onChange={v => updateScuola(sidx, { nome: v })} />
-                </Field>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+  <div className="schoolBox">
+    <h4>Scuole presidiate</h4>
 
-      <div className="grid two">
-        <Field label="Esito">
-          <Input value={i.esito} onChange={v => updateIntervento({ esito: v })} />
-        </Field>
-        <Field label="Note">
-          <Input value={i.note} onChange={v => updateIntervento({ note: v })} />
-        </Field>
+    {(i.scuole || []).map((s, sidx) => (
+      <div className="rowCard" key={sidx}>
+        <div className="grid three">
+          <Field label={`Scuola ${sidx + 1}`}>
+            <Input
+              value={s.nome}
+              onChange={v => updateScuola(sidx, { nome: v })}
+            />
+          </Field>
+
+          <Field label="Momento">
+            <Select
+              value={s.momento || ''}
+              onChange={v => updateScuola(sidx, { momento: v })}
+            >
+              <option value="">Seleziona</option>
+              <option>Ingresso</option>
+              <option>Uscita</option>
+              <option>Ingresso e uscita</option>
+            </Select>
+          </Field>
+
+          <Field label="Orario">
+            <Input
+              value={s.orario || ''}
+              onChange={v => updateScuola(sidx, { orario: v })}
+              placeholder="es. 08.00"
+            />
+          </Field>
+        </div>
+
+        <button
+          type="button"
+          className="ghost removeBtn"
+          onClick={() =>
+            updateIntervento({
+              scuole: (i.scuole || []).filter((_, n) => n !== sidx)
+            })
+          }
+        >
+          Rimuovi scuola
+        </button>
       </div>
-    </div>
-  );
-}
+    ))}
+
+    <button
+      type="button"
+      onClick={() =>
+        updateIntervento({
+          scuole: [...(i.scuole || []), emptyScuola()]
+        })
+      }
+    >
+      + Aggiungi scuola
+    </button>
+  </div>
+)}
     
 function OfficialReport({ reports, setReports, official, setOfficial }) {
   const [filterDate, setFilterDate] = useState('');
