@@ -743,7 +743,7 @@ function Intervento({ i, idx, updateIntervento, remove }) {
 }
   const [commanderNotes, setCommanderNotes] = useState('');
   const aggregate = useMemo(() => aggregateReports(reports), [reports]);
-  const text = useMemo(() => commanderReportText(aggregate, reports, commanderNotes), [aggregate, reports, commanderNotes]);
+  const commanderText = useMemo(() => commanderReportText(aggregate, reports, commanderNotes), [aggregate, reports, commanderNotes]);
 
   async function importFiles(e) {
     const files = Array.from(e.target.files || []);
