@@ -776,6 +776,8 @@ function Intervento({ i, idx, updateIntervento, remove }) {
     </button>
   </div>
 )}
+  );
+}
     
 function OfficialReport({ reports, setReports, official, setOfficial }) {
   const [filterDate, setFilterDate] = useState('');
