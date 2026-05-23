@@ -774,11 +774,12 @@ function Intervento({ i, idx, updateIntervento, remove }) {
     >
       + Aggiungi scuola
     </button>
-  </div>
+   </div>
 )}
+
+</div>
   );
 }
-    
 function OfficialReport({ reports, setReports, official, setOfficial }) {
   const [filterDate, setFilterDate] = useState('');
   const [filterTurno, setFilterTurno] = useState('');
