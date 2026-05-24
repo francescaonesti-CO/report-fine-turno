@@ -1261,8 +1261,46 @@ function buildOfficialPrintHtml(aggregate, reports, official, autoSintesi, autoE
   const ritardiList = splitList(official.ritardi);
   const presenti = reports.length ? new Set(reports.flatMap(r=>operatorNames(r))).size : '-';
   const personaleBody = `${statusList('Presenti', presenti, [], 'green')}${statusList('Ritardo', ritardiList.length, ritardiList, 'orange')}${statusList('Assenti', assentiList.length, assentiList, 'red')}<div class="status-row"><span>Totale</span><strong class="blue">${esc(presenti === '-' ? '-' : Number(presenti)+ritardiList.length+assentiList.length)}</strong></div>`;
-  const eventiText = [autoEventi, official.eventiManuali, official.anomalie].filter(Boolean).join('\n') || 'Nessun evento rilevante automatico rilevato.';
-  const page1 = `<section class="page">${headerHtml('REPORT UFFICIALE DI TURNO', subtitle)}<div class="kpis">${kpiBox('car','Interventi',aggregate.totalInterventi)}${kpiBox('doc','Verbali',aggregate.totaleViolazioni)}${kpiBox('warn','Eventi',eventiCount)}${kpiBox('clip','Atti redatti',attiTot)}</div><div class="grid-2">${panel('Personale','users',personaleBody)}${panel('Briefing operativo','clipboard',`<p>${esc(official.briefing || '-')}</p>`)}</div><div class="eventbox"><div class="eventico">${iconSvg('warn')}</div><div><h3>Eventi / anomalie degne di rilievo</h3><p>${esc(eventiText)}</p></div></div>${footerHtml(1)}</section>`;
+  const sintesiText = `${autoSintesi || '-'}${official.sintesiManuale ? '\n\nIntegrazione UDT alla sintesi:\n' + official.sintesiManuale : ''}`;
+
+const eventiText = `${autoEventi || 'Nessun evento rilevante automatico rilevato.'}${official.eventiManuali ? '\n\nIntegrazione UDT sugli eventi:\n' + official.eventiManuali : ''}`;
+
+const anomalieText = official.anomalie || '-';
+  const page1 = `<section class="page">
+  ${headerHtml('REPORT UFFICIALE DI TURNO', subtitle)}
+
+  <div class="kpis">
+    ${kpiBox('car','Interventi',aggregate.totalInterventi)}
+    ${kpiBox('doc','Verbali',aggregate.totaleViolazioni)}
+    ${kpiBox('warn','Eventi',eventiCount)}
+    ${kpiBox('clip','Atti redatti',attiTot)}
+  </div>
+
+  <div class="executive-block">
+    <h3>Sintesi operativa</h3>
+    <p>${esc(sintesiText)}</p>
+  </div>
+
+  <div class="eventbox">
+    <div class="eventico">${iconSvg('warn')}</div>
+    <div>
+      <h3>Eventi degni di rilievo</h3>
+      <p>${esc(eventiText)}</p>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    ${panel('Personale','users',personaleBody)}
+    ${panel('Briefing operativo','clipboard',`<p>${esc(official.briefing || '-')}</p>`)}
+  </div>
+
+  <div class="executive-block">
+    <h3>Anomalie riscontrate durante il turno</h3>
+    <p>${esc(anomalieText)}</p>
+  </div>
+
+  ${footerHtml(1)}
+</section>`;
   const rows = buildViolationRows(reports);
   const tableRows = rows.length ? rows : [['-','-',0,0,0,0,0,0]];
   const violTable = `<table class="table"><thead><tr><th style="width:42mm">Pattuglia</th><th style="width:38mm">Reparto</th><th>Prev.</th><th>C.d.S.</th><th>Urbana</th><th>Annonaria</th><th>Altre</th><th>Tot.</th></tr></thead><tbody>${tableRows.map((r,idx)=>`<tr class="${idx===tableRows.length-1 && rows.length?'total':''}">${r.map((c,i)=>`<td class="${i>=2?'num':''}">${esc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
