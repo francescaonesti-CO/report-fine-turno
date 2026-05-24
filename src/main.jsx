@@ -823,9 +823,8 @@ const getMacroTurno = (turno) => {
     } catch {
       payload = r;
     }
-
+if (!filterDate) return false;
     const matchDate =
-      !filterDate ||
       r.service_date === filterDate ||
       r.data === filterDate ||
       payload.data === filterDate;
