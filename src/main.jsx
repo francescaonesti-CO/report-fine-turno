@@ -1004,7 +1004,6 @@ const autoEventi = useMemo(() => officialEventsText(filteredReports), [filteredR
   type="button">
   className="ghost"
   onClick={() => removeAttivita(idx)}
->
   Rimuovi attività
 </button></div>)}<button onClick={addAttivita}>+ Aggiungi attività ispettiva</button></section>
  <section className="card">
