@@ -813,13 +813,37 @@ const getMacroTurno = (turno) => {
   return 'altro';
 };
   const filteredReports = useMemo(() => {
-    return (reports || []).filter(r => {
-      const matchDate = !filterDate || r.service_date === filterDate || r.data === filterDate;
-      const reportTurno = r.turno || r.shift_name || '';
-const matchTurno = !filterTurno || getMacroTurno(reportTurno) === filterTurno;
-      return matchDate && matchTurno;
-    });
-  }, [reports, filterDate, filterTurno]);
+  return (reports || []).filter(r => {
+    let payload = r;
+
+    try {
+      if (typeof r.notes === 'string') {
+        payload = JSON.parse(r.notes);
+      }
+    } catch {
+      payload = r;
+    }
+
+    const matchDate =
+      !filterDate ||
+      r.service_date === filterDate ||
+      r.data === filterDate ||
+      payload.data === filterDate;
+
+    const reportTurno =
+      payload.turno ||
+      payload.shift_name ||
+      r.turno ||
+      r.shift_name ||
+      '';
+
+    const matchTurno =
+      !filterTurno ||
+      getMacroTurno(reportTurno) === filterTurno;
+
+    return matchDate && matchTurno;
+  });
+}, [reports, filterDate, filterTurno]);
 
   const aggregate = useMemo(() => aggregateReports(filteredReports), [filteredReports]);
   const autoSintesi = useMemo(() => officialSynthesis(aggregate, filteredReports), [aggregate, filteredReports]);
