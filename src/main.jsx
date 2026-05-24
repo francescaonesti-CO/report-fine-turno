@@ -1909,15 +1909,59 @@ function buildOfficialShiftPdf_old(aggregate, reports, official, autoSintesi, au
   const subtitle = `${official.data || aggregate.dateLabel} | ${official.turno || ''}`;
   const doc = makePdf(title, subtitle);
   let y = 54;
-  y = section(doc, 'Data e turno', y, title, subtitle);
-  y = kvGrid(doc, [{ label: 'Data', value: official.data || aggregate.dateLabel }, { label: 'Turno', value: official.turno || '-' }, { label: 'Ufficiale di turno', value: official.ufficiale || '-' }, { label: 'Qualifica', value: official.qualifica || '-' }], y, 2, title, subtitle) + 2;
-  y = section(doc, 'Riepilogo rapido', y, title, subtitle);
-  y = kvGrid(doc, [{ label: 'Report operatori', value: reports.length }, { label: 'Interventi totali', value: aggregate.totalInterventi }, { label: 'Violazioni', value: aggregate.totaleViolazioni }, { label: 'Km complessivi', value: aggregate.kmTotali }], y, 4, title, subtitle) + 2;
-  y = section(doc, 'Briefing operativo', y, title, subtitle); y = paragraph(doc, official.briefing || '-', y, title, subtitle);
-  y = section(doc, 'Personale', y, title, subtitle);
-  y = kvGrid(doc, [{ label: 'A.P.L. assenti', value: official.assenti || '-' }, { label: 'A.P.L. in ritardo', value: official.ritardi || '-' }, { label: 'Note', value: official.noteGenerali || '-' }], y, 1, title, subtitle) + 2;
-  y = section(doc, 'Sintesi operativa', y, title, subtitle); y = paragraph(doc, `${autoSintesi}${official.sintesiManuali ? '\n\nIntegrazioni: ' + official.sintesiManuali : ''}`, y, title, subtitle);
-  y = section(doc, 'Eventi degni di rilievo', y, title, subtitle); y = paragraph(doc, autoEventi || 'Nessun evento rilevante automatico rilevato.', y, title, subtitle);
+
+// QUADRO DI COMANDO
+y = section(doc, 'Quadro di comando', y, title, subtitle);
+y = kvGrid(doc, [
+  { label: 'Data', value: official.data || aggregate.dateLabel },
+  { label: 'Turno', value: official.turno || '-' },
+  { label: 'Ufficiale di turno', value: official.ufficiale || '-' },
+  { label: 'Qualifica', value: official.qualifica || '-' }
+], y, 2, title, subtitle) + 2;
+
+// KPI OPERATIVI
+y = section(doc, 'Riepilogo operativo', y, title, subtitle);
+y = kvGrid(doc, [
+  { label: 'Report operatori', value: reports.length },
+  { label: 'Interventi totali', value: aggregate.totalInterventi },
+  { label: 'Violazioni', value: aggregate.totaleViolazioni },
+  { label: 'Km complessivi', value: aggregate.kmTotali }
+], y, 4, title, subtitle) + 4;
+
+// SINTESI EXECUTIVE
+y = section(doc, 'Sintesi operativa', y, title, subtitle);
+y = paragraph(
+  doc,
+  `${autoSintesi}${official.sintesiManuale ? '\n\nIntegrazione UDT alla sintesi:\n' + official.sintesiManuale : ''}`,
+  y,
+  title,
+  subtitle
+);
+
+// EVENTI DEGNI DI RILIEVO
+y = section(doc, 'Eventi degni di rilievo', y, title, subtitle);
+y = paragraph(
+  doc,
+  `${autoEventi || 'Nessun evento rilevante automatico rilevato.'}${official.eventiManuali ? '\n\nIntegrazione UDT sugli eventi:\n' + official.eventiManuali : ''}`,
+  y,
+  title,
+  subtitle
+);
+
+// DETTAGLIO PERSONALE E BRIEFING
+doc.addPage();
+drawHeaderModern(doc, title, subtitle, C.blue);
+y = 54;
+
+y = section(doc, 'Briefing operativo', y, title, subtitle);
+y = paragraph(doc, official.briefing || '-', y, title, subtitle);
+
+y = section(doc, 'Personale e note', y, title, subtitle);
+y = kvGrid(doc, [
+  { label: 'A.P.L. assenti', value: official.assenti || '-' },
+  { label: 'A.P.L. in ritardo', value: official.ritardi || '-' },
+  { label: 'Note generali', value: official.noteGenerali || '-' }
+], y, 1, title, subtitle) + 2;
   y = section(doc, 'Anomalie riscontrate durante il turno', y, title, subtitle); y = paragraph(doc, official.anomalie || '-', y, title, subtitle);
   y = section(doc, 'Attività ispettive', y, title, subtitle);
   const attivitaRows = (official.attivitaIspettive || []).filter(a => a.tipo || a.reparto || a.luogo || a.esito || a.note).map(a => [a.tipo || '-', a.reparto || '-', a.luogo || '-', a.orario || '-', a.esito || '-', a.violazioni || '-', a.note || '-']);
