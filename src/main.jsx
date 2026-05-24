@@ -503,7 +503,6 @@ console.log('COMMAND DATA:', COMMANDS[command])
       <Field label="Email ufficiale destinatario"><Input value={report.destinatario} onChange={v => update({ destinatario: v })} placeholder="es. ufficiale@comune.monza.it" /></Field>
 <div className="actions">
   <button onClick={generatePdf}>Apri report stampabile</button>
-  <button onClick={exportJson}>Scarica file dati JSON</button>
   <button onClick={saveToDatabase} disabled={dbSaving}>
     {dbSaving ? 'Salvataggio...' : 'Salva su database'}
   </button>
