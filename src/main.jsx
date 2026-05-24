@@ -783,11 +783,40 @@ function Intervento({ i, idx, updateIntervento, remove }) {
 function OfficialReport({ reports, setReports, official, setOfficial }) {
   const [filterDate, setFilterDate] = useState('');
   const [filterTurno, setFilterTurno] = useState('');
+const getMacroTurno = (turno) => {
+  const value = String(turno || '').trim();
 
+  const mattino = [
+    '06.00-13.00',
+    '06.30-13.30',
+    '07.00-14.00',
+    '08.00-15.00',
+    '09.00-16.00'
+  ];
+
+  const pomeriggio = [
+    '11.00-18.00',
+    '12.00-19.00',
+    '12.30-19.30',
+    '13.00-20.00'
+  ];
+
+  const seraNotte = [
+    '16.59-23.59',
+    '00.00-07.00'
+  ];
+
+  if (mattino.includes(value)) return 'mattino';
+  if (pomeriggio.includes(value)) return 'pomeriggio';
+  if (seraNotte.includes(value)) return 'sera_notte';
+
+  return 'altro';
+};
   const filteredReports = useMemo(() => {
     return (reports || []).filter(r => {
       const matchDate = !filterDate || r.service_date === filterDate || r.data === filterDate;
-      const matchTurno = !filterTurno || r.turno === filterTurno || r.shift_name === filterTurno;
+      const reportTurno = r.turno || r.shift_name || '';
+const matchTurno = !filterTurno || getMacroTurno(reportTurno) === filterTurno;
       return matchDate && matchTurno;
     });
   }, [reports, filterDate, filterTurno]);
