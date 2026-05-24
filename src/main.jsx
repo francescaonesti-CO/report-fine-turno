@@ -881,7 +881,7 @@ const autoEventi = useMemo(() => officialEventsText(filteredReports), [filteredR
         />
       </Field>
 
-      <<Field label="Macro-turno">
+      <Field label="Macro-turno">
   <Select
     value={filterTurno}
     onChange={v => setFilterTurno(v)}
