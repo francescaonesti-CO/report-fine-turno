@@ -881,13 +881,18 @@ const autoEventi = useMemo(() => officialEventsText(filteredReports), [filteredR
         />
       </Field>
 
-      <Field label="Turno">
-        <Input
-          value={filterTurno}
-          onChange={v => setFilterTurno(v)}
-          placeholder="es. 06.00-13.00"
-        />
-      </Field>
+      <<Field label="Macro-turno">
+  <Select
+    value={filterTurno}
+    onChange={v => setFilterTurno(v)}
+  >
+    <option value="">Tutti</option>
+    <option value="mattino">Mattino</option>
+    <option value="pomeriggio">Pomeriggio</option>
+    <option value="sera_notte">Sera / notte</option>
+    <option value="altro">Altro orario</option>
+  </Select>
+</Field>
     </div>
 
     <div className="actions">
