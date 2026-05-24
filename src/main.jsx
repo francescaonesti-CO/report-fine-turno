@@ -2018,8 +2018,52 @@ function totalVehiclesFromReports(reports) { return reports.reduce((sum,r)=>sum+
 
 function totalAttiFromReports(reports) { return reports.reduce((sum,r)=>{ const c=r.counters||{}; return sum + ['relazioni','annotazioni','sequestriAmministrativi','fermiAmministrativi','sequestriPenali','cnr','altriAttiNumero'].reduce((s,k)=>s+n(c[k]),0); },0); }
 function attiObjectFromReports(reports) { return reports.reduce((acc,r)=>{ const c=r.counters||{}; ['relazioni','annotazioni','sequestriAmministrativi','fermiAmministrativi','sequestriPenali','cnr','altriAttiNumero'].forEach(k=>acc[k]=n(acc[k])+n(c[k])); return acc; },{}); }
-function buildViolationRows(reports) { const rows = reports.map(r=>{ const c=r.counters||{}; return [operatorNames(r).join(' / ') || '-', repartoLabel(r), n(c.preavvisiCds), n(c.vdcCds), n(c.regPolizia), n(c.annonaria), n(c.altreNorme), getTotaleViolazioni(r)]; }); const totals = reports.reduce((acc,r)=>{ const c=r.counters||{}; ['preavvisiCds','vdcCds','regPolizia','annonaria','altreNorme'].forEach(k=>acc[k]=n(acc[k])+n(c[k])); acc.tot += getTotaleViolazioni(r); return acc; },{preavvisiCds:0,vdcCds:0,regPolizia:0,annonaria:0,altreNorme:0,tot:0}); if (rows.length) rows.push(['TOTALE COMPLESSIVO','-',totals.preavvisiCds,totals.vdcCds,totals.regPolizia,totals.annonaria,totals.altreNorme,totals.tot]); return rows; }
-function drawModernTable(doc, x,y,w,headers,rows,widths,opts={}) {
+function buildViolationRows(reports) {
+  const rows = reports.map(r => {
+    const c = r.counters || {};
+
+    const pattuglia = operatorNames(r).join(' - ') || '-';
+    const reparto = repartoLabel(r);
+
+    const preavvisi = n(c.preavvisiCds);
+    const verbaliCds = n(c.vdcCds) + n(c.regPolizia);
+    const altro = n(c.annonaria) + n(c.altreNorme);
+    const totale = preavvisi + verbaliCds + altro;
+
+    return [
+      pattuglia,
+      reparto,
+      preavvisi,
+      verbaliCds,
+      altro,
+      totale
+    ];
+  });
+
+  const totals = rows.reduce(
+    (acc, row) => {
+      acc.preavvisi += n(row[2]);
+      acc.verbaliCds += n(row[3]);
+      acc.altro += n(row[4]);
+      acc.totale += n(row[5]);
+      return acc;
+    },
+    { preavvisi: 0, verbaliCds: 0, altro: 0, totale: 0 }
+  );
+
+  if (rows.length) {
+  rows.push([
+    'TOTALE COMPLESSIVO',
+    '',
+    totals.preavvisi,
+    totals.verbaliCds,
+    totals.altro,
+    totals.totale
+  ]);
+}
+
+  return rows;
+}function drawModernTable(doc, x,y,w,headers,rows,widths,opts={}) {
   const C=themeColors(); const rowH=8; const headerH=10; fillC(doc,C.blue); doc.roundedRect(x,y,w,headerH,1.2,1.2,'F');
   doc.setFont('helvetica','bold'); doc.setFontSize(7.2); doc.setTextColor(255,255,255); let xx=x;
   headers.forEach((h,i)=>{ doc.text(String(h), xx+widths[i]/2, y+6.2,{align:'center', maxWidth: widths[i]-2}); xx+=widths[i]; });
