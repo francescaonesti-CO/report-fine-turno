@@ -1001,11 +1001,20 @@ const autoEventi = useMemo(() => officialEventsText(filteredReports), [filteredR
     <section className="card"><h2>3. Briefing, personale e note</h2><div className="grid two"><Field label="Briefing operativo"><Input value={official.briefing} onChange={v => update({ briefing: v })} placeholder="es. 06.45" /></Field><Field label="Note generali"><Input value={official.noteGenerali} onChange={v => update({ noteGenerali: v })} placeholder="es. Con il personale a disposizione coperte 11 scuole" /></Field></div><div className="grid two"><Field label="A.P.L. assenti"><Textarea value={official.assenti} onChange={v => update({ assenti: v })} /></Field><Field label="A.P.L. in ritardo"><Textarea value={official.ritardi} onChange={v => update({ ritardi: v })} /></Field></div></section>
     <section className="card"><h2>4. Eventi degni di rilievo</h2><p className="muted">Eventi rilevanti individuati automaticamente: sinistri con feriti, TSO/ASO, interventi con parole chiave critiche o lunga durata.</p><pre className="miniPreview">{autoEventi || 'Nessun evento rilevante automatico rilevato.'}</pre></section>
     <section className="card"><h2>5. Supervisione e controlli UDT</h2><Field label="Anomalie riscontrate durante il turno"><Textarea value={official.anomalie} onChange={v => update({ anomalie: v })} /></Field><h3>Controlli effettuati dall'UDT</h3>{official.attivitaIspettive.map((a, idx) => <div className="rowCard" key={idx}><div className="grid four"><Field label="Tipologia verifica"><Input value={a.tipo} onChange={v => updateAttivita(idx, { tipo: v })} placeholder="es. controllo equipaggiamento, verifica presenza..." /></Field><Field label="Pattuglia / reparto controllato"><Input value={a.reparto} onChange={v => updateAttivita(idx, { reparto: v })} /></Field><Field label="Luogo controllo"><Input value={a.luogo} onChange={v => updateAttivita(idx, { luogo: v })} /></Field><Field label="Orario"><Input value={a.orario} onChange={v => updateAttivita(idx, { orario: v })} /></Field></div><div className="grid three"><Field label="Esito"><Input value={a.esito} onChange={v => updateAttivita(idx, { esito: v })} /></Field><Field label="Criticità rilevate"><Input value={a.violazioni} onChange={v => updateAttivita(idx, { violazioni: v })} /></Field><Field label="Disposizioni impartite"><Input value={a.note} onChange={v => updateAttivita(idx, { note: v })} /></Field></div><button
-  type="button">
+  <button
+  type="button"
   className="ghost"
   onClick={() => removeAttivita(idx)}
+>
   Rimuovi attività
-</button></div>)}<button onClick={addAttivita}>+ Aggiungi attività ispettiva</button></section>
+</button>
+</div>
+))}
+
+<button type="button" onClick={addAttivita}>  + Aggiungi attività ispettiva
+</button>
+
+</section>
  <section className="card">
   <h2>6. Esiti e comunicazioni</h2>
 
