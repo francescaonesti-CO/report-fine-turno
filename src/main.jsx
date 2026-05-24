@@ -103,7 +103,7 @@ const PERSONALE = [
 ].map(([cognome, nome, matricola, qualifica]) => ({ cognome, nome, matricola, qualifica }));
 const QUALIFICHE_UFFICIALI = ['Dirigente', 'Commissario capo coord.', 'Commissario Capo', 'Commissario', 'Vice Commissario', 'Specialista di Vigilanza'];
 function isUfficiale(persona) { return persona && QUALIFICHE_UFFICIALI.includes(persona.qualifica); }
-function fullNamePersona(p) { return p.cognome + ' ' + p.nome; }
+function fullNamePersona(p) { return p.nome + ' ' + p.cognome; }
 function findPersonaByMatricola(matricola) { return PERSONALE.find(p => p.matricola === String(matricola || '').trim()); }
 
 const emptyOperatore = () => ({ nome: '', matricola: '', qualifica: '' });
