@@ -4,7 +4,7 @@ import jsPDF from 'jspdf';
 import * as XLSX from 'xlsx';
 import './style.css';
 import { supabase } from './lib/supabaseClient';
-
+import { fetchPersonale } from './lib/personale';
 const COMMANDS = {
   monza: {
     id: 'ae6f07c1-404f-41a1-9be7-9ff0bc83c325',
@@ -104,7 +104,13 @@ const PERSONALE = [
 const QUALIFICHE_UFFICIALI = ['Dirigente', 'Commissario capo coord.', 'Commissario Capo', 'Commissario', 'Vice Commissario', 'Specialista di Vigilanza'];
 function isUfficiale(persona) { return persona && QUALIFICHE_UFFICIALI.includes(persona.qualifica); }
 function fullNamePersona(p) { return p.nome + ' ' + p.cognome; }
-function findPersonaByMatricola(matricola) { return PERSONALE.find(p => p.matricola === String(matricola || '').trim()); }
+function findPersonaByMatricola(matricola, personaleDb = []) {
+  return personaleDb.find(
+    p => p.matricola === String(matricola || '').trim()
+  ) || PERSONALE.find(
+    p => p.matricola === String(matricola || '').trim()
+  );
+}
 
 const emptyOperatore = () => ({ nome: '', matricola: '', qualifica: '' });
 const emptyVeicolo = () => ({ sigla: '', kmInizio: '', kmFine: '', carburante: 'No', importoCarburante: '', oraPrelievoCard: '', oraRestituzioneCard: '', anomaliaVeicolo: '' });
@@ -215,7 +221,7 @@ function LoginScreen({ onLogin, command, setCommand }) {
   const [error, setError] = useState('');
   function submit(e) {
     e.preventDefault();
-    const persona = findPersonaByMatricola(matricola);
+    const persona = findPersonaByMatricola(matricola, personaleDb);
     if (!persona) { setError('Matricola non riconosciuta. Verificare il numero inserito.'); return; }
     onLogin({ persona, ruolo: matricola.trim() === '9654' ? 'admin' : (isUfficiale(persona) ? 'ufficiale' : 'operatore') });
   }
@@ -262,10 +268,29 @@ return (
 }
 function App() {
   const [command, setCommand] = useState('monza');
+  const [personaleDb, setPersonaleDb] = useState([]);
   const [auth, setAuth] = useState(() => { try { return JSON.parse(window.localStorage.getItem('reportPL_auth') || 'null'); } catch { return null; } });
 const [mode, setMode] = useState(() => (auth?.ruolo === 'ufficiale' || auth?.ruolo === 'admin') ? 'ufficiale' : 'operatore');  const [report, setReport] = useState(loadReportDraft);
   const [lastSaved, setLastSaved] = useState('');
   const [importedReports, setImportedReports] = useState([]);
+  useEffect(() => {
+  async function loadPersonale() {
+    const data = await fetchPersonale(
+      'ae6f07c1-404f-41a1-9be7-9ff0bc83c325'
+    );
+
+    const mapped = data.map((u) => ({
+      cognome: u.surname,
+      nome: u.name,
+      matricola: u.matricola,
+      qualifica: u.role,
+    }));
+
+    setPersonaleDb(mapped);
+  }
+
+  loadPersonale();
+}, []);
   useEffect(() => {
   async function loadReportsFromSupabase() {
     const { data, error } = await supabase
