@@ -393,20 +393,9 @@ console.log('COMMAND DATA:', COMMANDS[command])
 const body = encodeURIComponent(
 `Buongiorno,
 
-si trasmette il report di servizio relativo al turno indicato in oggetto.
+si trasmette in allegato il report di servizio relativo al turno indicato in oggetto.
 
-Il report contiene:
-- operatori impiegati;
-- veicoli utilizzati;
-- interventi effettuati;
-- violazioni accertate;
-- eventuali note operative e comunicazioni di servizio.
-
-Si invita ad allegare il PDF generato dall'applicativo.
-
-Cordiali saluti.
-
-Polizia Locale`
+Cordialmente,`
 );
     window.location.href = `mailto:${encodeURIComponent(report.destinatario)}?subject=${subject}&body=${body}`;
   }
