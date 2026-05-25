@@ -1275,7 +1275,7 @@ function headerHtml(title, subtitle) {
     
     <div class="brand">
       <h1>COMUNE DI MONZA</h1>
-      <p>Polizia Locale • Settore Sicurezza</p>
+      <p>Settore Polizia Locale, Protezione Civile</p>
     </div>
 
     <div class="contacts">
