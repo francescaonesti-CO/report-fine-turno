@@ -407,7 +407,7 @@ Si invita ad allegare il PDF generato dall'applicativo.
 Cordiali saluti.
 
 Polizia Locale`
-);n allegato PDF]' : ''}`);
+);
     window.location.href = `mailto:${encodeURIComponent(report.destinatario)}?subject=${subject}&body=${body}`;
   }
 
