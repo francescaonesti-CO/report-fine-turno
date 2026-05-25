@@ -216,7 +216,7 @@ function clearReportDraft() {
   window.localStorage.removeItem(REPORT_DRAFT_KEY);
 }
 
-function LoginScreen({ onLogin, command, setCommand }) {
+function LoginScreen({ onLogin, command, setCommand, personaleDb }) {
   const [matricola, setMatricola] = useState('');
   const [error, setError] = useState('');
   function submit(e) {
@@ -323,6 +323,7 @@ const [mode, setMode] = useState(() => (auth?.ruolo === 'ufficiale' || auth?.ruo
   onLogin={handleLogin}
   command={command}
   setCommand={setCommand}
+  personaleDb={personaleDb}
 />;
   const ufficiale = auth.ruolo === 'ufficiale' || auth.ruolo === 'admin';
 return <main><img id="pdfLogo" src="/POLIZIA.png" alt="Logo Polizia Locale" style={{ display: 'none' }} /><header className="hero"><div><p className="eyebrow">Polizia Locale</p><h1>Report Turno</h1><p>Accesso: <strong>{fullNamePersona(auth.persona)}</strong> — {auth.persona.qualifica}</p></div><nav className="tabs"><button className={mode === 'operatore' ? 'active' : ''} onClick={() => setMode('operatore')}>Report operatore</button>{ufficiale && <button className={mode === 'ufficiale' ? 'active' : ''} onClick={() => setMode('ufficiale')}>Dashboard ufficiale</button>}<button className="ghost" onClick={logout}>Esci</button></nav></header>{mode === 'operatore' && <OperatorReport report={report} setReport={setReport} lastSaved={lastSaved} resetReport={resetOperatorReport} command={command}/>}{mode === 'ufficiale' && ufficiale && <OfficialReport reports={importedReports} setReports={setImportedReports} official={officialReport} setOfficial={setOfficialReport} />}</main>;
