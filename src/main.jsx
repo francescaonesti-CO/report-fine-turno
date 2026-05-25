@@ -386,8 +386,28 @@ console.log('COMMAND DATA:', COMMANDS[command])
 }
 
   function sendMail() {
-    const subject = encodeURIComponent(`Report turno Polizia Locale - ${report.data} - ${turnoLabel(report)}`);
-    const body = encodeURIComponent(`Si trasmette il report del turno di servizio.\n\nAllegare il PDF scaricato dall'app e, per la dashboard dell'ufficiale, anche il file dati JSON.\n\n${text.slice(0, 1200)}${text.length > 1200 ? '\n\n[Report completo in allegato PDF]' : ''}`);
+    const subject = encodeURIComponent(
+  `Report di servizio - ${report.data} - ${turnoLabel(report)}`
+);
+
+const body = encodeURIComponent(
+`Buongiorno,
+
+si trasmette il report di servizio relativo al turno indicato in oggetto.
+
+Il report contiene:
+- operatori impiegati;
+- veicoli utilizzati;
+- interventi effettuati;
+- violazioni accertate;
+- eventuali note operative e comunicazioni di servizio.
+
+Si invita ad allegare il PDF generato dall'applicativo.
+
+Cordiali saluti.
+
+Polizia Locale`
+);n allegato PDF]' : ''}`);
     window.location.href = `mailto:${encodeURIComponent(report.destinatario)}?subject=${subject}&body=${body}`;
   }
 
