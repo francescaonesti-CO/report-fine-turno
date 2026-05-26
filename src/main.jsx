@@ -1001,10 +1001,15 @@ if (!filterDate) return false;
   const autoSintesi = useMemo(() => officialSynthesis(aggregate, filteredReports), [aggregate, filteredReports]);
 const autoEventi = useMemo(() => officialEventsText(filteredReports), [filteredReports]);
   const generatePeriodPdf = () => {
-  if (!periodReports.length) {
-    alert('Nessun report presente nel periodo selezionato.');
-    return;
-  }
+  if (!periodStart || !periodEnd) {
+  alert('Seleziona data iniziale e data finale per generare il report aggregato.');
+  return;
+}
+
+if (!periodReports.length) {
+  alert('Nessun report presente nel periodo selezionato.');
+  return;
+}
 
   const doc = new jsPDF('p', 'mm', 'a4');
 
@@ -1354,6 +1359,9 @@ const autoEventi = useMemo(() => officialEventsText(filteredReports), [filteredR
         onClick={() => {
           setFilterDate('');
           setFilterTurno('');
+          setPeriodStart('');
+          setPeriodEnd('');
+          setPeriodReparto('');
         }}
       >
         Reset filtri
