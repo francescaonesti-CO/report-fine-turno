@@ -1377,7 +1377,7 @@ if (!periodReports.length) {
 >
   Genera PDF aggregato
 </button>
-</div>
+</section>
     
     <section className="card">
   <h2>Operatori presenti nei report filtrati</h2>
