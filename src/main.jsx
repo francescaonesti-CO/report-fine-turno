@@ -105,10 +105,12 @@ const QUALIFICHE_UFFICIALI = ['Dirigente', 'Commissario capo coord.', 'Commissar
 function isUfficiale(persona) { return persona && QUALIFICHE_UFFICIALI.includes(persona.qualifica); }
 function fullNamePersona(p) { return p.nome + ' ' + p.cognome; }
 function findPersonaByMatricola(matricola, personaleDb = []) {
+  const clean = String(matricola || '').trim();
+
   return personaleDb.find(
-    p => p.matricola === String(matricola || '').trim()
+    p => String(p.matricola || '').trim() === clean
   ) || PERSONALE.find(
-    p => p.matricola === String(matricola || '').trim()
+    p => String(p.matricola || '').trim() === clean
   );
 }
 
@@ -282,11 +284,10 @@ const [mode, setMode] = useState(() => (auth?.ruolo === 'ufficiale' || auth?.ruo
     const mapped = data.map((u) => ({
   cognome: u.surname,
   nome: u.name,
-  matricola: u.matricola,
+  matricola: String(u.matricola).trim(),
   qualifica: u.qualification || u.role,
   ruolo: u.role,
 }));
-
     setPersonaleDb(mapped);
   }
 
