@@ -1379,8 +1379,27 @@ if (!periodReports.length) {
 </button>
     </div>
   </section>
-    <section className="metrics"><Metric label="Report operatori" value={filteredReports.length} /><Metric label="Interventi" value={aggregate.totalInterventi} /><Metric label="Violazioni" value={aggregate.totaleViolazioni} /><Metric label="Km" value={aggregate.kmTotali} /></section>
-    <section className="card">
+<section className="metrics">
+  <Metric
+    label="Report operatori"
+    value={filteredReports.length}
+  />
+
+  <Metric
+    label="Interventi"
+    value={aggregate.totalInterventi}
+  />
+
+  <Metric
+    label="Violazioni"
+    value={aggregate.totalViolazioni}
+  />
+
+  <Metric
+    label="Km"
+    value={aggregate.kmTotali}
+  />
+</section>    <section className="card">
   <h2>Operatori presenti nei report filtrati</h2>
 
   {operatorSummary.length === 0 ? (
