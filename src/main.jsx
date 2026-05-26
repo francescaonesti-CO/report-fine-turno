@@ -1158,6 +1158,87 @@ const autoEventi = useMemo(() => officialEventsText(filteredReports), [filteredR
   </div>
 </div>
 </div>
+<div className="grid two" style={{ marginTop: 20 }}>
+
+  <div className="card">
+    <div className="section-title">
+      Interventi per tipologia
+    </div>
+
+    {Object.entries(periodAggregate.interventiPerTipo).length === 0 ? (
+      <div className="muted">
+        Nessun dato disponibile
+      </div>
+    ) : (
+      Object.entries(periodAggregate.interventiPerTipo)
+        .sort((a, b) => b[1] - a[1])
+        .map(([tipo, totale]) => (
+          <div
+            key={tipo}
+            className="rowBetween"
+            style={{ marginBottom: 8 }}
+          >
+            <span>{tipo}</span>
+            <b>{totale}</b>
+          </div>
+        ))
+    )}
+  </div>
+
+  <div className="card">
+    <div className="section-title">
+      Report per reparto
+    </div>
+
+    {Object.entries(periodAggregate.reportPerReparto).length === 0 ? (
+      <div className="muted">
+        Nessun dato disponibile
+      </div>
+    ) : (
+      Object.entries(periodAggregate.reportPerReparto)
+        .sort((a, b) => b[1] - a[1])
+        .map(([reparto, totale]) => (
+          <div
+            key={reparto}
+            className="rowBetween"
+            style={{ marginBottom: 8 }}
+          >
+            <span>{reparto}</span>
+            <b>{totale}</b>
+          </div>
+        ))
+    )}
+  </div>
+
+</div>
+
+<div className="card" style={{ marginTop: 20 }}>
+  <div className="section-title">
+    Eventi e annotazioni rilevanti
+  </div>
+
+  {periodAggregate.eventiRilievo.length === 0 ? (
+    <div className="muted">
+      Nessun evento rilevante nel periodo selezionato
+    </div>
+  ) : (
+    periodAggregate.eventiRilievo.map((e, idx) => (
+      <div
+        key={idx}
+        className="rowCard"
+        style={{ marginBottom: 10 }}
+      >
+        <div style={{ fontSize: 12, opacity: 0.7 }}>
+          {e.data} — {e.reparto}
+        </div>
+
+        <div style={{ marginTop: 4 }}>
+          {e.testo}
+        </div>
+      </div>
+    ))
+  )}
+</div>    
     <div className="actions">
       <button
         type="button"
