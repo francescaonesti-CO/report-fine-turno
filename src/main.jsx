@@ -224,13 +224,7 @@ function LoginScreen({ onLogin, command, setCommand, personaleDb }) {
   function submit(e) {
   e.preventDefault();
 
-  console.log('MATRICOLA INSERITA:', matricola);
-  console.log('PERSONALE DB:', personaleDb);
-  console.log('NUMERO PERSONE DB:', personaleDb?.length);
-
   const persona = findPersonaByMatricola(matricola, personaleDb);
-
-  console.log('PERSONA TROVATA:', persona);
 
   if (!persona) {
     setError('Matricola non riconosciuta. Verificare il numero inserito.');
