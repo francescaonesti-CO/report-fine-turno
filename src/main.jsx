@@ -1368,15 +1368,17 @@ if (!periodReports.length) {
     }, 0);
   }}
 >
-  Reset filtri
-</button>i
+   Reset filtri
 </button>
-      <button
+
+<button
   type="button"
   onClick={generatePeriodPdf}
 >
   Genera PDF aggregato
 </button>
+</div>
+
 </section>
     
     <section className="card">
