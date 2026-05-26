@@ -828,6 +828,114 @@ function Intervento({ i, idx, updateIntervento, remove }) {
 function OfficialReport({ reports, setReports, official, setOfficial }) {
   const [filterDate, setFilterDate] = useState('');
   const [filterTurno, setFilterTurno] = useState('');
+  const [periodStart, setPeriodStart] = useState('');
+  const [periodEnd, setPeriodEnd] = useState('');
+  const [periodReparto, setPeriodReparto] = useState('');
+  const periodReports = useMemo(() => {
+  return (reports || []).filter(r => {
+    let payload = r;
+
+    try {
+      if (typeof r.notes === 'string') {
+        payload = JSON.parse(r.notes);
+      }
+    } catch {
+      payload = r;
+    }
+
+    const data = r.service_date || r.data || payload.data || r.date;
+
+    if (periodStart && data < periodStart) return false;
+    if (periodEnd && data > periodEnd) return false;
+
+    if (periodReparto) {
+      const reparto = payload.reparto || r.reparto || r.department || '';
+      if (reparto !== periodReparto) return false;
+    }
+
+    return true;
+  });
+}, [reports, periodStart, periodEnd, periodReparto]);
+
+const periodAggregate = useMemo(() => {
+  const aggregate = {
+    totaleReport: periodReports.length,
+    totaleInterventi: 0,
+    totaleViolazioni: 0,
+    totaleOperatori: 0,
+    totaleVeicoli: 0,
+    interventiPerTipo: {},
+    reportPerReparto: {},
+    eventiRilievo: []
+  };
+
+  periodReports.forEach(r => {
+    let payload = r;
+
+    try {
+      if (typeof r.notes === 'string') {
+        payload = JSON.parse(r.notes);
+      }
+    } catch {
+      payload = r;
+    }
+
+    const reparto =
+      payload.reparto ||
+      r.reparto ||
+      r.department ||
+      'Non indicato';
+
+    aggregate.reportPerReparto[reparto] =
+      (aggregate.reportPerReparto[reparto] || 0) + 1;
+
+    const operatori = payload.operatori || [];
+    const veicoli = payload.veicoli || [];
+    const interventi = payload.interventi || [];
+
+    aggregate.totaleOperatori += operatori.length;
+    aggregate.totaleVeicoli += veicoli.length;
+    aggregate.totaleInterventi += interventi.length;
+
+    interventi.forEach(i => {
+      const tipo = i.tipo || 'Altro';
+
+      aggregate.interventiPerTipo[tipo] =
+        (aggregate.interventiPerTipo[tipo] || 0) + 1;
+    });
+
+    const counters = payload.counters || {};
+
+    aggregate.totaleViolazioni +=
+      Number(counters.violazioni || 0) ||
+      Number(counters.totaleViolazioni || 0) ||
+      0;
+
+    if (payload.eventiRilievo) {
+      aggregate.eventiRilievo.push({
+        data:
+          r.service_date ||
+          payload.data ||
+          '',
+        reparto,
+        testo: payload.eventiRilievo
+      });
+    }
+
+    if (payload.noteUdt) {
+      aggregate.eventiRilievo.push({
+        data:
+          r.service_date ||
+          payload.data ||
+          '',
+        reparto,
+        testo: payload.noteUdt
+      });
+    }
+  });
+
+  return aggregate;
+}, [periodReports]);
 const getMacroTurno = (turno) => {
   const value = String(turno || '').trim();
 
@@ -991,7 +1099,68 @@ const autoEventi = useMemo(() => officialEventsText(filteredReports), [filteredR
   </Select>
 </Field>
     </div>
+<div className="card">
+  <div className="section-title">
+    Report aggregato per periodo
+  </div>
 
+  <div className="grid three">
+    <Field label="Data iniziale">
+      <Input
+        type="date"
+        value={periodStart}
+        onChange={v => setPeriodStart(v)}
+      />
+    </Field>
+
+    <Field label="Data finale">
+      <Input
+        type="date"
+        value={periodEnd}
+        onChange={v => setPeriodEnd(v)}
+      />
+    </Field>
+
+    <Field label="Reparto">
+      <Select
+        value={periodReparto}
+        onChange={v => setPeriodReparto(v)}
+      >
+        <option value="">Tutti i reparti</option>
+        {REPARTI.map(r => (
+          <option key={r} value={r}>
+            {r}
+          </option>
+        ))}
+      </Select>
+    </Field>
+  </div>
+
+  <div
+    className="stats-grid"
+    style={{ marginTop: 16 }}
+  >
+    <StatCard
+      title="Report"
+      value={periodAggregate.totaleReport}
+    />
+
+    <StatCard
+      title="Interventi"
+      value={periodAggregate.totaleInterventi}
+    />
+
+    <StatCard
+      title="Violazioni"
+      value={periodAggregate.totaleViolazioni}
+    />
+
+    <StatCard
+      title="Operatori"
+      value={periodAggregate.totaleOperatori}
+    />
+  </div>
+</div>
     <div className="actions">
       <button
         type="button"
