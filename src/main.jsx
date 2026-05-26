@@ -1377,28 +1377,7 @@ if (!periodReports.length) {
 >
   Genera PDF aggregato
 </button>
-    </div>
-<div className="metrics">
-  <Metric
-    label="Report operatori"
-    value={filteredReports.length}
-  />
-
-  <Metric
-    label="Interventi"
-    value={aggregate.totalInterventi}
-  />
-
-  <Metric
-    label="Violazioni"
-    value={aggregate.totalViolazioni}
-  />
-
-  <Metric
-    label="Km"
-    value={aggregate.kmTotali}
-  />
-</div>  
+</div>
 
 </section>
 
