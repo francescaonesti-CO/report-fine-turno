@@ -1000,6 +1000,114 @@ if (!filterDate) return false;
   const aggregate = useMemo(() => aggregateReports(filteredReports), [filteredReports]);
   const autoSintesi = useMemo(() => officialSynthesis(aggregate, filteredReports), [aggregate, filteredReports]);
 const autoEventi = useMemo(() => officialEventsText(filteredReports), [filteredReports]);
+  const generatePeriodPdf = () => {
+  if (!periodReports.length) {
+    alert('Nessun report presente nel periodo selezionato.');
+    return;
+  }
+
+  const doc = new jsPDF('p', 'mm', 'a4');
+
+  const title = 'REPORT AGGREGATO PER PERIODO';
+  const periodo = `${periodStart || 'inizio'} - ${periodEnd || 'fine'}`;
+  const reparto = periodReparto || 'Tutti i reparti';
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(16);
+  doc.text(title, 14, 18);
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(10);
+  doc.text(`Periodo: ${periodo}`, 14, 28);
+  doc.text(`Reparto: ${reparto}`, 14, 34);
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(12);
+  doc.text('Sintesi numerica', 14, 48);
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(10);
+  doc.text(`Report analizzati: ${periodAggregate.totaleReport}`, 14, 58);
+  doc.text(`Interventi complessivi: ${periodAggregate.totaleInterventi}`, 14, 65);
+  doc.text(`Violazioni rilevate: ${periodAggregate.totaleViolazioni}`, 14, 72);
+  doc.text(`Operatori impiegati: ${periodAggregate.totaleOperatori}`, 14, 79);
+  doc.text(`Veicoli impiegati: ${periodAggregate.totaleVeicoli}`, 14, 86);
+
+  let y = 102;
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(12);
+  doc.text('Interventi per tipologia', 14, y);
+  y += 8;
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+
+  Object.entries(periodAggregate.interventiPerTipo)
+    .sort((a, b) => b[1] - a[1])
+    .forEach(([tipo, totale]) => {
+      if (y > 275) {
+        doc.addPage();
+        y = 20;
+      }
+
+      doc.text(`${tipo}: ${totale}`, 16, y);
+      y += 7;
+    });
+
+  y += 8;
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(12);
+  doc.text('Report per reparto', 14, y);
+  y += 8;
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+
+  Object.entries(periodAggregate.reportPerReparto)
+    .sort((a, b) => b[1] - a[1])
+    .forEach(([rep, totale]) => {
+      if (y > 275) {
+        doc.addPage();
+        y = 20;
+      }
+
+      doc.text(`${rep}: ${totale}`, 16, y);
+      y += 7;
+    });
+
+  if (periodAggregate.eventiRilievo.length > 0) {
+    doc.addPage();
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(14);
+    doc.text('Eventi e annotazioni rilevanti', 14, 20);
+
+    y = 34;
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+
+    periodAggregate.eventiRilievo.forEach(e => {
+      if (y > 265) {
+        doc.addPage();
+        y = 20;
+      }
+
+      doc.setFont('helvetica', 'bold');
+      doc.text(`${e.data || '-'} — ${e.reparto || '-'}`, 14, y);
+      y += 6;
+
+      doc.setFont('helvetica', 'normal');
+      const lines = doc.splitTextToSize(String(e.testo || ''), 180);
+      doc.text(lines, 14, y);
+      y += lines.length * 5 + 6;
+    });
+  }
+
+  doc.save(`Report_aggregato_${periodStart || 'inizio'}_${periodEnd || 'fine'}.pdf`);
+};
   const operatorSummary = useMemo(() => {
   const rows = [];
 
@@ -1250,6 +1358,12 @@ const autoEventi = useMemo(() => officialEventsText(filteredReports), [filteredR
       >
         Reset filtri
       </button>
+      <button
+  type="button"
+  onClick={generatePeriodPdf}
+>
+  Genera PDF aggregato
+</button>
     </div>
   </section>
     <section className="metrics"><Metric label="Report operatori" value={filteredReports.length} /><Metric label="Interventi" value={aggregate.totalInterventi} /><Metric label="Violazioni" value={aggregate.totaleViolazioni} /><Metric label="Km" value={aggregate.kmTotali} /></section>
