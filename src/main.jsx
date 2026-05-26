@@ -1136,30 +1136,27 @@ const autoEventi = useMemo(() => officialEventsText(filteredReports), [filteredR
     </Field>
   </div>
 
-  <div
-    className="stats-grid"
-    style={{ marginTop: 16 }}
-  >
-    <StatCard
-      title="Report"
-      value={periodAggregate.totaleReport}
-    />
-
-    <StatCard
-      title="Interventi"
-      value={periodAggregate.totaleInterventi}
-    />
-
-    <StatCard
-      title="Violazioni"
-      value={periodAggregate.totaleViolazioni}
-    />
-
-    <StatCard
-      title="Operatori"
-      value={periodAggregate.totaleOperatori}
-    />
+  <div className="grid four" style={{ marginTop: 16 }}>
+  <div className="miniStat">
+    <b>{periodAggregate.totaleReport}</b>
+    <span>Report</span>
   </div>
+
+  <div className="miniStat">
+    <b>{periodAggregate.totaleInterventi}</b>
+    <span>Interventi</span>
+  </div>
+
+  <div className="miniStat">
+    <b>{periodAggregate.totaleViolazioni}</b>
+    <span>Violazioni</span>
+  </div>
+
+  <div className="miniStat">
+    <b>{periodAggregate.totaleOperatori}</b>
+    <span>Operatori</span>
+  </div>
+</div>
 </div>
     <div className="actions">
       <button
