@@ -222,11 +222,26 @@ function LoginScreen({ onLogin, command, setCommand, personaleDb }) {
   const [matricola, setMatricola] = useState('');
   const [error, setError] = useState('');
   function submit(e) {
-    e.preventDefault();
-    const persona = findPersonaByMatricola(matricola, personaleDb);
-    if (!persona) { setError('Matricola non riconosciuta. Verificare il numero inserito.'); return; }
-    onLogin({ persona, ruolo: matricola.trim() === '9654' ? 'admin' : (isUfficiale(persona) ? 'ufficiale' : 'operatore') });
+  e.preventDefault();
+
+  console.log('MATRICOLA INSERITA:', matricola);
+  console.log('PERSONALE DB:', personaleDb);
+  console.log('NUMERO PERSONE DB:', personaleDb?.length);
+
+  const persona = findPersonaByMatricola(matricola, personaleDb);
+
+  console.log('PERSONA TROVATA:', persona);
+
+  if (!persona) {
+    setError('Matricola non riconosciuta. Verificare il numero inserito.');
+    return;
   }
+
+  onLogin({
+    persona,
+    ruolo: persona.ruolo || persona.role || (matricola.trim() === '9654' ? 'admin' : (isUfficiale(persona) ? 'ufficiale' : 'operatore'))
+  });
+}
 return (
 <section className="loginScreen">
   <section className="loginCard">
