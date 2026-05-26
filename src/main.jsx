@@ -832,7 +832,9 @@ function OfficialReport({ reports, setReports, official, setOfficial }) {
   const [periodEnd, setPeriodEnd] = useState('');
   const [periodReparto, setPeriodReparto] = useState('');
   const periodReports = useMemo(() => {
-  return (reports || []).filter(r => {
+  if (!periodStart || !periodEnd) return [];
+
+return (reports || []).filter(r => {
     let payload = r;
 
     try {
@@ -1353,21 +1355,21 @@ if (!periodReports.length) {
   )}
 </div>    
     <div className="actions">
-    <button
+  <button
   type="button"
   className="ghost"
- onClick={(e) => {
-  e.preventDefault();
-  e.stopPropagation();
-
-  setFilterDate('');
-  setFilterTurno('');
-  setPeriodStart('');
-  setPeriodEnd('');
-  setPeriodReparto('');
-}}
+  onClick={() => {
+    window.setTimeout(() => {
+      setFilterDate('');
+      setFilterTurno('');
+      setPeriodStart('');
+      setPeriodEnd('');
+      setPeriodReparto('');
+    }, 0);
+  }}
 >
   Reset filtri
+</button>i
 </button>
       <button
   type="button"
