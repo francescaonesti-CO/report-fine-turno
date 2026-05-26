@@ -1353,19 +1353,22 @@ if (!periodReports.length) {
   )}
 </div>    
     <div className="actions">
-      <button
-        type="button"
-        className="ghost"
-        onClick={() => {
-          setFilterDate('');
-          setFilterTurno('');
-          setPeriodStart('');
-          setPeriodEnd('');
-          setPeriodReparto('');
-        }}
-      >
-        Reset filtri
-      </button>
+    <button
+  type="button"
+  className="ghost"
+ onClick={(e) => {
+  e.preventDefault();
+  e.stopPropagation();
+
+  setFilterDate('');
+  setFilterTurno('');
+  setPeriodStart('');
+  setPeriodEnd('');
+  setPeriodReparto('');
+}}
+>
+  Reset filtri
+</button>
       <button
   type="button"
   onClick={generatePeriodPdf}
