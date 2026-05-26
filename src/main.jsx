@@ -1378,8 +1378,7 @@ if (!periodReports.length) {
   Genera PDF aggregato
 </button>
     </div>
-  </section>
-<section className="metrics">
+<div className="metrics">
   <Metric
     label="Report operatori"
     value={filteredReports.length}
@@ -1399,7 +1398,11 @@ if (!periodReports.length) {
     label="Km"
     value={aggregate.kmTotali}
   />
-</section>    <section className="card">
+</div>  
+
+</section>
+
+    <section className="card">
   <h2>Operatori presenti nei report filtrati</h2>
 
   {operatorSummary.length === 0 ? (
