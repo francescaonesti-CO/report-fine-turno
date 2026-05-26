@@ -280,11 +280,12 @@ const [mode, setMode] = useState(() => (auth?.ruolo === 'ufficiale' || auth?.ruo
     );
 
     const mapped = data.map((u) => ({
-      cognome: u.surname,
-      nome: u.name,
-      matricola: u.matricola,
-      qualifica: u.role,
-    }));
+  cognome: u.surname,
+  nome: u.name,
+  matricola: u.matricola,
+  qualifica: u.qualification || u.role,
+  ruolo: u.role,
+}));
 
     setPersonaleDb(mapped);
   }
