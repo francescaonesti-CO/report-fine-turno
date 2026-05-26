@@ -299,7 +299,7 @@ const [mode, setMode] = useState(() => (auth?.ruolo === 'ufficiale' || auth?.ruo
     const mapped = data.map((u) => ({
   cognome: u.surname,
   nome: u.name,
-  matricola: String(u.matricola).trim(),
+  matricola: String(u.matricola || '').trim(),
   qualifica: u.qualification || u.role,
   ruolo: u.role,
 }));
