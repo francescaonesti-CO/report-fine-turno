@@ -1276,23 +1276,23 @@ if (!periodReports.length) {
 
   <div className="grid four" style={{ marginTop: 16 }}>
   <div className="miniStat">
-    <b>{periodAggregate.totaleReport}</b>
-    <span>Report</span>
-  </div>
+  <b>{periodAggregate.totaleReport}</b>
+  <span style={{ marginLeft: 6 }}>Report</span>
+</div>
 
   <div className="miniStat">
     <b>{periodAggregate.totaleInterventi}</b>
-    <span>Interventi</span>
+    <span style={{ marginLeft: 6 }}>Interventi</span>
   </div>
 
   <div className="miniStat">
     <b>{periodAggregate.totaleViolazioni}</b>
-    <span>Violazioni</span>
+    <span style={{ marginLeft: 6 }}>Violazioni</span>
   </div>
 
   <div className="miniStat">
     <b>{periodAggregate.totaleOperatori}</b>
-    <span>Operatori</span>
+    <span style={{ marginLeft: 6 }}>Operatori</span>
   </div>
 </div>
 </div>
