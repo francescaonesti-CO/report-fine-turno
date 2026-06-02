@@ -975,8 +975,11 @@ const periodAutoSintesi = useMemo(() => {
 
   const eventi = periodAggregate.eventiRilievo.length;
 
-  return `Nel periodo dal ${periodStart} al ${periodEnd}, per ${reparto}, risultano acquisiti ${periodAggregate.totaleReport} report operatori, con ${periodAggregate.totaleInterventi} interventi complessivi, ${periodAggregate.totaleViolazioni} violazioni rilevate e ${periodAggregate.totaleOperatori} operatori impiegati. La tipologia di intervento prevalente risulta: ${tipoPrevalente}. ${eventi > 0 ? `Sono presenti ${eventi} eventi o annotazioni rilevanti da valutare.` : 'Non risultano eventi rilevanti nel periodo selezionato.'}`;
-}, [periodStart, periodEnd, periodReparto, periodReports, periodAggregate]);
+return `Nel periodo in esame, dal ${periodStart} al ${periodEnd}, l'attività operativa riferita a ${reparto} evidenzia ${periodAggregate.totaleReport} report acquisiti e ${periodAggregate.totaleInterventi} interventi complessivi. La tipologia di intervento prevalente risulta ${tipoPrevalente}. Sono state rilevate ${periodAggregate.totaleViolazioni} violazioni e risultano impiegati ${periodAggregate.totaleOperatori} operatori. ${
+  eventi > 0
+    ? `Si segnalano ${eventi} eventi o annotazioni meritevoli di attenzione operativa.`
+    : 'Non emergono eventi rilevanti nel periodo selezionato.'
+}`;
   
 const getMacroTurno = (turno) => {
   const value = String(turno || '').trim();
