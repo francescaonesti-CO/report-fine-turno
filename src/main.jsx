@@ -1108,14 +1108,29 @@ doc.text(`Reparto: ${reparto}`, 14, 62);
 
 doc.setTextColor(0, 0, 0);
 
+// TITOLO SEZIONE
 doc.setFont('helvetica', 'bold');
 doc.setFontSize(12);
-doc.text('Sintesi operativa', 14, 76);
+doc.setTextColor(12, 47, 97);
+doc.text('SINTESI OPERATIVA', 14, 76);
 
+// BOX SINTESI
+doc.setDrawColor(180, 195, 215);
+doc.setFillColor(245, 248, 252);
+doc.roundedRect(14, 82, 182, 34, 3, 3, 'FD');
+
+// linea verticale laterale
+doc.setFillColor(12, 47, 97);
+doc.rect(14, 82, 3, 34, 'F');
+
+// testo sintesi
+doc.setTextColor(40, 40, 40);
 doc.setFont('helvetica', 'normal');
 doc.setFontSize(9);
 
-const sintesiLines = doc.splitTextToSize(sintesiFinale, 180);
+const sintesiLines = doc.splitTextToSize(sintesiFinale, 170);
+doc.text(sintesiLines, 22, 90);
+    
 doc.text(sintesiLines, 14, 84);
 doc.setFont('helvetica', 'bold');
 doc.setFontSize(12);
@@ -1143,30 +1158,30 @@ kpis.forEach(([label, value]) => {
 
   // sfondo box
   doc.setFillColor(...color);
-  doc.roundedRect(kpiX, 126, 42, 26, 4, 4, 'F');
+  doc.roundedRect(kpiX, 146, 42, 26, 4, 4, 'F');
 
   // numero grande
   doc.setTextColor(255, 255, 255);
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(18);
-  doc.text(String(value), kpiX + 21, 138, { align: 'center' });
+  doc.text(String(value), kpiX + 21, 158, { align: 'center' });
 
   // etichetta
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8);
-  doc.text(label, kpiX + 21, 147, { align: 'center' });
+  doc.text(label, kpiX + 21, 167, { align: 'center' });
 
   // mini linea inferiore elegante
   doc.setDrawColor(255, 255, 255);
   doc.setLineWidth(0.3);
-  doc.line(kpiX + 10, 150, kpiX + 32, 150);
+  doc.line(kpiX + 10, 170, kpiX + 32, 150);
 
   kpiX += 46;
 });
 
 doc.setTextColor(0, 0, 0);
 
-  let y = 164;
+  let y = 184;
 
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(12);
