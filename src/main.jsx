@@ -1377,6 +1377,22 @@ if (!periodReports.length) {
     ))
   )}
 </div>    
+    <div className="card" style={{ marginTop: 20 }}>
+  <div className="section-title">
+    Sintesi operativa del periodo
+  </div>
+
+  <p className="muted" style={{ marginBottom: 10 }}>
+    Testo generato automaticamente dal sistema. L'ufficiale può modificarlo,
+    integrarlo o sostituirlo prima della generazione del PDF aggregato.
+  </p>
+
+  <Textarea
+    value={periodSintesiManuale || periodAutoSintesi}
+    onChange={v => setPeriodSintesiManuale(v)}
+    placeholder="Sintesi operativa del periodo..."
+  />
+</div>
     <div className="actions">
   <button
   type="button"
