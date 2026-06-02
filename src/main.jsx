@@ -1053,6 +1053,9 @@ if (!periodReports.length) {
   return;
 }
 
+  const sintesiFinale = periodSintesiManuale?.trim()
+  ? periodSintesiManuale
+  : periodAutoSintesi;
   const doc = new jsPDF('p', 'mm', 'a4');
 
   const title = 'REPORT AGGREGATO PER PERIODO';
@@ -1067,20 +1070,29 @@ if (!periodReports.length) {
   doc.setFontSize(10);
   doc.text(`Periodo: ${periodo}`, 14, 28);
   doc.text(`Reparto: ${reparto}`, 14, 34);
+  doc.setFont('helvetica', 'bold');
+doc.setFontSize(12);
+doc.text('Sintesi operativa', 14, 48);
+
+doc.setFont('helvetica', 'normal');
+doc.setFontSize(9);
+
+const sintesiLines = doc.splitTextToSize(sintesiFinale, 180);
+doc.text(sintesiLines, 14, 56);
 
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(12);
-  doc.text('Sintesi numerica', 14, 48);
+  doc.text('Sintesi numerica', 14, 88);
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(10);
-  doc.text(`Report analizzati: ${periodAggregate.totaleReport}`, 14, 58);
-  doc.text(`Interventi complessivi: ${periodAggregate.totaleInterventi}`, 14, 65);
-  doc.text(`Violazioni rilevate: ${periodAggregate.totaleViolazioni}`, 14, 72);
-  doc.text(`Operatori impiegati: ${periodAggregate.totaleOperatori}`, 14, 79);
-  doc.text(`Veicoli impiegati: ${periodAggregate.totaleVeicoli}`, 14, 86);
+  doc.text(`Report analizzati: ${periodAggregate.totaleReport}`, 14, 98);
+  doc.text(`Interventi complessivi: ${periodAggregate.totaleInterventi}`, 14, 105);
+  doc.text(`Violazioni rilevate: ${periodAggregate.totaleViolazioni}`, 14, 112);
+  doc.text(`Operatori impiegati: ${periodAggregate.totaleOperatori}`, 14, 119);
+  doc.text(`Veicoli impiegati: ${periodAggregate.totaleVeicoli}`, 14, 126);
 
-  let y = 102;
+  let y = 142;
 
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(12);
