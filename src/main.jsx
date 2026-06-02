@@ -152,8 +152,15 @@ function sanitizeFileName(s) { return String(s || 'report').replace(/[^a-z0-9._-
 
 function Field({ label, children }) {
   return (
-    <label className="field">
-      <span style={{ display: 'block', marginBottom: 8 }}>
+    <label
+  className="field"
+  style={{
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'flex-start'
+  }}
+>
+      <span style={{ display: 'block', marginBottom: 4 }}>
         {label}
       </span>
 
