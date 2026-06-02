@@ -1238,9 +1238,12 @@ if (!periodReports.length) {
 </Field>
     </div>
 <div className="card">
-  <div className="section-title">
-    Report aggregato per periodo
-  </div>
+  <div
+  className="section-title"
+  style={{ marginBottom: 18 }}
+>
+  Report aggregato per periodo
+</div>
 
   <div className="grid three">
     <Field label="Data iniziale">
