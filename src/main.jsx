@@ -1187,48 +1187,68 @@ kpis.forEach((k, i) => {
 doc.setTextColor(0, 0, 0);
 let y = 174;
 
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(12);
-  doc.text('Interventi per tipologia', 14, y);
-  y += 8;
+  // --- BOX INTERVENTI / REPARTI ---
+const boxTopY = y;
+const boxW = 88;
+const boxH = 58;
+const leftX = 14;
+const rightX = 108;
 
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(9);
+function drawMiniBox(x, y, w, h, title) {
+  doc.setFillColor(248, 250, 252);
+  doc.setDrawColor(220, 226, 235);
+  doc.roundedRect(x, y, w, h, 3, 3, 'FD');
 
-  Object.entries(periodAggregate.interventiPerTipo)
-    .sort((a, b) => b[1] - a[1])
-    .forEach(([tipo, totale]) => {
-      if (y > 275) {
-        doc.addPage();
-        y = 20;
-      }
-
-      doc.text(`${tipo}: ${totale}`, 16, y);
-      y += 7;
-    });
-
-  y += 8;
+  doc.setFillColor(12, 47, 97);
+  doc.roundedRect(x, y, w, 10, 3, 3, 'F');
 
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(12);
-  doc.text('Report per reparto', 14, y);
-  y += 8;
+  doc.setFontSize(8.5);
+  doc.setTextColor(255, 255, 255);
+  doc.text(title, x + 4, y + 6.5);
+}
 
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(9);
+drawMiniBox(leftX, boxTopY, boxW, boxH, 'Interventi per tipologia');
+drawMiniBox(rightX, boxTopY, boxW, boxH, 'Report per reparto');
 
-  Object.entries(periodAggregate.reportPerReparto)
-    .sort((a, b) => b[1] - a[1])
-    .forEach(([rep, totale]) => {
-      if (y > 275) {
-        doc.addPage();
-        y = 20;
-      }
+let leftY = boxTopY + 17;
 
-      doc.text(`${rep}: ${totale}`, 16, y);
-      y += 7;
-    });
+Object.entries(periodAggregate.interventiPerTipo || {})
+  .sort((a, b) => b[1] - a[1])
+  .slice(0, 6)
+  .forEach(([tipo, totale]) => {
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.setTextColor(45, 55, 72);
+    doc.text(String(tipo), leftX + 5, leftY, { maxWidth: 62 });
 
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(12, 47, 97);
+    doc.text(String(totale), leftX + boxW - 8, leftY, { align: 'right' });
+
+    leftY += 6;
+  });
+
+let rightY = boxTopY + 17;
+
+Object.entries(periodAggregate.reportPerReparto || {})
+  .sort((a, b) => b[1] - a[1])
+  .slice(0, 6)
+  .forEach(([rep, totale]) => {
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.setTextColor(45, 55, 72);
+    doc.text(String(rep), rightX + 5, rightY, { maxWidth: 62 });
+
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(12, 47, 97);
+    doc.text(String(totale), rightX + boxW - 8, rightY, { align: 'right' });
+
+    rightY += 6;
+  });
+
+doc.setTextColor(0, 0, 0);
+y = boxTopY + boxH + 10;
   if (periodAggregate.eventiRilievo.length > 0) {
     doc.addPage();
 
