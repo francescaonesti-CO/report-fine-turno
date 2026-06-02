@@ -1300,10 +1300,10 @@ y = 38;
   doc.setTextColor(12, 47, 97);
 
   doc.text(
-    `${formatDate(e.data)} — ${e.reparto || '-'}`
-    24,
-    y + 8
-  );
+  `${formatDate(e.data)} — ${e.reparto || '-'}`,
+  24,
+  y + 8
+);
 
   // TESTO
   doc.setFont('helvetica', 'normal');
