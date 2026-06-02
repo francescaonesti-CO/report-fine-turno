@@ -1062,9 +1062,17 @@ if (!periodReports.length) {
   ? periodSintesiManuale
   : periodAutoSintesi;
   const doc = new jsPDF('p', 'mm', 'a4');
+const formatDate = (dateString) => {
+  if (!dateString) return '-';
 
+  const [year, month, day] = String(dateString).split('-');
+
+  if (!year || !month || !day) return dateString;
+
+  return `${day}/${month}/${year}`;
+};
   const title = 'REPORT AGGREGATO PER PERIODO';
-  const periodo = `${periodStart || 'inizio'} - ${periodEnd || 'fine'}`;
+  const periodo = `${formatDate(periodStart)} - ${formatDate(periodEnd)}`;
   const reparto = periodReparto || 'Tutti i reparti';
 // HEADER ISTITUZIONALE
 try {
@@ -1292,7 +1300,7 @@ y = 38;
   doc.setTextColor(12, 47, 97);
 
   doc.text(
-    `${e.data || '-'} — ${e.reparto || '-'}`,
+    `${formatDate(e.data)} — ${e.reparto || '-'}`
     24,
     y + 8
   );
