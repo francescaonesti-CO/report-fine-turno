@@ -1144,28 +1144,50 @@ const kpis = [
 
 let kpiX = 14;
 
-const kpiColors = {
+const kpiStyles = {
   REPORT: {
-    border: [120, 165, 215],
-    fill: [238, 246, 255],
-    text: [28, 78, 128]
+    border: [150, 180, 220],
+    fill: [245, 249, 255],
+    text: [12, 47, 97]
   },
   INTERVENTI: {
-    border: [235, 180, 110],
-    fill: [255, 247, 237],
-    text: [180, 83, 9]
+    border: [230, 190, 140],
+    fill: [255, 250, 243],
+    text: [170, 90, 20]
   },
   VIOLAZIONI: {
-    border: [235, 150, 150],
-    fill: [254, 242, 242],
-    text: [153, 27, 27]
+    border: [230, 165, 165],
+    fill: [255, 246, 246],
+    text: [160, 35, 35]
   },
   OPERATORI: {
-    border: [135, 190, 160],
-    fill: [240, 253, 244],
-    text: [22, 101, 52]
+    border: [160, 205, 180],
+    fill: [246, 253, 248],
+    text: [25, 100, 55]
   }
 };
+
+kpis.forEach(([label, value]) => {
+  const style = kpiStyles[label];
+
+  doc.setDrawColor(...style.border);
+  doc.setFillColor(...style.fill);
+  doc.roundedRect(kpiX, 146, 42, 26, 3, 3, 'FD');
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(18);
+  doc.setTextColor(...style.text);
+  doc.text(String(value), kpiX + 21, 158, { align: 'center' });
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(7);
+  doc.setTextColor(45, 55, 70);
+  doc.text(label, kpiX + 21, 168, { align: 'center' });
+
+  kpiX += 46;
+});
+
+doc.setTextColor(0, 0, 0);
 
 kpis.forEach(([label, value]) => {
 
