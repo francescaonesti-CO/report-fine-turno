@@ -1145,7 +1145,28 @@ const kpiTopY = 140;
 const kpiW = 43;
 const kpiH = 24;
 const kpiGap = 4;
-
+const kpis = [
+  {
+    label: 'Report acquisiti',
+    value: aggregate.totaleReport || 0,
+    color: [232, 240, 254],
+  },
+  {
+    label: 'Interventi',
+    value: aggregate.totaleInterventi || 0,
+    color: [232, 245, 233],
+  },
+  {
+    label: 'Violazioni',
+    value: aggregate.totaleViolazioni || 0,
+    color: [255, 243, 224],
+  },
+  {
+    label: 'Operatori',
+    value: aggregate.totaleOperatori || 0,
+    color: [243, 229, 245],
+  },
+];
 kpis.forEach((k, i) => {
   const x = 14 + i * (kpiW + kpiGap);
 
