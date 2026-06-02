@@ -1190,9 +1190,9 @@ let y = 174;
   // --- BOX INTERVENTI / REPARTI ---
 const boxTopY = y;
 const boxW = 88;
-const boxH = 58;
+const boxH = 68;
 const leftX = 14;
-const rightX = 108;
+const rightX = 107;
 
 function drawMiniBox(x, y, w, h, title) {
   doc.setFillColor(248, 250, 252);
@@ -1203,7 +1203,7 @@ function drawMiniBox(x, y, w, h, title) {
   doc.roundedRect(x, y, w, 10, 3, 3, 'F');
 
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(8.5);
+  doc.setFontSize(8);
   doc.setTextColor(255, 255, 255);
   doc.text(title, x + 4, y + 6.5);
 }
@@ -1226,7 +1226,7 @@ Object.entries(periodAggregate.interventiPerTipo || {})
     doc.setTextColor(12, 47, 97);
     doc.text(String(totale), leftX + boxW - 8, leftY, { align: 'right' });
 
-    leftY += 6;
+    leftY += 7;
   });
 
 let rightY = boxTopY + 17;
@@ -1244,11 +1244,11 @@ Object.entries(periodAggregate.reportPerReparto || {})
     doc.setTextColor(12, 47, 97);
     doc.text(String(totale), rightX + boxW - 8, rightY, { align: 'right' });
 
-    rightY += 6;
+    rightY += 7;
   });
 
 doc.setTextColor(0, 0, 0);
-y = boxTopY + boxH + 10;
+y = boxTopY + boxH + 14;
   if (periodAggregate.eventiRilievo.length > 0) {
     doc.addPage();
 
