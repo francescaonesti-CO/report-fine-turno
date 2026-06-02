@@ -1221,10 +1221,15 @@ drawMiniBox(rightX, boxTopY, boxW, boxH, 'Report per reparto');
 
 let leftY = boxTopY + 17;
 
+const totaleInterventiPeriodo = periodAggregate.totaleInterventi || 0;
+
 Object.entries(periodAggregate.interventiPerTipo || {})
   .sort((a, b) => b[1] - a[1])
   .slice(0, 6)
   .forEach(([tipo, totale]) => {
+    const percentuale = totaleInterventiPeriodo
+      ? Math.round((totale / totaleInterventiPeriodo) * 100)
+      : 0;
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(8);
     doc.setTextColor(45, 55, 72);
@@ -1232,7 +1237,7 @@ Object.entries(periodAggregate.interventiPerTipo || {})
 
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(12, 47, 97);
-    doc.text(String(totale), leftX + boxW - 8, leftY, { align: 'right' });
+    doc.text(`${totale} (${percentuale}%)`, leftX + boxW - 5, leftY, { align: 'right' });
 
     leftY += 7;
   });
@@ -1317,21 +1322,28 @@ y = 38;
 
   doc.text(lines.slice(0, 3), 24, y + 16);
 
-  // BADGE
-  doc.setFillColor(12, 47, 97);
-  doc.circle(184, y + 8, 4, 'F');
+  // ICONA CALENDARIO
+doc.setDrawColor(12, 47, 97);
+doc.setLineWidth(0.8);
 
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(7);
-  doc.setTextColor(255, 255, 255);
+// corpo calendario
+doc.roundedRect(178, y + 5, 10, 9, 1.5, 1.5, 'S');
 
-  doc.text(
-    String(index + 1),
-    184,
-    y + 9.5,
-    { align: 'center' }
-  );
+// barra superiore
+doc.line(178, y + 8, 188, y + 8);
 
+// anelli
+doc.line(181, y + 4, 181, y + 7);
+doc.line(185, y + 4, 185, y + 7);
+
+// piccoli punti interni
+doc.setFillColor(12, 47, 97);
+doc.circle(181, y + 10, 0.5, 'F');
+doc.circle(184, y + 10, 0.5, 'F');
+doc.circle(187, y + 10, 0.5, 'F');
+doc.circle(181, y + 12, 0.5, 'F');
+doc.circle(184, y + 12, 0.5, 'F');
+doc.circle(187, y + 12, 0.5, 'F');
   y += 38;
 });
 }
