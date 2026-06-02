@@ -160,7 +160,14 @@ function Field({ label, children }) {
     justifyContent: 'flex-start'
   }}
 >
-      <span style={{ display: 'block', marginBottom: 4 }}>
+      <span
+  style={{
+    display: 'block',
+    marginBottom: 10,
+    fontWeight: 600,
+    color: '#33415c'
+  }}
+>
         {label}
       </span>
 
