@@ -1168,7 +1168,11 @@ const kpiStyles = {
 };
 
 kpis.forEach(([label, value]) => {
-  const style = kpiStyles[label];
+  const style = kpiStyles[label] || {
+  border: [200, 200, 200],
+  fill: [248, 248, 248],
+  text: [60, 60, 60]
+};
 
   doc.setDrawColor(...style.border);
   doc.setFillColor(...style.fill);
