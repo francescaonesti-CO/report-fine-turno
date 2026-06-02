@@ -1568,7 +1568,7 @@ function Distribution({ title, data, labels = {} }) {
     )}
   </div>
 );
-
+}
 
 // ===== REPORT PROFESSIONALI STAMPABILI HTML/CSS =====
 // Questa sezione sostituisce il PDF disegnato a coordinate: apre una pagina HTML stampabile,
