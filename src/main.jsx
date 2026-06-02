@@ -1195,7 +1195,7 @@ doc.setTextColor(0, 0, 0);
 
 kpis.forEach(([label, value]) => {
 
-  const color = kpiColors[label] || {
+  const style = kpiStyles[label] || {
   border: [200, 200, 200],
   fill: [248, 248, 248],
   text: [60, 60, 60]
