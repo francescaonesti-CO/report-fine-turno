@@ -1349,7 +1349,7 @@ doc.text(sintesiLines, 14, 56);
             style={{ marginBottom: 8 }}
           >
             <span>{tipo}</span>
-            <b>{totale}</b>
+            <b style={{ marginLeft: 6 }}>({totale})</b>
           </div>
         ))
     )}
@@ -1374,7 +1374,7 @@ doc.text(sintesiLines, 14, 56);
             style={{ marginBottom: 8 }}
           >
             <span>{reparto}</span>
-            <b>{totale}</b>
+            <b style={{ marginLeft: 6 }}>({totale})</b>
           </div>
         ))
     )}
