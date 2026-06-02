@@ -1158,19 +1158,19 @@ const generatePeriodPdf = () => {
     doc.setTextColor(255, 255, 255);
     doc.text('REPORT AGGREGATO PER PERIODO', 105, 42, { align: 'center' });
 
-    card(14, 48, 91, 16);
-    card(105, 48, 91, 16);
+    card(14, 48, 88, 16);
+    card(108, 48, 88, 16);
 
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(9);
     setText(C.blue);
     doc.text('Periodo:', 24, 58);
-    doc.text('Reparto:', 116, 58);
+    doc.text('Reparto:', 119, 58);
 
     doc.setFont('helvetica', 'normal');
     setText(C.text);
     doc.text(periodo, 42, 58);
-    doc.text(reparto, 134, 58);
+    doc.text(reparto, 137, 58);
   }
 
   function drawKpi(x, y, w, label, value, color) {
