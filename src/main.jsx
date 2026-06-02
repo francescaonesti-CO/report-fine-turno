@@ -1061,7 +1061,24 @@ if (!periodReports.length) {
   const title = 'REPORT AGGREGATO PER PERIODO';
   const periodo = `${periodStart || 'inizio'} - ${periodEnd || 'fine'}`;
   const reparto = periodReparto || 'Tutti i reparti';
+doc.setFont('helvetica', 'bold');
+doc.setFontSize(16);
+doc.text(title, 14, 18);
 
+doc.setFont('helvetica', 'normal');
+doc.setFontSize(10);
+doc.text(`Periodo: ${periodo}`, 14, 28);
+doc.text(`Reparto: ${reparto}`, 14, 34);
+
+doc.setFont('helvetica', 'bold');
+doc.setFontSize(12);
+doc.text('Sintesi operativa', 14, 48);
+
+doc.setFont('helvetica', 'normal');
+doc.setFontSize(9);
+
+const sintesiLines = doc.splitTextToSize(sintesiFinale, 180);
+doc.text(sintesiLines, 14, 56);
 doc.setFont('helvetica', 'bold');
 doc.setFontSize(12);
 doc.text('Sintesi numerica', 14, 88);
