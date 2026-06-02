@@ -1133,67 +1133,38 @@ doc.text(sintesiLines, 22, 90);
     
 doc.setFont('helvetica', 'bold');
 doc.setFontSize(12);
-doc.text('Sintesi numerica', 14, 118);
+// --- SINTESI NUMERICA / KPI ---
+const kpiTitleY = 132;
 
-const kpis = [
-  ['REPORT', periodAggregate.totaleReport],
-  ['INTERVENTI', periodAggregate.totaleInterventi],
-  ['VIOLAZIONI', periodAggregate.totaleViolazioni],
-  ['OPERATORI', periodAggregate.totaleOperatori]
-];
+doc.setFont('helvetica', 'bold');
+doc.setFontSize(11);
+doc.setTextColor(12, 47, 97);
+doc.text('Sintesi numerica', 14, kpiTitleY);
 
-let kpiX = 14;
+const kpiTopY = 140;
+const kpiW = 43;
+const kpiH = 24;
+const kpiGap = 4;
 
-const kpiStyles = {
-  REPORT: {
-    border: [150, 180, 220],
-    fill: [245, 249, 255],
-    text: [12, 47, 97]
-  },
-  INTERVENTI: {
-    border: [230, 190, 140],
-    fill: [255, 250, 243],
-    text: [170, 90, 20]
-  },
-  VIOLAZIONI: {
-    border: [230, 165, 165],
-    fill: [255, 246, 246],
-    text: [160, 35, 35]
-  },
-  OPERATORI: {
-    border: [160, 205, 180],
-    fill: [246, 253, 248],
-    text: [25, 100, 55]
-  }
-};
+kpis.forEach((k, i) => {
+  const x = 14 + i * (kpiW + kpiGap);
 
-kpis.forEach(([label, value]) => {
-  const style = kpiStyles[label] || {
-  border: [200, 200, 200],
-  fill: [248, 248, 248],
-  text: [60, 60, 60]
-};
-
-  doc.setDrawColor(...style.border);
-  doc.setFillColor(...style.fill);
-  doc.roundedRect(kpiX, 146, 42, 26, 3, 3, 'FD');
+  doc.setFillColor(...(k.color || [245, 247, 250]));
+  doc.roundedRect(x, kpiTopY, kpiW, kpiH, 3, 3, 'F');
 
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(18);
-  doc.setTextColor(...style.text);
-  doc.text(String(value), kpiX + 21, 158, { align: 'center' });
+  doc.setFontSize(14);
+  doc.setTextColor(12, 47, 97);
+  doc.text(String(k.value), x + 5, kpiTopY + 10);
 
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(7);
-  doc.setTextColor(45, 55, 70);
-  doc.text(label, kpiX + 21, 168, { align: 'center' });
-
-  kpiX += 46;
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7.5);
+  doc.setTextColor(90, 100, 115);
+  doc.text(k.label, x + 5, kpiTopY + 18, { maxWidth: kpiW - 10 });
 });
 
 doc.setTextColor(0, 0, 0);
-
-  let y = 184;
+let y = 174;
 
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(12);
