@@ -1335,7 +1335,39 @@ y = 38;
   y += 38;
 });
 }
+// ======================================================
+// FOOTER ISTITUZIONALE
+// ======================================================
 
+const totalPages = doc.internal.getNumberOfPages();
+
+for (let i = 1; i <= totalPages; i++) {
+
+  doc.setPage(i);
+
+  // linea separatrice
+  doc.setDrawColor(210, 218, 230);
+  doc.setLineWidth(0.4);
+  doc.line(14, 287, 196, 287);
+
+  // testo footer
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7);
+  doc.setTextColor(110, 120, 135);
+
+  doc.text(
+    'Polizia Locale di Monza — Report aggregato operativo',
+    14,
+    292
+  );
+
+  doc.text(
+    `Pagina ${i} / ${totalPages}`,
+    196,
+    292,
+    { align: 'right' }
+  );
+}
   doc.save(`Report_aggregato_${periodStart || 'inizio'}_${periodEnd || 'fine'}.pdf`);
 };
   const operatorSummary = useMemo(() => {
