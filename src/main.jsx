@@ -1528,11 +1528,46 @@ if (!periodReports.length) {
 
 </>;
 }
-function Metric({ label, value }) { return <div className="metric"><strong>{value}</strong><span>{label}</span></div>; }
+function Metric({ label, value }) {
+  return (
+    <div className="metric">
+      <strong style={{ marginRight: 6 }}>
+        {value}
+      </strong>
+
+      <span>
+        {label}
+      </span>
+    </div>
+  );
+}
 function Distribution({ title, data, labels = {} }) {
   const entries = Object.entries(data || {}).filter(([, value]) => n(value) > 0).sort((a, b) => n(b[1]) - n(a[1]));
-  return <div><h3>{title}</h3>{entries.length === 0 ? <p className="muted">Nessun dato.</p> : <ul className="distList">{entries.map(([key, value]) => <li key={key}><span>{labels[key] || key}</span><strong>{value}</strong></li>)}</ul>}</div>;
-}
+  return (
+  <div>
+    <h3>{title}</h3>
+
+    {entries.length === 0 ? (
+      <p className="muted">
+        Nessun dato.
+      </p>
+    ) : (
+      <ul className="distList">
+        {entries.map(([key, value]) => (
+          <li key={key}>
+            <span>
+              {labels[key] || key}
+            </span>
+
+            <strong style={{ marginLeft: 6 }}>
+              ({value})
+            </strong>
+          </li>
+        ))}
+      </ul>
+    )}
+  </div>
+);
 
 
 // ===== REPORT PROFESSIONALI STAMPABILI HTML/CSS =====
