@@ -981,6 +981,8 @@ return `Nel periodo in esame, dal ${periodStart} al ${periodEnd}, l'attività op
     : 'Non emergono eventi rilevanti nel periodo selezionato.'
 }`;
   
+}, [periodStart, periodEnd, periodReparto, periodReports, periodAggregate]);
+  
 const getMacroTurno = (turno) => {
   const value = String(turno || '').trim();
 
