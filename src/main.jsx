@@ -1289,11 +1289,12 @@ const generatePeriodPdf = () => {
     doc.text(rep, 114, ry, { maxWidth: 24 });
 
     setFill([118, 165, 220]);
-    doc.rect(145, ry - 5, barW, 5, 'F');
+doc.rect(145, ry - 5, barW, 5, 'F');
 
-    doc.setFont('helvetica', 'bold');
-    setText(C.blue);
-    doc.text(String(totale), 145 + barW + 4, ry - 1);
+doc.setFont('helvetica', 'bold');
+doc.setFontSize(7.5);
+setText(C.blue);
+doc.text(String(totale), 190, ry - 1, { align: 'right' });
 
     ry += 11;
   });
@@ -1311,27 +1312,30 @@ const generatePeriodPdf = () => {
   let y = 42;
 
   eventi.slice(0, 6).forEach((e) => {
-    card(14, y, 112, 24);
+  const eventTextLines = doc.splitTextToSize(String(e.testo || '-'), 82);
+  const cardH = Math.max(24, 17 + eventTextLines.length * 4);
 
-    setFill([225, 70, 70]);
-    doc.rect(30, y + 4, 1.2, 16, 'F');
+  card(14, y, 112, cardH);
 
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(9);
-    setText(C.red);
-    doc.text(formatDate(e.data), 36, y + 9);
+  setFill([225, 70, 70]);
+  doc.rect(30, y + 4, 1.2, cardH - 8, 'F');
 
-    doc.setFontSize(8);
-    setText(C.blue);
-    doc.text(e.reparto || '-', 36, y + 14);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(9);
+  setText(C.red);
+  doc.text(formatDate(e.data), 36, y + 9);
 
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(7.5);
-    setText(C.text);
-    doc.text(String(e.testo || '-'), 36, y + 19, { maxWidth: 82 });
+  doc.setFontSize(8);
+  setText(C.blue);
+  doc.text(e.reparto || '-', 36, y + 14);
 
-    y += 29;
-  });
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7.5);
+  setText(C.text);
+  doc.text(eventTextLines, 36, y + 19);
+
+  y += cardH + 5;
+});
 
   // VALUTAZIONE OPERATIVA
   card(134, 26, 62, 44);
@@ -1361,7 +1365,7 @@ const generatePeriodPdf = () => {
   );
 
   // LEGENDA
-  card(134, 88, 62, 48);
+  card(134, 88, 62, 58);
 
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(8);
@@ -1375,7 +1379,7 @@ const generatePeriodPdf = () => {
     ['ALTA PRESSIONE', 'Situazione critica', C.red],
   ];
 
-  let ly = 109;
+  let ly = 108;
 
   legenda.forEach(([label, descr, color]) => {
     setFill(color);
@@ -1388,9 +1392,9 @@ const generatePeriodPdf = () => {
 
     doc.setFont('helvetica', 'normal');
     setText(C.text);
-    doc.text(descr, 148, ly + 4, { maxWidth: 38 });
+    doc.text(descr, 148, ly + 3.5, { maxWidth: 38 });
 
-    ly += 10;
+ly += 9;
   });
 
  // FOOTER DETTAGLIATO PAGINA 2
