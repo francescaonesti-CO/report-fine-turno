@@ -1047,339 +1047,373 @@ if (!filterDate) return false;
   const aggregate = useMemo(() => aggregateReports(filteredReports), [filteredReports]);
   const autoSintesi = useMemo(() => officialSynthesis(aggregate, filteredReports), [aggregate, filteredReports]);
 const autoEventi = useMemo(() => officialEventsText(filteredReports), [filteredReports]);
-  const generatePeriodPdf = () => {
+const generatePeriodPdf = () => {
   if (!periodStart || !periodEnd) {
-  alert('Seleziona data iniziale e data finale per generare il report aggregato.');
-  return;
-}
+    alert('Seleziona data iniziale e data finale per generare il report aggregato.');
+    return;
+  }
 
-if (!periodReports.length) {
-  alert('Nessun report presente nel periodo selezionato.');
-  return;
-}
+  if (!periodReports.length) {
+    alert('Nessun report presente nel periodo selezionato.');
+    return;
+  }
+
+  const doc = new jsPDF('p', 'mm', 'a4');
+
+  const C = {
+    blue: [12, 47, 97],
+    lightBlue: [235, 243, 255],
+    border: [214, 224, 236],
+    text: [30, 40, 55],
+    muted: [80, 90, 105],
+    orange: [234, 126, 0],
+    red: [190, 30, 45],
+    green: [22, 145, 90],
+    soft: [248, 250, 252],
+  };
+
+  const setText = (color) => doc.setTextColor(...color);
+  const setFill = (color) => doc.setFillColor(...color);
+  const setDraw = (color) => doc.setDrawColor(...color);
+
+  const formatDate = (dateString) => {
+    if (!dateString) return '-';
+    const [year, month, day] = String(dateString).split('-');
+    if (!year || !month || !day) return dateString;
+    return `${day}/${month}/${year}`;
+  };
+
+  const formatDateTime = () => {
+    const now = new Date();
+    return now.toLocaleDateString('it-IT') + ' ' + now.toLocaleTimeString('it-IT', {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
 
   const sintesiFinale = periodSintesiManuale?.trim()
-  ? periodSintesiManuale
-  : periodAutoSintesi;
-  const doc = new jsPDF('p', 'mm', 'a4');
-const formatDate = (dateString) => {
-  if (!dateString) return '-';
+    ? periodSintesiManuale
+    : periodAutoSintesi;
 
-  const [year, month, day] = String(dateString).split('-');
-
-  if (!year || !month || !day) return dateString;
-
-  return `${day}/${month}/${year}`;
-};
-  const title = 'REPORT AGGREGATO PER PERIODO';
   const periodo = `${formatDate(periodStart)} - ${formatDate(periodEnd)}`;
   const reparto = periodReparto || 'Tutti i reparti';
-// HEADER ISTITUZIONALE
-try {
-  const img = document.getElementById('pdfLogo');
-  if (img && img.complete) {
-    doc.addImage(img, 'PNG', 14, 8, 18, 18);
+
+  const totaleInterventi = periodAggregate.totaleInterventi || 0;
+  const interventiEntries = Object.entries(periodAggregate.interventiPerTipo || {})
+    .sort((a, b) => b[1] - a[1]);
+
+  const repartiEntries = Object.entries(periodAggregate.reportPerReparto || {})
+    .sort((a, b) => b[1] - a[1]);
+
+  const eventi = periodAggregate.eventiRilievo || [];
+
+  function card(x, y, w, h) {
+    doc.setFillColor(255, 255, 255);
+    setDraw(C.border);
+    doc.setLineWidth(0.35);
+    doc.roundedRect(x, y, w, h, 2, 2, 'FD');
   }
-} catch (e) {}
 
-doc.setFont('helvetica', 'bold');
-doc.setFontSize(14);
-doc.setTextColor(12, 47, 97);
-doc.text('COMUNE DI MONZA', 38, 14);
+  function sectionTitle(title, x, y) {
+    setFill([0, 86, 179]);
+    doc.rect(x, y - 7, 2, 8, 'F');
 
-doc.setFontSize(9);
-doc.text('Settore Polizia Locale, Protezione Civile', 38, 20);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(11);
+    setText(C.blue);
+    doc.text(title.toUpperCase(), x + 5, y);
+  }
 
-doc.setFont('helvetica', 'normal');
-doc.setFontSize(8);
-doc.setTextColor(60, 70, 85);
-doc.text('Via Marsala 13 - 20900 Monza', 150, 13);
-doc.text('Tel. 039 28161', 150, 18);
+  function drawHeader() {
+    try {
+      const img = document.getElementById('pdfLogo');
+      if (img && img.complete) {
+        doc.addImage(img, 'PNG', 14, 8, 18, 18);
+      }
+    } catch (e) {}
 
-doc.setDrawColor(12, 47, 97);
-doc.setLineWidth(0.6);
-doc.line(14, 30, 196, 30);
+    setDraw(C.blue);
+    doc.setLineWidth(0.4);
+    doc.line(38, 8, 38, 27);
 
-doc.setFillColor(12, 47, 97);
-doc.roundedRect(14, 36, 182, 11, 2, 2, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(15);
+    setText(C.blue);
+    doc.text('COMUNE DI MONZA', 42, 15);
 
-doc.setFont('helvetica', 'bold');
-doc.setFontSize(12);
-doc.setTextColor(255, 255, 255);
-doc.text(title, 105, 43, { align: 'center' });
+    doc.setFontSize(9);
+    doc.text('Settore Polizia Locale, Protezione Civile', 42, 22);
 
-doc.setFont('helvetica', 'normal');
-doc.setFontSize(9);
-doc.setTextColor(30, 40, 55);
-doc.text(`Periodo: ${periodo}`, 14, 56);
-doc.text(`Reparto: ${reparto}`, 14, 62);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    setText(C.text);
+    doc.text('Via Marsala 13 - 20900 Monza', 145, 14);
+    doc.text('Tel. 039 28161', 145, 21);
 
-doc.setTextColor(0, 0, 0);
+    setFill(C.blue);
+    doc.roundedRect(14, 34, 182, 12, 2, 2, 'F');
 
-// TITOLO SEZIONE
-doc.setFont('helvetica', 'bold');
-doc.setFontSize(12);
-doc.setTextColor(12, 47, 97);
-doc.text('SINTESI OPERATIVA', 14, 76);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(13);
+    doc.setTextColor(255, 255, 255);
+    doc.text('REPORT AGGREGATO PER PERIODO', 105, 42, { align: 'center' });
 
-// BOX SINTESI
-doc.setDrawColor(180, 195, 215);
-doc.setFillColor(245, 248, 252);
-doc.roundedRect(14, 82, 182, 34, 3, 3, 'FD');
+    card(14, 48, 91, 16);
+    card(105, 48, 91, 16);
 
-// linea verticale laterale
-doc.setFillColor(12, 47, 97);
-doc.rect(14, 82, 3, 34, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(9);
+    setText(C.blue);
+    doc.text('Periodo:', 24, 58);
+    doc.text('Reparto:', 116, 58);
 
-// testo sintesi
-doc.setTextColor(40, 40, 40);
-doc.setFont('helvetica', 'normal');
-doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    setText(C.text);
+    doc.text(periodo, 42, 58);
+    doc.text(reparto, 134, 58);
+  }
 
-const sintesiLines = doc.splitTextToSize(sintesiFinale, 170);
-doc.text(sintesiLines, 22, 90);
-    
-doc.setFont('helvetica', 'bold');
-doc.setFontSize(12);
-// --- SINTESI NUMERICA / KPI ---
-const kpiTitleY = 132;
+  function drawKpi(x, y, w, label, value, color) {
+    card(x, y, w, 30);
 
-doc.setFont('helvetica', 'bold');
-doc.setFontSize(11);
-doc.setTextColor(12, 47, 97);
-doc.text('Sintesi numerica', 14, kpiTitleY);
+    doc.setFillColor(color[0], color[1], color[2], 0.12);
+    doc.circle(x + 13, y + 13, 6, 'F');
 
-const kpiTopY = 140;
-const kpiW = 43;
-const kpiH = 24;
-const kpiGap = 4;
-const kpis = [
-  {
-    label: 'Report acquisiti',
-    value: periodAggregate.totaleReport || 0,
-    color: [232, 240, 254],
-  },
-  {
-    label: 'Interventi',
-    value: periodAggregate.totaleInterventi || 0,
-    color: [232, 245, 233],
-  },
-  {
-    label: 'Violazioni',
-    value: periodAggregate.totaleViolazioni || 0,
-    color: [255, 243, 224],
-  },
-  {
-    label: 'Operatori',
-    value: periodAggregate.totaleOperatori || 0,
-    color: [243, 229, 245],
-  },
-];
-kpis.forEach((k, i) => {
-  const x = 14 + i * (kpiW + kpiGap);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(20);
+    doc.setTextColor(...color);
+    doc.text(String(value), x + w - 13, y + 16, { align: 'right' });
 
-  doc.setFillColor(...(k.color || [245, 247, 250]));
-  doc.roundedRect(x, kpiTopY, kpiW, kpiH, 3, 3, 'F');
+    doc.setFontSize(8);
+    doc.text(label.toUpperCase(), x + w - 13, y + 24, { align: 'right' });
+  }
 
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(14);
-  doc.setTextColor(12, 47, 97);
-  doc.text(String(k.value), x + 5, kpiTopY + 10);
+  function drawFooter(page, total) {
+    setDraw(C.blue);
+    doc.setLineWidth(0.4);
+    doc.line(14, 278, 196, 278);
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(7);
+    setText(C.blue);
+    doc.text(`Pagina ${page} di ${total}`, 190, 287, { align: 'right' });
+  }
+
+  // =========================
+  // PAGINA 1
+  // =========================
+
+  drawHeader();
+
+  sectionTitle('Sintesi operativa', 14, 78);
+
+  card(14, 82, 182, 32);
+  setDraw([150, 185, 230]);
+  setFill([246, 250, 255]);
+  doc.roundedRect(14, 82, 182, 32, 2, 2, 'FD');
 
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(7.5);
-  doc.setTextColor(90, 100, 115);
-  doc.text(k.label, x + 5, kpiTopY + 18, { maxWidth: kpiW - 10 });
-});
+  doc.setFontSize(8.5);
+  setText(C.text);
 
-doc.setTextColor(0, 0, 0);
-let y = 174;
+  const sintesiLines = doc.splitTextToSize(sintesiFinale, 165);
+  doc.text(sintesiLines.slice(0, 5), 20, 91);
 
-  // --- BOX INTERVENTI / REPARTI ---
-const boxTopY = y;
-const boxW = 88;
-const boxH = 68;
-const leftX = 14;
-const rightX = 107;
+  sectionTitle('Sintesi numerica', 14, 126);
 
-function drawMiniBox(x, y, w, h, title) {
-  doc.setFillColor(248, 250, 252);
-  doc.setDrawColor(220, 226, 235);
-  doc.roundedRect(x, y, w, h, 3, 3, 'FD');
+  drawKpi(14, 132, 42, 'Report', periodAggregate.totaleReport || 0, [0, 86, 179]);
+  drawKpi(61, 132, 42, 'Interventi', periodAggregate.totaleInterventi || 0, [234, 126, 0]);
+  drawKpi(108, 132, 42, 'Violazioni', periodAggregate.totaleViolazioni || 0, [185, 28, 28]);
+  drawKpi(155, 132, 41, 'Operatori', periodAggregate.totaleOperatori || 0, [22, 145, 90]);
 
-  doc.setFillColor(12, 47, 97);
-  doc.roundedRect(x, y, w, 10, 3, 3, 'F');
+  // BOX INTERVENTI
+  card(14, 170, 88, 58);
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(9);
+  setText(C.blue);
+  doc.text('INTERVENTI PER TIPOLOGIA', 20, 180);
+
+  let iy = 193;
+
+  interventiEntries.slice(0, 5).forEach(([tipo, totale], idx) => {
+    const perc = totaleInterventi
+      ? Math.round((totale / totaleInterventi) * 100)
+      : 0;
+
+    const colors = [
+      [102, 153, 220],
+      [255, 170, 110],
+      [125, 190, 150],
+      [150, 130, 210],
+      [230, 160, 80],
+    ];
+
+    setFill(colors[idx] || C.blue);
+    doc.rect(21, iy - 3, 3, 3, 'F');
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7.5);
+    setText(C.text);
+    doc.text(String(tipo), 27, iy, { maxWidth: 45 });
+
+    setDraw([170, 180, 195]);
+    doc.setLineDashPattern([1, 1], 0);
+    doc.line(60, iy - 1, 83, iy - 1);
+    doc.setLineDashPattern([], 0);
+
+    doc.setFont('helvetica', 'bold');
+    setText(C.blue);
+    doc.text(`${totale} (${perc}%)`, 96, iy, { align: 'right' });
+
+    iy += 8;
+  });
+
+  // BOX REPARTI
+  card(108, 170, 88, 58);
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(9);
+  setText(C.blue);
+  doc.text('REPORT PER REPARTO', 114, 180);
+
+  let ry = 196;
+  const maxReparto = Math.max(1, ...repartiEntries.map(([, v]) => v));
+
+  repartiEntries.slice(0, 4).forEach(([rep, totale]) => {
+    const barW = Math.max(8, (totale / maxReparto) * 50);
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7.5);
+    setText(C.text);
+    doc.text(rep, 114, ry, { maxWidth: 24 });
+
+    setFill([118, 165, 220]);
+    doc.rect(145, ry - 5, barW, 5, 'F');
+
+    doc.setFont('helvetica', 'bold');
+    setText(C.blue);
+    doc.text(String(totale), 145 + barW + 4, ry - 1);
+
+    ry += 11;
+  });
+
+  drawFooter(1, 2);
+
+  // =========================
+  // PAGINA 2
+  // =========================
+
+  doc.addPage();
+
+  sectionTitle('Eventi e annotazioni rilevanti', 14, 26);
+
+  let y = 42;
+
+  eventi.slice(0, 6).forEach((e) => {
+    card(14, y, 112, 24);
+
+    setFill([225, 70, 70]);
+    doc.rect(30, y + 4, 1.2, 16, 'F');
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(9);
+    setText(C.red);
+    doc.text(formatDate(e.data), 36, y + 9);
+
+    doc.setFontSize(8);
+    setText(C.blue);
+    doc.text(e.reparto || '-', 36, y + 14);
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7.5);
+    setText(C.text);
+    doc.text(String(e.testo || '-'), 36, y + 19, { maxWidth: 82 });
+
+    y += 29;
+  });
+
+  // VALUTAZIONE OPERATIVA
+  card(134, 26, 62, 44);
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(9);
+  setText(C.blue);
+  doc.text('VALUTAZIONE OPERATIVA', 165, 36, { align: 'center' });
+
+  setFill([225, 245, 235]);
+  doc.circle(165, 49, 8, 'F');
+
+  doc.setFontSize(11);
+  setText(C.green);
+  doc.text('ORDINARIO', 165, 63, { align: 'center' });
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7);
+  setText(C.muted);
+  doc.text(
+    doc.splitTextToSize(
+      'Attività operativa svolta in condizioni di regolarità, senza criticità rilevanti.',
+      48
+    ),
+    141,
+    75
+  );
+
+  // LEGENDA
+  card(134, 88, 62, 48);
 
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(8);
-  doc.setTextColor(255, 255, 255);
-  doc.text(title, x + 4, y + 6.5);
-}
+  setText(C.blue);
+  doc.text('LEGENDA VALUTAZIONE', 165, 98, { align: 'center' });
 
-drawMiniBox(leftX, boxTopY, boxW, boxH, 'Interventi per tipologia');
-drawMiniBox(rightX, boxTopY, boxW, boxH, 'Report per reparto');
+  const legenda = [
+    ['ORDINARIO', 'Attività regolare', C.green],
+    ['MODERATO', 'Criticità sotto controllo', [245, 170, 20]],
+    ['CRITICO', 'Criticità rilevanti', C.orange],
+    ['ALTA PRESSIONE', 'Situazione critica', C.red],
+  ];
 
-let leftY = boxTopY + 17;
+  let ly = 109;
 
-const totaleInterventiPeriodo = periodAggregate.totaleInterventi || 0;
-
-Object.entries(periodAggregate.interventiPerTipo || {})
-  .sort((a, b) => b[1] - a[1])
-  .slice(0, 6)
-  .forEach(([tipo, totale]) => {
-    const percentuale = totaleInterventiPeriodo
-      ? Math.round((totale / totaleInterventiPeriodo) * 100)
-      : 0;
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(8);
-    doc.setTextColor(45, 55, 72);
-    doc.text(String(tipo), leftX + 5, leftY, { maxWidth: 62 });
+  legenda.forEach(([label, descr, color]) => {
+    setFill(color);
+    doc.circle(142, ly - 1, 2, 'F');
 
     doc.setFont('helvetica', 'bold');
-    doc.setTextColor(12, 47, 97);
-    doc.text(`${totale} (${percentuale}%)`, leftX + boxW - 5, leftY, { align: 'right' });
+    doc.setFontSize(6.8);
+    setText(color);
+    doc.text(label, 148, ly);
 
-    leftY += 7;
-  });
-
-let rightY = boxTopY + 17;
-
-Object.entries(periodAggregate.reportPerReparto || {})
-  .sort((a, b) => b[1] - a[1])
-  .slice(0, 6)
-  .forEach(([rep, totale]) => {
     doc.setFont('helvetica', 'normal');
-    doc.setFontSize(8);
-    doc.setTextColor(45, 55, 72);
-    doc.text(String(rep), rightX + 5, rightY, { maxWidth: 62 });
+    setText(C.text);
+    doc.text(descr, 148, ly + 4, { maxWidth: 38 });
 
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(12, 47, 97);
-    doc.text(String(totale), rightX + boxW - 8, rightY, { align: 'right' });
-
-    rightY += 7;
+    ly += 10;
   });
 
-doc.setTextColor(0, 0, 0);
-y = boxTopY + boxH + 14;
-  if (periodAggregate.eventiRilievo.length > 0) {
-    // ======================================================
-// PAGINA 2 — EVENTI RILEVANTI
-// ======================================================
-
-doc.addPage();
-
-doc.setFillColor(12, 47, 97);
-doc.rect(0, 0, 210, 26, 'F');
-
-doc.setFont('helvetica', 'bold');
-doc.setFontSize(18);
-doc.setTextColor(255, 255, 255);
-doc.text('EVENTI E ANNOTAZIONI RILEVANTI', 14, 16);
-
-doc.setFont('helvetica', 'normal');
-doc.setFontSize(9);
-doc.text('Sintesi degli eventi operativi meritevoli di attenzione', 14, 22);
-
-y = 38;
-
-(periodAggregate.eventiRilievo || []).forEach((e, index) => {
-
-  if (y > 245) {
-    doc.addPage();
-    y = 20;
-  }
-
-  // CARD
-  doc.setFillColor(248, 250, 252);
-  doc.setDrawColor(220, 226, 235);
-  doc.roundedRect(14, y, 182, 30, 4, 4, 'FD');
-
-  // BARRA LATERALE
-  doc.setFillColor(217, 119, 6);
-  doc.roundedRect(14, y, 4, 30, 4, 4, 'F');
-
-  // HEADER
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(10);
-  doc.setTextColor(12, 47, 97);
-
-  doc.text(
-  `${formatDate(e.data)} — ${e.reparto || '-'}`,
-  24,
-  y + 8
-);
-
-  // TESTO
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(9);
-  doc.setTextColor(70, 80, 95);
-
-  const lines = doc.splitTextToSize(
-    String(e.testo || ''),
-    150
-  );
-
-  doc.text(lines.slice(0, 3), 24, y + 16);
-
-  // ICONA CALENDARIO
-doc.setDrawColor(12, 47, 97);
-doc.setLineWidth(0.8);
-
-// corpo calendario
-doc.roundedRect(178, y + 5, 10, 9, 1.5, 1.5, 'S');
-
-// barra superiore
-doc.line(178, y + 8, 188, y + 8);
-
-// anelli
-doc.line(181, y + 4, 181, y + 7);
-doc.line(185, y + 4, 185, y + 7);
-
-// piccoli punti interni
-doc.setFillColor(12, 47, 97);
-doc.circle(181, y + 10, 0.5, 'F');
-doc.circle(184, y + 10, 0.5, 'F');
-doc.circle(187, y + 10, 0.5, 'F');
-doc.circle(181, y + 12, 0.5, 'F');
-doc.circle(184, y + 12, 0.5, 'F');
-doc.circle(187, y + 12, 0.5, 'F');
-  y += 38;
-});
-}
-// ======================================================
-// FOOTER ISTITUZIONALE
-// ======================================================
-
-const totalPages = doc.internal.getNumberOfPages();
-
-for (let i = 1; i <= totalPages; i++) {
-
-  doc.setPage(i);
-
-  // linea separatrice
-  doc.setDrawColor(210, 218, 230);
+  // FOOTER DETTAGLIATO PAGINA 2
+  setDraw(C.blue);
   doc.setLineWidth(0.4);
-  doc.line(14, 287, 196, 287);
+  doc.line(14, 260, 196, 260);
 
-  // testo footer
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(8);
+  setText(C.blue);
+  doc.text('Data generazione:', 25, 272);
+  doc.text('Sistema di reportistica', 83, 272);
+  doc.text('Ufficiale responsabile', 143, 272);
+
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(7);
-  doc.setTextColor(110, 120, 135);
+  doc.setFontSize(8);
+  setText(C.text);
+  doc.text(formatDateTime(), 25, 278);
+  doc.text('Polizia Locale - Monza', 83, 278);
+  doc.text(official?.ufficiale || 'Comandante Polizia Locale', 143, 278);
 
-  doc.text(
-    'Polizia Locale di Monza — Report aggregato operativo',
-    14,
-    292
-  );
+  drawFooter(2, 2);
 
-  doc.text(
-    `Pagina ${i} / ${totalPages}`,
-    196,
-    292,
-    { align: 'right' }
-  );
-}
   doc.save(`Report_aggregato_${periodStart || 'inizio'}_${periodEnd || 'fine'}.pdf`);
 };
   const operatorSummary = useMemo(() => {
