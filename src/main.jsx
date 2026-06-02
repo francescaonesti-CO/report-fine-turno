@@ -1145,35 +1145,52 @@ const kpis = [
 let kpiX = 14;
 
 const kpiColors = {
-  REPORT: [28, 78, 128],
-  INTERVENTI: [217, 119, 6],
-  VIOLAZIONI: [185, 28, 28],
-  OPERATORI: [22, 101, 52]
+  REPORT: {
+    border: [120, 165, 215],
+    fill: [238, 246, 255],
+    text: [28, 78, 128]
+  },
+  INTERVENTI: {
+    border: [235, 180, 110],
+    fill: [255, 247, 237],
+    text: [180, 83, 9]
+  },
+  VIOLAZIONI: {
+    border: [235, 150, 150],
+    fill: [254, 242, 242],
+    text: [153, 27, 27]
+  },
+  OPERATORI: {
+    border: [135, 190, 160],
+    fill: [240, 253, 244],
+    text: [22, 101, 52]
+  }
 };
 
 kpis.forEach(([label, value]) => {
 
-  const color = kpiColors[label] || [60, 60, 60];
+  const color = kpiColors[label] || {
+  border: [200, 200, 200],
+  fill: [248, 248, 248],
+  text: [60, 60, 60]
+};
 
-  // sfondo box
-  doc.setFillColor(...color);
-  doc.roundedRect(kpiX, 146, 42, 26, 4, 4, 'F');
+// ombra leggerissima
+doc.setFillColor(230, 235, 242);
+doc.roundedRect(kpiX + 1, 147, 42, 26, 4, 4, 'F');
 
-  // numero grande
-  doc.setTextColor(255, 255, 255);
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(18);
-  doc.text(String(value), kpiX + 21, 158, { align: 'center' });
+// sfondo box tenue
+doc.setDrawColor(...color.border);
+doc.setFillColor(...color.fill);
+doc.roundedRect(kpiX, 146, 42, 26, 4, 4, 'FD');
+
+// numero grande
+doc.setTextColor(...color.text);
 
   // etichetta
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8);
   doc.text(label, kpiX + 21, 167, { align: 'center' });
-
-  // mini linea inferiore elegante
-  doc.setDrawColor(255, 255, 255);
-  doc.setLineWidth(0.3);
-  doc.line(kpiX + 10, 170, kpiX + 32, 150);
 
   kpiX += 46;
 });
