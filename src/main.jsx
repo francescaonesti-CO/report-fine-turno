@@ -1131,7 +1131,6 @@ doc.setFontSize(9);
 const sintesiLines = doc.splitTextToSize(sintesiFinale, 170);
 doc.text(sintesiLines, 22, 90);
     
-doc.text(sintesiLines, 14, 84);
 doc.setFont('helvetica', 'bold');
 doc.setFontSize(12);
 doc.text('Sintesi numerica', 14, 118);
