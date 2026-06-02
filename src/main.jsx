@@ -150,7 +150,17 @@ function turnoLabel(report) { return report.turno === 'Altro orario' ? `${report
 function repartoLabel(report) { return report.reparto === 'Altri servizi' ? `${report.reparto}: ${report.altroServizio || '-'}` : report.reparto; }
 function sanitizeFileName(s) { return String(s || 'report').replace(/[^a-z0-9._-]+/gi, '-').replace(/-+/g, '-'); }
 
-function Field({ label, children }) { return <label className="field"><span>{label}</span>{children}</label>; }
+function Field({ label, children }) {
+  return (
+    <label className="field">
+      <span style={{ display: 'block', marginBottom: 8 }}>
+        {label}
+      </span>
+
+      {children}
+    </label>
+  );
+}
 function Input({ value, onChange, type = 'text', placeholder = '' }) { return <input type={type} value={value} placeholder={placeholder} onChange={e => onChange(e.target.value)} />; }
 function Textarea({ value, onChange, placeholder = '' }) { return <textarea value={value} placeholder={placeholder} onChange={e => onChange(e.target.value)} />; }
 function Select({ value, onChange, children }) { return <select value={value} onChange={e => onChange(e.target.value)}>{children}</select>; }
