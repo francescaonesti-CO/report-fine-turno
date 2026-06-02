@@ -1062,37 +1062,35 @@ if (!periodReports.length) {
   const periodo = `${periodStart || 'inizio'} - ${periodEnd || 'fine'}`;
   const reparto = periodReparto || 'Tutti i reparti';
 
+doc.setFont('helvetica', 'bold');
+doc.setFontSize(12);
+doc.text('Sintesi numerica', 14, 88);
+
+const kpis = [
+  ['REPORT', periodAggregate.totaleReport],
+  ['INTERVENTI', periodAggregate.totaleInterventi],
+  ['VIOLAZIONI', periodAggregate.totaleViolazioni],
+  ['OPERATORI', periodAggregate.totaleOperatori]
+];
+
+let kpiX = 14;
+
+kpis.forEach(([label, value]) => {
+  doc.setDrawColor(210);
+  doc.roundedRect(kpiX, 96, 42, 24, 3, 3);
+
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(16);
-  doc.text(title, 14, 18);
+  doc.text(String(value), kpiX + 21, 108, { align: 'center' });
 
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(10);
-  doc.text(`Periodo: ${periodo}`, 14, 28);
-  doc.text(`Reparto: ${reparto}`, 14, 34);
-  doc.setFont('helvetica', 'bold');
-doc.setFontSize(12);
-doc.text('Sintesi operativa', 14, 48);
+  doc.setFontSize(8);
+  doc.text(label, kpiX + 21, 116, { align: 'center' });
 
-doc.setFont('helvetica', 'normal');
-doc.setFontSize(9);
+  kpiX += 46;
+});
 
-const sintesiLines = doc.splitTextToSize(sintesiFinale, 180);
-doc.text(sintesiLines, 14, 56);
-
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(12);
-  doc.text('Sintesi numerica', 14, 88);
-
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(10);
-  doc.text(`Report analizzati: ${periodAggregate.totaleReport}`, 14, 98);
-  doc.text(`Interventi complessivi: ${periodAggregate.totaleInterventi}`, 14, 105);
-  doc.text(`Violazioni rilevate: ${periodAggregate.totaleViolazioni}`, 14, 112);
-  doc.text(`Operatori impiegati: ${periodAggregate.totaleOperatori}`, 14, 119);
-  doc.text(`Veicoli impiegati: ${periodAggregate.totaleVeicoli}`, 14, 126);
-
-  let y = 142;
+  let y = 132;
 
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(12);
