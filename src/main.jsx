@@ -831,6 +831,7 @@ function OfficialReport({ reports, setReports, official, setOfficial }) {
   const [periodStart, setPeriodStart] = useState('');
   const [periodEnd, setPeriodEnd] = useState('');
   const [periodReparto, setPeriodReparto] = useState('');
+  const [periodSintesiManuale, setPeriodSintesiManuale] = useState('');
   const periodReports = useMemo(() => {
   if (!periodStart || !periodEnd) return [];
 
@@ -938,6 +939,28 @@ const periodAggregate = useMemo(() => {
 
   return aggregate;
 }, [periodReports]);
+const periodAutoSintesi = useMemo(() => {
+  if (!periodStart || !periodEnd) {
+    return 'Selezionare un periodo per generare la sintesi operativa.';
+  }
+
+  if (!periodReports.length) {
+    return 'Nel periodo selezionato non risultano report operatori acquisiti.';
+  }
+
+  const reparto = periodReparto || 'tutti i reparti';
+  const topIntervento = Object.entries(periodAggregate.interventiPerTipo)
+    .sort((a, b) => b[1] - a[1])[0];
+
+  const tipoPrevalente = topIntervento
+    ? `${topIntervento[0]} (${topIntervento[1]})`
+    : 'nessuna tipologia prevalente';
+
+  const eventi = periodAggregate.eventiRilievo.length;
+
+  return `Nel periodo dal ${periodStart} al ${periodEnd}, per ${reparto}, risultano acquisiti ${periodAggregate.totaleReport} report operatori, con ${periodAggregate.totaleInterventi} interventi complessivi, ${periodAggregate.totaleViolazioni} violazioni rilevate e ${periodAggregate.totaleOperatori} operatori impiegati. La tipologia di intervento prevalente risulta: ${tipoPrevalente}. ${eventi > 0 ? `Sono presenti ${eventi} eventi o annotazioni rilevanti da valutare.` : 'Non risultano eventi rilevanti nel periodo selezionato.'}`;
+}, [periodStart, periodEnd, periodReparto, periodReports, periodAggregate]);
+  
 const getMacroTurno = (turno) => {
   const value = String(turno || '').trim();
 
