@@ -1288,7 +1288,7 @@ const generatePeriodPdf = () => {
     setText(C.text);
     doc.text(rep, 114, ry, { maxWidth: 24 });
 
-    setFill([118, 165, 220]);
+    setFill([205, 225, 248]);
 doc.rect(145, ry - 5, barW, 5, 'F');
 
 doc.setFont('helvetica', 'bold');
