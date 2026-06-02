@@ -1191,12 +1191,12 @@ const generatePeriodPdf = () => {
   function drawFooter(page, total) {
     setDraw(C.blue);
     doc.setLineWidth(0.4);
-    doc.line(14, 278, 196, 278);
+    doc.line(14, 282, 196, 282);
 
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(7);
     setText(C.blue);
-    doc.text(`Pagina ${page} di ${total}`, 190, 287, { align: 'right' });
+    doc.text(`Pagina ${page} di ${total}`, 190, 290, { align: 'right' });
   }
 
   // =========================
@@ -1393,24 +1393,26 @@ const generatePeriodPdf = () => {
     ly += 10;
   });
 
-  // FOOTER DETTAGLIATO PAGINA 2
-  setDraw(C.blue);
-  doc.setLineWidth(0.4);
-  doc.line(14, 260, 196, 260);
+ // FOOTER DETTAGLIATO PAGINA 2
+setDraw(C.blue);
+doc.setLineWidth(0.4);
+doc.line(14, 254, 196, 254);
 
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(8);
-  setText(C.blue);
-  doc.text('Data generazione:', 25, 272);
-  doc.text('Sistema di reportistica', 83, 272);
-  doc.text('Ufficiale responsabile', 143, 272);
+doc.setFont('helvetica', 'bold');
+doc.setFontSize(8);
+setText(C.blue);
 
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8);
-  setText(C.text);
-  doc.text(formatDateTime(), 25, 278);
-  doc.text('Polizia Locale - Monza', 83, 278);
-  doc.text(official?.ufficiale || 'Comandante Polizia Locale', 143, 278);
+doc.text('Data generazione:', 25, 264);
+doc.text('Sistema di reportistica', 83, 264);
+doc.text('Ufficiale responsabile', 143, 264);
+
+doc.setFont('helvetica', 'normal');
+doc.setFontSize(8);
+setText(C.text);
+
+doc.text(formatDateTime(), 25, 270);
+doc.text('Polizia Locale - Monza', 83, 270);
+doc.text(official?.ufficiale || 'Comandante Polizia Locale', 143, 270);
 
   drawFooter(2, 2);
 
