@@ -1250,33 +1250,83 @@ Object.entries(periodAggregate.reportPerReparto || {})
 doc.setTextColor(0, 0, 0);
 y = boxTopY + boxH + 14;
   if (periodAggregate.eventiRilievo.length > 0) {
+    // ======================================================
+// PAGINA 2 — EVENTI RILEVANTI
+// ======================================================
+
+doc.addPage();
+
+doc.setFillColor(12, 47, 97);
+doc.rect(0, 0, 210, 26, 'F');
+
+doc.setFont('helvetica', 'bold');
+doc.setFontSize(18);
+doc.setTextColor(255, 255, 255);
+doc.text('EVENTI E ANNOTAZIONI RILEVANTI', 14, 16);
+
+doc.setFont('helvetica', 'normal');
+doc.setFontSize(9);
+doc.text('Sintesi degli eventi operativi meritevoli di attenzione', 14, 22);
+
+y = 38;
+
+(periodAggregate.eventiRilievo || []).forEach((e, index) => {
+
+  if (y > 245) {
     doc.addPage();
-
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(14);
-    doc.text('Eventi e annotazioni rilevanti', 14, 20);
-
-    y = 34;
-
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(9);
-
-    periodAggregate.eventiRilievo.forEach(e => {
-      if (y > 265) {
-        doc.addPage();
-        y = 20;
-      }
-
-      doc.setFont('helvetica', 'bold');
-      doc.text(`${e.data || '-'} — ${e.reparto || '-'}`, 14, y);
-      y += 6;
-
-      doc.setFont('helvetica', 'normal');
-      const lines = doc.splitTextToSize(String(e.testo || ''), 180);
-      doc.text(lines, 14, y);
-      y += lines.length * 5 + 6;
-    });
+    y = 20;
   }
+
+  // CARD
+  doc.setFillColor(248, 250, 252);
+  doc.setDrawColor(220, 226, 235);
+  doc.roundedRect(14, y, 182, 30, 4, 4, 'FD');
+
+  // BARRA LATERALE
+  doc.setFillColor(217, 119, 6);
+  doc.roundedRect(14, y, 4, 30, 4, 4, 'F');
+
+  // HEADER
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(10);
+  doc.setTextColor(12, 47, 97);
+
+  doc.text(
+    `${e.data || '-'} — ${e.reparto || '-'}`,
+    24,
+    y + 8
+  );
+
+  // TESTO
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  doc.setTextColor(70, 80, 95);
+
+  const lines = doc.splitTextToSize(
+    String(e.testo || ''),
+    150
+  );
+
+  doc.text(lines.slice(0, 3), 24, y + 16);
+
+  // BADGE
+  doc.setFillColor(12, 47, 97);
+  doc.circle(184, y + 8, 4, 'F');
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(7);
+  doc.setTextColor(255, 255, 255);
+
+  doc.text(
+    String(index + 1),
+    184,
+    y + 9.5,
+    { align: 'center' }
+  );
+
+  y += 38;
+});
+}
 
   doc.save(`Report_aggregato_${periodStart || 'inizio'}_${periodEnd || 'fine'}.pdf`);
 };
