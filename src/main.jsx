@@ -1193,36 +1193,6 @@ kpis.forEach(([label, value]) => {
 
 doc.setTextColor(0, 0, 0);
 
-kpis.forEach(([label, value]) => {
-
-  const style = kpiStyles[label] || {
-  border: [200, 200, 200],
-  fill: [248, 248, 248],
-  text: [60, 60, 60]
-};
-
-// ombra leggerissima
-doc.setFillColor(230, 235, 242);
-doc.roundedRect(kpiX + 1, 147, 42, 26, 4, 4, 'F');
-
-// sfondo box tenue
-doc.setDrawColor(...color.border);
-doc.setFillColor(...color.fill);
-doc.roundedRect(kpiX, 146, 42, 26, 4, 4, 'FD');
-
-// numero grande
-doc.setTextColor(...color.text);
-
-  // etichetta
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8);
-  doc.text(label, kpiX + 21, 167, { align: 'center' });
-
-  kpiX += 46;
-});
-
-doc.setTextColor(0, 0, 0);
-
   let y = 184;
 
   doc.setFont('helvetica', 'bold');
