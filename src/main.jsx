@@ -1066,27 +1066,60 @@ if (!periodReports.length) {
   const title = 'REPORT AGGREGATO PER PERIODO';
   const periodo = `${periodStart || 'inizio'} - ${periodEnd || 'fine'}`;
   const reparto = periodReparto || 'Tutti i reparti';
+// HEADER ISTITUZIONALE
+try {
+  const img = document.getElementById('pdfLogo');
+  if (img && img.complete) {
+    doc.addImage(img, 'PNG', 14, 8, 18, 18);
+  }
+} catch (e) {}
+
 doc.setFont('helvetica', 'bold');
-doc.setFontSize(16);
-doc.text(title, 14, 18);
+doc.setFontSize(14);
+doc.setTextColor(12, 47, 97);
+doc.text('COMUNE DI MONZA', 38, 14);
+
+doc.setFontSize(9);
+doc.text('Settore Polizia Locale, Protezione Civile', 38, 20);
 
 doc.setFont('helvetica', 'normal');
-doc.setFontSize(10);
-doc.text(`Periodo: ${periodo}`, 14, 28);
-doc.text(`Reparto: ${reparto}`, 14, 34);
+doc.setFontSize(8);
+doc.setTextColor(60, 70, 85);
+doc.text('Via Marsala 13 - 20900 Monza', 150, 13);
+doc.text('Tel. 039 28161', 150, 18);
+
+doc.setDrawColor(12, 47, 97);
+doc.setLineWidth(0.6);
+doc.line(14, 30, 196, 30);
+
+doc.setFillColor(12, 47, 97);
+doc.roundedRect(14, 36, 182, 11, 2, 2, 'F');
 
 doc.setFont('helvetica', 'bold');
 doc.setFontSize(12);
-doc.text('Sintesi operativa', 14, 48);
+doc.setTextColor(255, 255, 255);
+doc.text(title, 105, 43, { align: 'center' });
+
+doc.setFont('helvetica', 'normal');
+doc.setFontSize(9);
+doc.setTextColor(30, 40, 55);
+doc.text(`Periodo: ${periodo}`, 14, 56);
+doc.text(`Reparto: ${reparto}`, 14, 62);
+
+doc.setTextColor(0, 0, 0);
+
+doc.setFont('helvetica', 'bold');
+doc.setFontSize(12);
+doc.text('Sintesi operativa', 14, 76);
 
 doc.setFont('helvetica', 'normal');
 doc.setFontSize(9);
 
 const sintesiLines = doc.splitTextToSize(sintesiFinale, 180);
-doc.text(sintesiLines, 14, 56);
+doc.text(sintesiLines, 14, 84);
 doc.setFont('helvetica', 'bold');
 doc.setFontSize(12);
-doc.text('Sintesi numerica', 14, 88);
+doc.text('Sintesi numerica', 14, 118);
 
 const kpis = [
   ['REPORT', periodAggregate.totaleReport],
@@ -1099,20 +1132,20 @@ let kpiX = 14;
 
 kpis.forEach(([label, value]) => {
   doc.setDrawColor(210);
-  doc.roundedRect(kpiX, 96, 42, 24, 3, 3);
+ doc.roundedRect(kpiX, 126, 42, 24, 3, 3);
 
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(16);
-  doc.text(String(value), kpiX + 21, 108, { align: 'center' });
+  doc.text(String(value), kpiX + 21, 138, { align: 'center' });
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8);
-  doc.text(label, kpiX + 21, 116, { align: 'center' });
+  doc.text(label, kpiX + 21, 146, { align: 'center' });
 
   kpiX += 46;
 });
 
-  let y = 132;
+  let y = 164;
 
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(12);
