@@ -1148,22 +1148,22 @@ const kpiGap = 4;
 const kpis = [
   {
     label: 'Report acquisiti',
-    value: aggregate.totaleReport || 0,
+    value: periodAggregate.totaleReport || 0,
     color: [232, 240, 254],
   },
   {
     label: 'Interventi',
-    value: aggregate.totaleInterventi || 0,
+    value: periodAggregate.totaleInterventi || 0,
     color: [232, 245, 233],
   },
   {
     label: 'Violazioni',
-    value: aggregate.totaleViolazioni || 0,
+    value: periodAggregate.totaleViolazioni || 0,
     color: [255, 243, 224],
   },
   {
     label: 'Operatori',
-    value: aggregate.totaleOperatori || 0,
+    value: periodAggregate.totaleOperatori || 0,
     color: [243, 229, 245],
   },
 ];
