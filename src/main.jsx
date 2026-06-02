@@ -1130,20 +1130,41 @@ const kpis = [
 
 let kpiX = 14;
 
-kpis.forEach(([label, value]) => {
-  doc.setDrawColor(210);
- doc.roundedRect(kpiX, 126, 42, 24, 3, 3);
+const kpiColors = {
+  REPORT: [28, 78, 128],
+  INTERVENTI: [217, 119, 6],
+  VIOLAZIONI: [185, 28, 28],
+  OPERATORI: [22, 101, 52]
+};
 
+kpis.forEach(([label, value]) => {
+
+  const color = kpiColors[label] || [60, 60, 60];
+
+  // sfondo box
+  doc.setFillColor(...color);
+  doc.roundedRect(kpiX, 126, 42, 26, 4, 4, 'F');
+
+  // numero grande
+  doc.setTextColor(255, 255, 255);
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(16);
+  doc.setFontSize(18);
   doc.text(String(value), kpiX + 21, 138, { align: 'center' });
 
+  // etichetta
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8);
-  doc.text(label, kpiX + 21, 146, { align: 'center' });
+  doc.text(label, kpiX + 21, 147, { align: 'center' });
+
+  // mini linea inferiore elegante
+  doc.setDrawColor(255, 255, 255);
+  doc.setLineWidth(0.3);
+  doc.line(kpiX + 10, 150, kpiX + 32, 150);
 
   kpiX += 46;
 });
+
+doc.setTextColor(0, 0, 0);
 
   let y = 164;
 
