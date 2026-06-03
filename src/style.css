@@ -463,6 +463,30 @@ small {
     grid-template-columns: 1fr 38px 70px 38px;
   }
 }
-.intervento > .field + .grid {
-  margin-top: 24px;
+/* Refinement specifico card intervento */
+.intervento {
+  padding: 20px !important;
+}
+
+.interventoHead {
+  margin-bottom: 14px !important;
+}
+
+.intervento .grid {
+  gap: 14px 24px !important;
+}
+
+.intervento > .grid + .grid,
+.intervento > .grid + .field,
+.intervento > .field + .grid,
+.intervento > .field + .field {
+  margin-top: 14px !important;
+}
+
+.intervento textarea {
+  min-height: 72px;
+}
+
+.intervento .grid.three:last-of-type {
+  align-items: end !important;
 }
