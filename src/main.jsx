@@ -560,7 +560,14 @@ Cordialmente,`
       <div className="counterGrid">
         {['preavvisiCds','vdcCds','regPolizia','regEdilizio','regBenessereAnimali','annonaria','altreNorme'].map(key => <Counter key={key} label={LABELS[key]} value={report.counters[key]} onChange={v => update({ counters: { ...report.counters, [key]: v } })} />)}
       </div>
-      <Field label="Specificare altre norme"><Input value={report.counters.altreNormeDescrizione} onChange={v => update({ counters: { ...report.counters, altreNormeDescrizione: v } })} /></Field>
+      <div style={{ marginTop: 16 }}>
+  <Field label="Specificare altre norme">
+    <Input
+      value={report.counters.altreNormeDescrizione}
+      onChange={v => update({ counters: { ...report.counters, altreNormeDescrizione: v } })}
+    />
+  </Field>
+</div>
       <div className="totalBox">Totale violazioni: <strong>{totaleViolazioni}</strong></div>
     </section>
 
