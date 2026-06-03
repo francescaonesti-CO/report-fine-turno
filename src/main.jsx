@@ -547,7 +547,8 @@ Cordialmente,`
     />
   </Field>
 </div>
-
+</section>
+    
     <section className="card">
       <h2>6. Violazioni</h2>
       <div className="counterGrid">
