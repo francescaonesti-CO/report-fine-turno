@@ -127,7 +127,7 @@ h4 {
 .field > span {
   display: block;
   margin-bottom: 6px;
-  padding-left: 0;
+  padding-left: 4px;
   font-weight: 700;
   color: #1f2f46;
 }
