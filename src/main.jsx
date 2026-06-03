@@ -1935,9 +1935,11 @@ doc.text(official?.ufficiale || 'Comandante Polizia Locale', 143, 270);
         </Field>
       </div>
 
-      <button type="button" className="ghost" onClick={() => removeAttivita(idx)}>
-        Rimuovi attività
-      </button>
+     <div style={{ marginTop: 10 }}>
+  <button type="button" className="ghost" onClick={() => removeAttivita(idx)}>
+    Rimuovi attività
+  </button>
+</div>
     </div>
   ))}
 
