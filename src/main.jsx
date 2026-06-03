@@ -1618,7 +1618,13 @@ doc.text(official?.ufficiale || 'Comandante Polizia Locale', 143, 270);
 </div>
 <div className="grid two" style={{ marginTop: 20 }}>
 
-  <div className="card">
+  <div
+  className="card"
+  style={{
+    minHeight: 90,
+    padding: 24
+  }}
+>
     <div className="section-title">
       Interventi per tipologia
     </div>
@@ -1643,7 +1649,13 @@ doc.text(official?.ufficiale || 'Comandante Polizia Locale', 143, 270);
     )}
   </div>
 
-  <div className="card">
+  <div
+  className="card"
+  style={{
+    minHeight: 90,
+    padding: 24
+  }}
+>
     <div className="section-title">
       Report per reparto
     </div>
@@ -1670,7 +1682,14 @@ doc.text(official?.ufficiale || 'Comandante Polizia Locale', 143, 270);
 
 </div>
 
-<div className="card" style={{ marginTop: 20 }}>
+<div
+  className="card"
+  style={{
+    marginTop: 20,
+    minHeight: 80,
+    padding: 24
+  }}
+>
   <div className="section-title">
     Eventi e annotazioni rilevanti
   </div>
