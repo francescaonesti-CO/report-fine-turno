@@ -592,7 +592,7 @@ Cordialmente,`
 </div>
     </section>
 
-  </>;
+ </>;
 }
 
 function Intervento({ i, idx, updateIntervento, remove }) {
