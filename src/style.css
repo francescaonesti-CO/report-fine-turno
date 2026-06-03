@@ -106,3 +106,12 @@ small { color: #667085; }
   font-size: 13px;
   font-weight: 700;
 }
+/* Refinement UI dashboard/report */
+.grid {
+  row-gap: 24px !important;
+  column-gap: 24px !important;
+}
+
+.rowCard {
+  padding: 24px !important;
+}
