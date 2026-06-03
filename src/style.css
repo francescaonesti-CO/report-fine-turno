@@ -106,36 +106,59 @@ small { color: #667085; }
   font-size: 13px;
   font-weight: 700;
 }
-/* Refinement UI form operatori/dashboard */
+/* UI form alignment - versione stabile */
+.field {
+  min-width: 0;
+}
+
 .field > span {
+  display: block;
   margin-bottom: 6px !important;
+  padding-left: 0 !important;
   font-weight: 700 !important;
   color: #1f2f46 !important;
-  padding-left: 0 !important;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .grid {
-  row-gap: 18px !important;
-  column-gap: 24px !important;
-  align-items: start !important;
+  display: grid;
+  gap: 18px 24px !important;
+  align-items: start;
 }
 
-.rowCard {
+.grid.two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.grid.three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.grid.four {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.rowCard,
+.intervento {
   padding: 22px !important;
 }
 
 .rowCard .grid + .grid,
-.rowCard .grid + .field,
-.rowCard .field + .field,
-.intervento .grid + .grid,
-.intervento .grid + .field,
-.intervento .field + .grid,
-.intervento .field + .field {
-  margin-top: 16px !important;
+.intervento .grid + .grid {
+  margin-top: 18px !important;
 }
 
-.card > .field + .field,
-.card > .grid + .field,
-.card > .field + .grid {
-  margin-top: 16px !important;
+.rowCard .grid + .field,
+.intervento .grid + .field,
+.rowCard .field + .grid,
+.intervento .field + .grid,
+.rowCard .field + .field,
+.intervento .field + .field {
+  margin-top: 18px !important;
 }
