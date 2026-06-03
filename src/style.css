@@ -463,3 +463,6 @@ small {
     grid-template-columns: 1fr 38px 70px 38px;
   }
 }
+.intervento > .field + .grid {
+  margin-top: 24px;
+}
