@@ -116,7 +116,7 @@ small { color: #667085; }
 }
 
 .grid {
-  row-gap: 26px !important;
+  row-gap: 34px !important;
   column-gap: 24px !important;
   align-items: start;
 }
@@ -126,8 +126,8 @@ small { color: #667085; }
 }
 
 .rowCard .field span {
-  margin-bottom: 5px !important;
-  padding-left: 10px;
+  margin-bottom: 6px !important;
+  padding-left: 4px;
 }
 
 .rowCard input,
