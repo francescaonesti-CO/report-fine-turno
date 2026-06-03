@@ -1904,7 +1904,9 @@ doc.text(official?.ufficiale || 'Comandante Polizia Locale', 143, 270);
     <Textarea value={official.anomalie} onChange={v => update({ anomalie: v })} />
   </Field>
 
-  <h3>Controlli effettuati dall'UDT</h3>
+  <h3 style={{ marginTop: 8 }}>
+  Controlli effettuati dall'UDT
+</h3>
 
   {official.attivitaIspettive.map((a, idx) => (
     <div className="rowCard" key={idx}>
