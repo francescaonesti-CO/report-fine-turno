@@ -1957,7 +1957,7 @@ doc.text(official?.ufficiale || 'Comandante Polizia Locale', 143, 270);
     />
   </Field>
 
-  <div className="grid two">
+  <div className="grid two" style={{ marginTop: 6 }}>
     <Field label="Comunicazione all'E.Q. di turno">
       <Textarea
         value={official.comunicazioneEq}
