@@ -163,13 +163,13 @@ function Field({ label, children }) {
       <span
   style={{
     display: 'block',
-    marginBottom: 10,
-    fontWeight: 600,
-    color: '#33415c'
+    marginBottom: 8,
+    fontWeight: 700,
+    color: '#1f2f46'
   }}
 >
-        {label}
-      </span>
+  {label}
+</span>
 
       {children}
     </label>
