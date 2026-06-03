@@ -729,7 +729,7 @@ function Intervento({ i, idx, updateIntervento, remove }) {
 
       {i.tipo !== 'Servizio scuole' && (
         <>
-          <div className="grid two">
+          <div className="grid three">
             <Field label="Ora inizio">
               <Input value={i.oraInizio} onChange={v => updateIntervento({ oraInizio: v })} placeholder="es. 08.15" />
             </Field>
