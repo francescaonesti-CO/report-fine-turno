@@ -499,3 +499,8 @@ small {
 .counterGrid input[type="text"] {
   min-height: 40px;
 }
+/* Allineamento riga "Altri atti" */
+.grid.two > .counter {
+  width: 100%;
+  min-height: 56px;
+}
