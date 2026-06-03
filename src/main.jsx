@@ -164,7 +164,7 @@ function Field({ label, children }) {
   style={{
     display: 'block',
 marginBottom: 6,
-paddingLeft: 10,
+paddingLeft: 4,
 fontWeight: 700,
 color: '#1f2f46'
   }}
