@@ -1616,7 +1616,13 @@ doc.text(official?.ufficiale || 'Comandante Polizia Locale', 143, 270);
   </div>
 </div>
 </div>
-<div className="grid two" style={{ marginTop: 20 }}>
+<div
+  className="grid two"
+  style={{
+    marginTop: 20,
+    alignItems: 'start'
+  }}
+>
 
   <div
   className="card"
