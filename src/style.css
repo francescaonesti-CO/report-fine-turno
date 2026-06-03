@@ -490,3 +490,12 @@ small {
 .intervento .grid.three:last-of-type {
   align-items: end !important;
 }
+/* Refinement sezione Atti redatti */
+.counterGrid > .field {
+  margin-top: 14px;
+}
+
+.counterGrid textarea,
+.counterGrid input[type="text"] {
+  min-height: 40px;
+}
