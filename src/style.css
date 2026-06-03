@@ -107,11 +107,29 @@ small { color: #667085; }
   font-weight: 700;
 }
 /* Refinement UI dashboard/report */
+.field span {
+  display: block;
+  margin-bottom: 8px !important;
+  font-weight: 700 !important;
+  color: #1f2f46 !important;
+}
+
 .grid {
-  row-gap: 24px !important;
+  row-gap: 18px !important;
   column-gap: 24px !important;
+  align-items: start;
 }
 
 .rowCard {
-  padding: 24px !important;
+  padding: 22px 24px !important;
+}
+
+.rowCard .grid {
+  row-gap: 18px !important;
+}
+
+input,
+select,
+textarea {
+  margin-top: 0 !important;
 }
