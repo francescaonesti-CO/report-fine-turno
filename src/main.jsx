@@ -537,27 +537,13 @@ Cordialmente,`
   <Counter
     label="Altri atti"
     value={report.counters.altriAttiNumero}
-    onChange={v =>
-      update({
-        counters: {
-          ...report.counters,
-          altriAttiNumero: v
-        }
-      })
-    }
+    onChange={v => update({ counters: { ...report.counters, altriAttiNumero: v } })}
   />
 
   <Field label="Descrizione altri atti">
     <Input
       value={report.counters.altriAttiDescrizione}
-      onChange={v =>
-        update({
-          counters: {
-            ...report.counters,
-            altriAttiDescrizione: v
-          }
-        })
-      }
+      onChange={v => update({ counters: { ...report.counters, altriAttiDescrizione: v } })}
     />
   </Field>
 </div>
