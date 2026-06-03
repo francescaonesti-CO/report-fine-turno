@@ -211,18 +211,18 @@ button.ghost {
 }
 
 /* SPAZIATURE CONTROLLATE TRA BLOCCHI */
-.grid + .grid,
-.grid + .field,
-.field + .grid,
-.field + .field,
-.rowCard .grid + .grid,
-.rowCard .grid + .field,
-.rowCard .field + .grid,
-.rowCard .field + .field,
-.intervento .grid + .grid,
-.intervento .grid + .field,
-.intervento .field + .grid,
-.intervento .field + .field {
+.rowCard > .grid + .grid,
+.intervento > .grid + .grid {
+  margin-top: 16px;
+}
+
+.rowCard > .field,
+.intervento > .field {
+  margin-top: 16px;
+}
+
+.card > .grid + .field,
+.card > .field + .field {
   margin-top: 16px;
 }
 
