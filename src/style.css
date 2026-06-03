@@ -140,3 +140,27 @@ small { color: #667085; }
   margin-top: 28px;
   margin-bottom: 16px;
 }
+/* Spaziatura verticale tra blocchi form */
+.grid + .field {
+  margin-top: 18px !important;
+}
+
+.grid + .grid {
+  margin-top: 18px !important;
+}
+
+.field + .field {
+  margin-top: 18px !important;
+}
+
+.rowCard .grid + .field,
+.rowCard .grid + .grid,
+.rowCard .field + .field {
+  margin-top: 18px !important;
+}
+
+.intervento .grid + .field,
+.intervento .grid + .grid,
+.intervento .field + .field {
+  margin-top: 18px !important;
+}
