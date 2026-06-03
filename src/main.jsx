@@ -533,12 +533,20 @@ Cordialmente,`
       <div className="counterGrid">
         {['relazioni','annotazioni','sequestriAmministrativi','fermiAmministrativi','sequestriPenali','cnr'].map(key => <Counter key={key} label={LABELS[key]} value={report.counters[key]} onChange={v => update({ counters: { ...report.counters, [key]: v } })} />)}
       </div>
-      <div className="grid two" style={{ marginTop: 14 }}>
-  <Counter
-    label="Altri atti"
-    value={report.counters.altriAttiNumero}
-    onChange={v => update({ counters: { ...report.counters, altriAttiNumero: v } })}
-  />
+    <div
+  className="grid two"
+  style={{
+    marginTop: 14,
+    alignItems: 'stretch'
+  }}
+>
+  <div style={{ width: '100%' }}>
+    <Counter
+      label="Altri atti"
+      value={report.counters.altriAttiNumero}
+      onChange={v => update({ counters: { ...report.counters, altriAttiNumero: v } })}
+    />
+  </div>
 
   <Field label="Descrizione altri atti">
     <Input
