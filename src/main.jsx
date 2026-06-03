@@ -163,9 +163,10 @@ function Field({ label, children }) {
       <span
   style={{
     display: 'block',
-    marginBottom: 8,
-    fontWeight: 700,
-    color: '#1f2f46'
+marginBottom: 6,
+paddingLeft: 10,
+fontWeight: 700,
+color: '#1f2f46'
   }}
 >
   {label}
