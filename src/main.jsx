@@ -1636,9 +1636,15 @@ doc.text(official?.ufficiale || 'Comandante Polizia Locale', 143, 270);
     </div>
 
     {Object.entries(periodAggregate.interventiPerTipo).length === 0 ? (
-      <div className="muted">
-        Nessun dato disponibile
-      </div>
+      <div
+  className="muted"
+  style={{
+    fontSize: 13,
+    marginTop: 4
+  }}
+>
+  Nessun dato disponibile
+</div>
     ) : (
       Object.entries(periodAggregate.interventiPerTipo)
         .sort((a, b) => b[1] - a[1])
@@ -1667,9 +1673,15 @@ doc.text(official?.ufficiale || 'Comandante Polizia Locale', 143, 270);
     </div>
 
     {Object.entries(periodAggregate.reportPerReparto).length === 0 ? (
-      <div className="muted">
-        Nessun dato disponibile
-      </div>
+     <div
+  className="muted"
+  style={{
+    fontSize: 13,
+    marginTop: 4
+  }}
+>
+  Nessun dato disponibile
+</div>
     ) : (
       Object.entries(periodAggregate.reportPerReparto)
         .sort((a, b) => b[1] - a[1])
@@ -1701,9 +1713,15 @@ doc.text(official?.ufficiale || 'Comandante Polizia Locale', 143, 270);
   </div>
 
   {periodAggregate.eventiRilievo.length === 0 ? (
-    <div className="muted">
-      Nessun evento rilevante nel periodo selezionato
-    </div>
+    <div
+  className="muted"
+  style={{
+    fontSize: 13,
+    marginTop: 4
+  }}
+>
+  Nessun evento rilevante nel periodo selezionato
+</div>
   ) : (
     periodAggregate.eventiRilievo.map((e, idx) => (
       <div
