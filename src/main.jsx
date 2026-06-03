@@ -1595,25 +1595,101 @@ doc.text(official?.ufficiale || 'Comandante Polizia Locale', 143, 270);
   </div>
 
   <div className="grid four" style={{ marginTop: 16 }}>
-  <div className="miniStat">
-  <b>{periodAggregate.totaleReport}</b>
-  <span style={{ marginLeft: 6 }}>Report</span>
+ <div className="miniStat">
+  <div
+    style={{
+      fontSize: 22,
+      fontWeight: 700,
+      lineHeight: 1
+    }}
+  >
+    {periodAggregate.totaleReport}
+  </div>
+
+  <div
+    style={{
+      fontSize: 12,
+      opacity: 0.7,
+      marginTop: 4,
+      textTransform: 'uppercase',
+      letterSpacing: 0.5
+    }}
+  >
+    Report
+  </div>
+</div>
+
+ <div className="miniStat">
+  <div
+    style={{
+      fontSize: 22,
+      fontWeight: 700,
+      lineHeight: 1
+    }}
+  >
+    {periodAggregate.totaleInterventi}
+  </div>
+
+  <div
+    style={{
+      fontSize: 12,
+      opacity: 0.7,
+      marginTop: 4,
+      textTransform: 'uppercase',
+      letterSpacing: 0.5
+    }}
+  >
+    Interventi
+  </div>
 </div>
 
   <div className="miniStat">
-    <b>{periodAggregate.totaleInterventi}</b>
-    <span style={{ marginLeft: 6 }}>Interventi</span>
+  <div
+    style={{
+      fontSize: 22,
+      fontWeight: 700,
+      lineHeight: 1
+    }}
+  >
+    {periodAggregate.totaleViolazioni}
   </div>
 
-  <div className="miniStat">
-    <b>{periodAggregate.totaleViolazioni}</b>
-    <span style={{ marginLeft: 6 }}>Violazioni</span>
+  <div
+    style={{
+      fontSize: 12,
+      opacity: 0.7,
+      marginTop: 4,
+      textTransform: 'uppercase',
+      letterSpacing: 0.5
+    }}
+  >
+    Violazioni
+  </div>
+</div>
+
+ <div className="miniStat">
+  <div
+    style={{
+      fontSize: 22,
+      fontWeight: 700,
+      lineHeight: 1
+    }}
+  >
+    {periodAggregate.totaleOperatori}
   </div>
 
-  <div className="miniStat">
-    <b>{periodAggregate.totaleOperatori}</b>
-    <span style={{ marginLeft: 6 }}>Operatori</span>
+  <div
+    style={{
+      fontSize: 12,
+      opacity: 0.7,
+      marginTop: 4,
+      textTransform: 'uppercase',
+      letterSpacing: 0.5
+    }}
+  >
+    Operatori
   </div>
+</div>
 </div>
 </div>
 <div
