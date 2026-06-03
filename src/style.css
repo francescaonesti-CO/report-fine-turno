@@ -106,61 +106,36 @@ small { color: #667085; }
   font-size: 13px;
   font-weight: 700;
 }
-/* Refinement UI dashboard/report */
-.field span {
-  display: block;
+/* Refinement UI form operatori/dashboard */
+.field > span {
   margin-bottom: 6px !important;
-  padding-left: 10px;
   font-weight: 700 !important;
   color: #1f2f46 !important;
+  padding-left: 0 !important;
 }
 
 .grid {
-  row-gap: 34px !important;
+  row-gap: 18px !important;
   column-gap: 24px !important;
-  align-items: start;
+  align-items: start !important;
 }
 
 .rowCard {
-  padding: 24px !important;
+  padding: 22px !important;
 }
 
-.rowCard .field span {
-  margin-bottom: 6px !important;
-  padding-left: 4px;
-}
-
-.rowCard input,
-.rowCard select,
-.rowCard textarea {
-  margin-top: 0 !important;
-}
-
-.card h3 {
-  margin-top: 28px;
-  margin-bottom: 16px;
-}
-/* Spaziatura verticale tra blocchi form */
-.grid + .field {
-  margin-top: 18px !important;
-}
-
-.grid + .grid {
-  margin-top: 18px !important;
-}
-
-.field + .field {
-  margin-top: 18px !important;
-}
-
-.rowCard .grid + .field,
 .rowCard .grid + .grid,
-.rowCard .field + .field {
-  margin-top: 18px !important;
+.rowCard .grid + .field,
+.rowCard .field + .field,
+.intervento .grid + .grid,
+.intervento .grid + .field,
+.intervento .field + .grid,
+.intervento .field + .field {
+  margin-top: 16px !important;
 }
 
-.intervento .grid + .field,
-.intervento .grid + .grid,
-.intervento .field + .field {
-  margin-top: 18px !important;
+.card > .field + .field,
+.card > .grid + .field,
+.card > .field + .grid {
+  margin-top: 16px !important;
 }
