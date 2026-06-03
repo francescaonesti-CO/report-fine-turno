@@ -109,27 +109,34 @@ small { color: #667085; }
 /* Refinement UI dashboard/report */
 .field span {
   display: block;
-  margin-bottom: 8px !important;
+  margin-bottom: 6px !important;
+  padding-left: 10px;
   font-weight: 700 !important;
   color: #1f2f46 !important;
 }
 
 .grid {
-  row-gap: 18px !important;
+  row-gap: 26px !important;
   column-gap: 24px !important;
   align-items: start;
 }
 
 .rowCard {
-  padding: 22px 24px !important;
+  padding: 24px !important;
 }
 
-.rowCard .grid {
-  row-gap: 18px !important;
+.rowCard .field span {
+  margin-bottom: 5px !important;
+  padding-left: 10px;
 }
 
-input,
-select,
-textarea {
+.rowCard input,
+.rowCard select,
+.rowCard textarea {
   margin-top: 0 !important;
+}
+
+.card h3 {
+  margin-top: 28px;
+  margin-bottom: 16px;
 }
