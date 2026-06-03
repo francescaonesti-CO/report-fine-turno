@@ -213,7 +213,7 @@ button.ghost {
 /* SPAZIATURE CONTROLLATE TRA BLOCCHI */
 .rowCard > .grid + .grid,
 .intervento > .grid + .grid {
-  margin-top: 16px;
+  margin-top: 24px;
 }
 
 .rowCard > .field,
