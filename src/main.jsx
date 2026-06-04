@@ -3164,8 +3164,17 @@ function buildOfficialShiftPdf(aggregate, reports, official, autoSintesi, autoEv
   drawKpiBox(doc,150,58,48,38,'clip','Atti redatti',totalAttiFromReports(reports),C.blue);
   drawPanel(doc,12,104,67,55,'Personale','people');
   const presenti = new Set(reports.flatMap(r=>(r.operatori||[]).map(o=>o.matricola||o.nome).filter(Boolean))).size;
-  const ritardiList=listFromText(official.ritardi); const assentiList=listFromText(official.assenti);
-  const ritardi=ritardiList.length; const assenti=assentiList.length;
+  const cleanPersonaleList = text =>
+  listFromText(text).filter(x => {
+    const v = String(x || '').trim().toLowerCase();
+    return v && !['nessuno', 'nessuna', 'no', 'nulla', '-'].includes(v);
+  });
+
+const ritardiList = cleanPersonaleList(official.ritardi);
+const assentiList = cleanPersonaleList(official.assenti);
+
+const ritardi = ritardiList.length;
+const assenti = assentiList.length;
   doc.setFontSize(8); setC(doc,C.text); doc.setFont('helvetica','normal');
   doc.text('Presenti',18,121); setC(doc,C.green); doc.setFont('helvetica','bold'); doc.text(String(presenti || '-'),72,121,{align:'right'});
   doc.setDrawColor(C.line[0],C.line[1],C.line[2]); doc.line(18,124,73,124);
