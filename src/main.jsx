@@ -2379,7 +2379,7 @@ function addFooter(doc) {
     doc.roundedRect(178, 287, 20, 7, 1.2, 1.2, 'F');
     doc.setTextColor(255, 255, 255);
     doc.setFont('helvetica', 'bold');
-    doc.text(`Pag. ${i} di ${pages}`, 188, 291.6, { align: 'center' });
+    doc.text(`Pag. ${i} di ${pages}`, 186, 291.6, { align: 'center' });
     doc.setTextColor(0, 0, 0);
   }
 }
