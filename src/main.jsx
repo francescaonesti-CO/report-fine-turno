@@ -3165,7 +3165,8 @@ const rows = reports.map(r => {
 }
 
   return rows;
-}function drawModernTable(doc, x,y,w,headers,rows,widths,opts={}) {
+}
+function drawModernTable(doc, x,y,w,headers,rows,widths,opts={}) {
   const C=themeColors(); const rowH=8; const headerH=10; fillC(doc,C.blue); doc.roundedRect(x,y,w,headerH,1.2,1.2,'F');
   doc.setFont('helvetica','bold'); doc.setFontSize(7.2); doc.setTextColor(255,255,255); let xx=x;
   headers.forEach((h,i)=>{ doc.text(String(h), xx+widths[i]/2, y+6.2,{align:'center', maxWidth: widths[i]-2}); xx+=widths[i]; });
