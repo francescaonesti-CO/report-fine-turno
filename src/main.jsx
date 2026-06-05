@@ -3389,36 +3389,6 @@ drawModernTable(
   [38, 28, 22, 16, 22, 24, 36],
   {}
 );
-const attiBottomY = controlliY + 52;
-
-drawPanel(
-  doc,
-  12,
-  attiBottomY,
-  186,
-  26,
-  'Atti redatti',
-  'clip'
-);
-
-const at = attiObjectFromReports(reports);
-
-const attiSummary = [
-  `Fermi amministrativi: ${n(at.fermiAmministrativi)}`,
-  `Sequestri amministrativi: ${n(at.sequestriAmministrativi)}`,
-  `Sequestri penali: ${n(at.sequestriPenali)}`,
-  `Notizie di reato: ${n(at.cnr)}`
-].join('   •   ');
-
-writeTextInBox(
-  doc,
-  attiSummary,
-  18,
-  attiBottomY + 16,
-  168,
-  4,
-  8
-);
   doc.addPage();
 drawHeaderModern(doc,'REPORT UFFICIALE DI TURNO - NOTE',subtitle,C.blue);
 let noteY = 58;
