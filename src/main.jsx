@@ -3338,20 +3338,6 @@ drawModernTable(
 
 const attiY = page2SintesiEndY + 110;
 
-drawPanel(doc, 12, attiY, 82, 45, 'Atti redatti', 'clip');
-
-const at = attiObjectFromReports(reports);
-
-const attiLines = [
-  ['Fermi amministrativi', at.fermiAmministrativi],
-  ['Sequestri amministrativi', at.sequestriAmministrativi],
-  ['Sequestri penali', at.sequestriPenali],
-  ['Notizie di reato', at.cnr]
-];
-
-doc.setFontSize(8);
-
-attiLines.forEach((r, i) => {
   setC(doc, C.text);
   doc.setFont('helvetica', 'normal');
   doc.text(r[0], 18, attiY + 18 + i * 7);
@@ -3410,6 +3396,36 @@ drawModernTable(
   controlliRows,
   [28, 34, 25, 18, 24, 27, 30],
   {}
+);
+const attiBottomY = controlliY + 52;
+
+drawPanel(
+  doc,
+  12,
+  attiBottomY,
+  186,
+  26,
+  'Atti redatti',
+  'clip'
+);
+
+const at = attiObjectFromReports(reports);
+
+const attiSummary = [
+  `Fermi amministrativi: ${n(at.fermiAmministrativi)}`,
+  `Sequestri amministrativi: ${n(at.sequestriAmministrativi)}`,
+  `Sequestri penali: ${n(at.sequestriPenali)}`,
+  `Notizie di reato: ${n(at.cnr)}`
+].join('   •   ');
+
+writeTextInBox(
+  doc,
+  attiSummary,
+  18,
+  attiBottomY + 16,
+  168,
+  4,
+  8
 );
   doc.addPage();
 drawHeaderModern(doc,'REPORT UFFICIALE DI TURNO - NOTE',subtitle,C.blue);
