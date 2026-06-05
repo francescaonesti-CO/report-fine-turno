@@ -3089,11 +3089,11 @@ function drawPanel(doc, x,y,w,h,title, icon='list', opts={}) {
   const C = themeColors(); const bg = opts.bg || [255,255,255]; const border = opts.border || C.line; const accent = opts.accent || C.blue;
   fillC(doc,bg); doc.setDrawColor(border[0],border[1],border[2]); doc.setLineWidth(0.35); doc.roundedRect(x,y,w,h,1.6,1.6,'FD');
   if (opts.leftStripe) { fillC(doc, opts.leftStripe); doc.rect(x,y,2.2,h,'F'); }
- drawMiniIcon(doc, icon, x + 5, y + 4, accent);
+ drawMiniIcon(doc, icon, x + 5, y + 1.8, accent);
 doc.setFont('helvetica','bold');
 doc.setFontSize(8);
 setC(doc,C.blue);
-doc.text(title.toUpperCase(), x + 20, y + 11);
+doc.text(title.toUpperCase(), x + 20, y + 7.2);
   setC(doc,C.text); doc.setFont('helvetica','normal');
 }
 function drawKpiBox(doc,x,y,w,h,icon,label,value,color=[12,47,97]) {
@@ -3230,7 +3230,7 @@ const rows=buildViolationRows(reports); drawModernTable(doc,12,72,186,['Pattugli
   drawPanel(doc,101,168,97,30,'Esito turno','check',{bg:[247,253,250],border:[187,223,206],accent:C.green}); writeTextInBox(doc, official.esiti || '-', 107,186,84,3,8);
   drawPanel(doc,101,204,97,25,"Comunicazioni E.Q.",'mail'); writeTextInBox(doc, official.comunicazioneEq || '-', 107,222,84,2,8);
   drawPanel(doc,12,236,124,34,'Nota del Comandante','user'); writeTextInBox(doc, official.notaComandante || '-', 18,254,110,3,8);
-  drawPanel(doc,144,236,54,34,'Responsabile di turno','user'); doc.setFontSize(7.5); setC(doc,C.text); doc.text(official.qualifica || '-',171,253,{align:'center'}); doc.setFont('helvetica','bold'); doc.text(official.ufficiale || '-',171,259,{align:'center'}); doc.line(154,265,188,265);
+  drawPanel(doc,136,236,62,34,'Responsabile di turno','user'); doc.setFontSize(7.5); setC(doc,C.text); doc.text(official.qualifica || '-',171,253,{align:'center'}); doc.setFont('helvetica','bold'); doc.text(official.ufficiale || '-',171,259,{align:'center'}); doc.line(154,265,188,265);
   footerModern(doc); return doc;
 }
 function buildServicePdf(report) {
