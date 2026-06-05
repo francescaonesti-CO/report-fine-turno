@@ -3280,7 +3280,7 @@ writeTextInBox(
   const noteGeneraliEndY = drawAutoTextPanel(
   doc,
   12,
-  232,
+  226,
   186,
   'Note generali',
   'doc',
