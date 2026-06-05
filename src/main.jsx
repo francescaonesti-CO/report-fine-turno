@@ -3469,7 +3469,36 @@ noteY = drawAutoTextPanel(
     panelOpts: { noIcon: true }
   }
 );
+const attiFinalY = noteY + 8;
 
+drawPanel(
+  doc,
+  12,
+  attiFinalY,
+  186,
+  24,
+  'Atti redatti',
+  'clip'
+);
+
+const at = attiObjectFromReports(reports);
+
+const attiSummary = [
+  `Fermi amministrativi: ${n(at.fermiAmministrativi)}`,
+  `Sequestri amministrativi: ${n(at.sequestriAmministrativi)}`,
+  `Sequestri penali: ${n(at.sequestriPenali)}`,
+  `Notizie di reato: ${n(at.cnr)}`
+].join('   •   ');
+
+writeTextInBox(
+  doc,
+  attiSummary,
+  18,
+  attiFinalY + 15,
+  168,
+  4,
+  8
+);
 drawPanel(doc,136,noteY,62,34,'Responsabile di turno','user');
 
 doc.setFontSize(7.5);
