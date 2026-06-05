@@ -2232,7 +2232,10 @@ function headerHtml(title, subtitle) {
 function kpiBox(icon, label, value) { return `<div class="kpi"><div class="ico">${iconSvg(icon)}</div><div class="label">${esc(label)}</div><div><div class="num">${esc(value)}</div><div class="sub">Totali</div></div></div>`; }
 function panel(title, icon, body, extraClass='') { return `<section class="panel ${extraClass}"><div class="panel-title">${iconSvg(icon)}<span>${esc(title)}</span></div><div class="panel-body">${body}</div></section>`; }
 function openPrintWindow(html) { const w = window.open('', '_blank'); if (!w) { alert('Popup bloccato: consenti le finestre popup per stampare il report.'); return; } w.document.open(); w.document.write(html); w.document.close(); setTimeout(() => { try { w.focus(); } catch(e) {} }, 300); }
-function printServiceReport(report) { openPrintWindow(buildServicePrintHtml(report)); }
+function printServiceReport(report) {
+  buildServicePdf(report)
+    .save(`Report_di_servizio_${sanitizeFileName(report.data)}_${sanitizeFileName(turnoLabel(report))}.pdf`);
+}
 function printOfficialReport(aggregate, reports, official, autoSintesi, autoEventi) {
   buildOfficialShiftPdf(aggregate, reports, official, autoSintesi, autoEventi)
     .save(`Report_ufficiale_turno_${sanitizeFileName(official.data || aggregate.dateLabel)}.pdf`);
@@ -3217,11 +3220,10 @@ const assenti = assentiList.length;
   drawPanel(doc,12,166,186,45,'Eventi / anomalie degne di rilievo','warn',{leftStripe:C.orange,bg:[255,251,245],border:[245,208,166],accent:C.orange}); writeTextInBox(doc, `${autoEventi || 'Nessun evento rilevante automatico rilevato.'}${official.anomalie ? '\nAnomalie: '+official.anomalie : ''}`, 18, 184, 172, 5, 8.2);
   drawPanel(doc,12,218,90,38,'Note generali','doc'); writeTextInBox(doc, official.noteGenerali || '-', 18,236,78,4,8);
   drawPanel(doc,108,218,90,38,'Sintesi operativa','list'); writeTextInBox(doc, `${autoSintesi}${official.sintesiManuali ? '\n'+official.sintesiManuali : ''}\nKm totali veicoli: ${totalKmFromReports(reports)} km`, 114,236,78,4,8);
-  footerModern(doc);
+ 
   doc.addPage(); drawHeaderModern(doc,'REPORT UFFICIALE DI TURNO - DETTAGLIO',subtitle,C.blue);
   drawPanel(doc,12,58,186,10,'Violazioni riscontrate','list');
-  const rows=buildViolationRows(reports); drawModernTable(doc,12,72,186,['Pattuglia','Reparto','Preavvisi CdS','Verbali CdS','Altro','Totale'], rows.length?rows:[['-','-','0','0','0','0']], [55,42,28,28,18,15], {totalLast:true});
-  drawPanel(doc,12,168,82,45,'Atti redatti','clip'); const at=attiObjectFromReports(reports); const attiLines=[['Fermi amministrativi',at.fermiAmministrativi],['Sequestri amministrativi',at.sequestriAmministrativi],['Sequestri penali',at.sequestriPenali],['Notizie di reato',at.cnr]]; doc.setFontSize(8); attiLines.forEach((r,i)=>{ setC(doc,C.text); doc.setFont('helvetica','normal'); doc.text(r[0],18,186+i*7); doc.setFont('helvetica','bold'); doc.text(String(n(r[1])),88,186+i*7,{align:'right'}); });
+const rows=buildViolationRows(reports); drawModernTable(doc,12,72,186,['Pattuglia','Reparto','Prev.','C.d.S.','Urbana','Annon.','Altre','Tot.'], rows.length?rows:[['-','-','0','0','0','0','0','0']], [42,35,18,18,20,20,18,15], {totalLast:true});  drawPanel(doc,12,168,82,45,'Atti redatti','clip'); const at=attiObjectFromReports(reports); const attiLines=[['Fermi amministrativi',at.fermiAmministrativi],['Sequestri amministrativi',at.sequestriAmministrativi],['Sequestri penali',at.sequestriPenali],['Notizie di reato',at.cnr]]; doc.setFontSize(8); attiLines.forEach((r,i)=>{ setC(doc,C.text); doc.setFont('helvetica','normal'); doc.text(r[0],18,186+i*7); doc.setFont('helvetica','bold'); doc.text(String(n(r[1])),88,186+i*7,{align:'right'}); });
   drawPanel(doc,101,168,97,30,'Esito turno','check',{bg:[247,253,250],border:[187,223,206],accent:C.green}); writeTextInBox(doc, official.esiti || '-', 107,186,84,3,8);
   drawPanel(doc,101,204,97,25,"Comunicazioni E.Q.",'mail'); writeTextInBox(doc, official.comunicazioneEq || '-', 107,222,84,2,8);
   drawPanel(doc,12,236,124,34,'Nota del Comandante','user'); writeTextInBox(doc, official.notaComandante || '-', 18,254,110,3,8);
