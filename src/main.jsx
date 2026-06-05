@@ -2233,7 +2233,10 @@ function kpiBox(icon, label, value) { return `<div class="kpi"><div class="ico">
 function panel(title, icon, body, extraClass='') { return `<section class="panel ${extraClass}"><div class="panel-title">${iconSvg(icon)}<span>${esc(title)}</span></div><div class="panel-body">${body}</div></section>`; }
 function openPrintWindow(html) { const w = window.open('', '_blank'); if (!w) { alert('Popup bloccato: consenti le finestre popup per stampare il report.'); return; } w.document.open(); w.document.write(html); w.document.close(); setTimeout(() => { try { w.focus(); } catch(e) {} }, 300); }
 function printServiceReport(report) { openPrintWindow(buildServicePrintHtml(report)); }
-function printOfficialReport(aggregate, reports, official, autoSintesi, autoEventi) { openPrintWindow(buildOfficialPrintHtml(aggregate, reports, official, autoSintesi, autoEventi)); }
+function printOfficialReport(aggregate, reports, official, autoSintesi, autoEventi) {
+  buildOfficialShiftPdf(aggregate, reports, official, autoSintesi, autoEventi)
+    .save(`Report_ufficiale_turno_${sanitizeFileName(official.data || aggregate.dateLabel)}.pdf`);
+}
 function buildServicePrintHtml(report) {
   const c = report.counters || emptyCounters();
   const interventions = report.interventi || [];
