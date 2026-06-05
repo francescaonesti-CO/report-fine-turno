@@ -3336,7 +3336,7 @@ drawModernTable(
   { totalLast: true }
 );
 
-const anomalieUdtY = page2SintesiEndY + 110;
+const anomalieUdtY = page2SintesiEndY + 62;
   
 const anomalieUdtEndY = drawAutoTextPanel(
   doc,
