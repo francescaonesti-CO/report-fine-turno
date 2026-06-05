@@ -3229,7 +3229,27 @@ function buildOfficialShiftPdf(aggregate, reports, official, autoSintesi, autoEv
   drawKpiBox(doc,58,58,40,38,'doc','Verbali',aggregate.totaleViolazioni,C.blue);
   drawKpiBox(doc,104,58,40,38,'warn','Eventi',relevantInterventions(reports).length,C.orange);
   drawKpiBox(doc,150,58,48,38,'clip','Atti redatti',totalAttiFromReports(reports),C.blue);
-  drawPanel(doc,12,104,67,55,'Personale','people');
+  drawPanel(doc,12,90,186,18,'Atti redatti','clip');
+
+const at = attiObjectFromReports(reports);
+
+const attiMini = [
+  `Fermi amm.: ${n(at.fermiAmministrativi)}`,
+  `Sequestri amm.: ${n(at.sequestriAmministrativi)}`,
+  `Sequestri penali: ${n(at.sequestriPenali)}`,
+  `CNR: ${n(at.cnr)}`
+].join('   •   ');
+
+writeTextInBox(
+  doc,
+  attiMini,
+  18,
+  101,
+  170,
+  4,
+  7.6
+);
+  drawPanel(doc,12,104,67,58,'Personale','people');
   const presenti = new Set(reports.flatMap(r=>(r.operatori||[]).map(o=>o.matricola||o.nome).filter(Boolean))).size;
   const cleanPersonaleList = text =>
   listFromText(text).filter(x => {
@@ -3265,13 +3285,13 @@ const assenti = assentiList.length;
     paddingTop: 18
   }
 );
-drawPanel(doc,12,174,186,52,'Eventi / anomalie degne di rilievo','warn',{leftStripe:C.orange,bg:[255,251,245],border:[245,208,174],accent:C.orange});
+drawPanel(doc,12,168,186,52,'Eventi / anomalie degne di rilievo','warn',{leftStripe:C.orange,bg:[255,251,245],border:[245,208,174],accent:C.orange});
 
 writeTextInBox(
   doc,
   `${autoEventi || 'Nessun evento rilevante automatico rilevato.'}${official.anomalie ? '\nAnomalie: '+official.anomalie : ''}`,
   18,
-  192,
+  186,
   172,
   5,
   8.2
@@ -3279,7 +3299,7 @@ writeTextInBox(
   const noteGeneraliEndY = drawAutoTextPanel(
   doc,
   12,
-  226,
+  232,
   186,
   'Note generali',
   'doc',
@@ -3469,36 +3489,7 @@ noteY = drawAutoTextPanel(
     panelOpts: { noIcon: true }
   }
 );
-const attiFinalY = noteY + 8;
-
-drawPanel(
-  doc,
-  12,
-  attiFinalY,
-  186,
-  24,
-  'Atti redatti',
-  'clip'
-);
-
-const at = attiObjectFromReports(reports);
-
-const attiSummary = [
-  `Fermi amministrativi: ${n(at.fermiAmministrativi)}`,
-  `Sequestri amministrativi: ${n(at.sequestriAmministrativi)}`,
-  `Sequestri penali: ${n(at.sequestriPenali)}`,
-  `Notizie di reato: ${n(at.cnr)}`
-].join('   •   ');
-
-writeTextInBox(
-  doc,
-  attiSummary,
-  18,
-  attiFinalY + 15,
-  168,
-  4,
-  8
-);
+  
 drawPanel(doc,136,noteY,62,34,'Responsabile di turno','user');
 
 doc.setFontSize(7.5);
