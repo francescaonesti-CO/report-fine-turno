@@ -3109,12 +3109,12 @@ function totalVehiclesFromReports(reports) { return reports.reduce((sum,r)=>sum+
 
 function totalAttiFromReports(reports) { return reports.reduce((sum,r)=>{ const c=r.counters||{}; return sum + ['relazioni','annotazioni','sequestriAmministrativi','fermiAmministrativi','sequestriPenali','cnr','altriAttiNumero'].reduce((s,k)=>s+n(c[k]),0); },0); }
 function attiObjectFromReports(reports) { return reports.reduce((acc,r)=>{ const c=r.counters||{}; ['relazioni','annotazioni','sequestriAmministrativi','fermiAmministrativi','sequestriPenali','cnr','altriAttiNumero'].forEach(k=>acc[k]=n(acc[k])+n(c[k])); return acc; },{}); }
-function buildViolationRows(reports) {
-  const rows = reports.map(r => {
-    const c = r.counters || {};
+const rows = reports.map(r => {
+  const report = normalizeReportData(r);
+  const c = report.counters || {};
 
-    const pattuglia = operatorNames(r).join(' - ') || '-';
-    const reparto = repartoLabel(r);
+  const pattuglia = operatorNames(report).join(' - ') || '-';
+  const reparto = repartoLabel(report);
 
     const preavvisi = n(c.preavvisiCds);
     const verbaliCds = n(c.vdcCds) + n(c.regPolizia);
