@@ -3113,6 +3113,31 @@ function writeTextInBox(doc, text, x, y, w, maxLines=8, fontSize=8) {
   doc.text(lines, x, y);
   return lines.length;
 }
+
+function drawAutoTextPanel(doc, x, y, w, title, icon, text, opts = {}) {
+  const C = themeColors();
+  const fontSize = opts.fontSize || 8;
+  const lineH = opts.lineH || 4.2;
+  const paddingTop = opts.paddingTop || 18;
+  const paddingBottom = opts.paddingBottom || 6;
+  const paddingX = opts.paddingX || 6;
+  const maxWidth = w - paddingX * 2;
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(fontSize);
+
+  const lines = doc.splitTextToSize(String(text || '-'), maxWidth);
+  const h = Math.max(opts.minH || 28, paddingTop + paddingBottom + lines.length * lineH);
+
+  drawPanel(doc, x, y, w, h, title, icon, opts.panelOpts || {});
+
+  setC(doc, C.text);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(fontSize);
+  doc.text(lines, x + paddingX, y + paddingTop);
+
+  return y + h + (opts.gap || 6);
+}
 function countTextItems(text) { const s = String(text || '').trim(); if (!s || /^nessun[oa]$/i.test(s) || s === '-') return 0; return s.split(/\n|;/).map(x=>x.trim()).filter(Boolean).length; }
 function formatDateIT(value) {
   const s = String(value || '').trim();
@@ -3225,8 +3250,21 @@ const assenti = assentiList.length;
   drawPanel(doc,84,104,114,55,'Briefing operativo','list'); writeTextInBox(doc, official.briefing || '-', 90, 122, 100, 7, 8);
   drawPanel(doc,12,166,186,45,'Eventi / anomalie degne di rilievo','warn',{leftStripe:C.orange,bg:[255,251,245],border:[245,208,166],accent:C.orange}); writeTextInBox(doc, `${autoEventi || 'Nessun evento rilevante automatico rilevato.'}${official.anomalie ? '\nAnomalie: '+official.anomalie : ''}`, 18, 184, 172, 5, 8.2);
   drawPanel(doc,12,218,90,38,'Note generali','doc'); writeTextInBox(doc, official.noteGenerali || '-', 18,236,78,4,8);
-  drawPanel(doc,108,218,90,38,'Sintesi operativa','list'); writeTextInBox(doc, `${autoSintesi}${official.sintesiManuale ? '\n'+official.sintesiManuale : ''}\nKm totali veicoli: ${totalKmFromReports(reports)} km`, 114,234,78,5,7.4);
- 
+  drawAutoTextPanel(
+  doc,
+  108,
+  218,
+  90,
+  'Sintesi operativa',
+  'list',
+  `${autoSintesi}${official.sintesiManuale ? '\n' + official.sintesiManuale : ''}\nKm totali veicoli: ${totalKmFromReports(reports)} km`,
+  {
+    minH: 38,
+    fontSize: 7.4,
+    lineH: 4,
+    paddingTop: 16
+  }
+); 
   doc.addPage(); drawHeaderModern(doc,'REPORT UFFICIALE DI TURNO - DETTAGLIO',subtitle,C.blue);
   drawPanel(doc,12,58,186,10,'Violazioni riscontrate','list', { noIcon: true });
 const rows=buildViolationRows(reports); drawModernTable(doc,12,72,186,['Pattuglia','Reparto','Prev.','C.d.S.','Urbana','Annon.','Altre','Tot.'], rows.length?rows:[['-','-','0','0','0','0','0','0']], [42,35,18,18,20,20,18,15], {totalLast:true});  drawPanel(doc,12,168,82,45,'Atti redatti','clip'); const at=attiObjectFromReports(reports); const attiLines=[['Fermi amministrativi',at.fermiAmministrativi],['Sequestri amministrativi',at.sequestriAmministrativi],['Sequestri penali',at.sequestriPenali],['Notizie di reato',at.cnr]]; doc.setFontSize(8); attiLines.forEach((r,i)=>{ setC(doc,C.text); doc.setFont('helvetica','normal'); doc.text(r[0],18,186+i*7); doc.setFont('helvetica','bold'); doc.text(String(n(r[1])),88,186+i*7,{align:'right'}); });
