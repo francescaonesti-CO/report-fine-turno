@@ -3120,24 +3120,29 @@ function totalVehiclesFromReports(reports) { return reports.reduce((sum,r)=>sum+
 
 function totalAttiFromReports(reports) { return reports.reduce((sum,r)=>{ const c=r.counters||{}; return sum + ['relazioni','annotazioni','sequestriAmministrativi','fermiAmministrativi','sequestriPenali','cnr','altriAttiNumero'].reduce((s,k)=>s+n(c[k]),0); },0); }
 function attiObjectFromReports(reports) { return reports.reduce((acc,r)=>{ const c=r.counters||{}; ['relazioni','annotazioni','sequestriAmministrativi','fermiAmministrativi','sequestriPenali','cnr','altriAttiNumero'].forEach(k=>acc[k]=n(acc[k])+n(c[k])); return acc; },{}); }
-const rows = reports.map(r => {
-  const report = normalizeReportData(r);
-  const c = report.counters || {};
+function buildViolationRows(reports) {
+  const rows = reports.map(r => {
+    const report = normalizeReportData(r);
+    const c = report.counters || {};
 
-  const pattuglia = operatorNames(report).join(' - ') || '-';
-  const reparto = repartoLabel(report);
+    const pattuglia = operatorNames(report).join(' - ') || '-';
+    const reparto = repartoLabel(report);
 
     const preavvisi = n(c.preavvisiCds);
-    const verbaliCds = n(c.vdcCds) + n(c.regPolizia);
-    const altro = n(c.annonaria) + n(c.altreNorme);
-    const totale = preavvisi + verbaliCds + altro;
+    const cds = n(c.vdcCds);
+    const urbana = n(c.regPolizia) + n(c.regEdilizio) + n(c.regBenessereAnimali);
+    const annonaria = n(c.annonaria);
+    const altre = n(c.altreNorme);
+    const totale = preavvisi + cds + urbana + annonaria + altre;
 
     return [
       pattuglia,
       reparto,
       preavvisi,
-      verbaliCds,
-      altro,
+      cds,
+      urbana,
+      annonaria,
+      altre,
       totale
     ];
   });
@@ -3145,24 +3150,28 @@ const rows = reports.map(r => {
   const totals = rows.reduce(
     (acc, row) => {
       acc.preavvisi += n(row[2]);
-      acc.verbaliCds += n(row[3]);
-      acc.altro += n(row[4]);
-      acc.totale += n(row[5]);
+      acc.cds += n(row[3]);
+      acc.urbana += n(row[4]);
+      acc.annonaria += n(row[5]);
+      acc.altre += n(row[6]);
+      acc.totale += n(row[7]);
       return acc;
     },
-    { preavvisi: 0, verbaliCds: 0, altro: 0, totale: 0 }
+    { preavvisi: 0, cds: 0, urbana: 0, annonaria: 0, altre: 0, totale: 0 }
   );
 
   if (rows.length) {
-  rows.push([
-    'TOTALE COMPLESSIVO',
-    '',
-    totals.preavvisi,
-    totals.verbaliCds,
-    totals.altro,
-    totals.totale
-  ]);
-}
+    rows.push([
+      'TOTALE COMPLESSIVO',
+      '',
+      totals.preavvisi,
+      totals.cds,
+      totals.urbana,
+      totals.annonaria,
+      totals.altre,
+      totals.totale
+    ]);
+  }
 
   return rows;
 }
