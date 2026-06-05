@@ -3089,8 +3089,8 @@ function drawPanel(doc, x,y,w,h,title, icon='list', opts={}) {
   const C = themeColors(); const bg = opts.bg || [255,255,255]; const border = opts.border || C.line; const accent = opts.accent || C.blue;
   fillC(doc,bg); doc.setDrawColor(border[0],border[1],border[2]); doc.setLineWidth(0.35); doc.roundedRect(x,y,w,h,1.6,1.6,'FD');
   if (opts.leftStripe) { fillC(doc, opts.leftStripe); doc.rect(x,y,2.2,h,'F'); }
-  drawMiniIcon(doc, icon, x+5, y+4, accent);
-  doc.setFont('helvetica','bold'); doc.setFontSize(9); setC(doc,C.blue); doc.text(title.toUpperCase(), x+20, y+10);
+  drawMiniIcon(doc, icon, x+5, y+2, accent);
+  doc.setFont('helvetica','bold'); doc.setFontSize(9); setC(doc,C.blue); doc.text(title.toUpperCase(), x+20, y+8);
   setC(doc,C.text); doc.setFont('helvetica','normal');
 }
 function drawKpiBox(doc,x,y,w,h,icon,label,value,color=[12,47,97]) {
