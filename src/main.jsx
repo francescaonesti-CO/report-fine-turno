@@ -3270,8 +3270,26 @@ const assenti = assentiList.length;
 const rows=buildViolationRows(reports); drawModernTable(doc,12,72,186,['Pattuglia','Reparto','Prev.','C.d.S.','Urbana','Annon.','Altre','Tot.'], rows.length?rows:[['-','-','0','0','0','0','0','0']], [42,35,18,18,20,20,18,15], {totalLast:true});  drawPanel(doc,12,168,82,45,'Atti redatti','clip'); const at=attiObjectFromReports(reports); const attiLines=[['Fermi amministrativi',at.fermiAmministrativi],['Sequestri amministrativi',at.sequestriAmministrativi],['Sequestri penali',at.sequestriPenali],['Notizie di reato',at.cnr]]; doc.setFontSize(8); attiLines.forEach((r,i)=>{ setC(doc,C.text); doc.setFont('helvetica','normal'); doc.text(r[0],18,186+i*7); doc.setFont('helvetica','bold'); doc.text(String(n(r[1])),88,186+i*7,{align:'right'}); });
   drawPanel(doc,101,168,97,30,'Esito turno','check',{bg:[247,253,250],border:[187,223,206],accent:C.green}); writeTextInBox(doc, official.esiti || '-', 107,186,84,3,8);
   drawPanel(doc,101,204,97,25,"Comunicazioni E.Q.",'mail'); writeTextInBox(doc, official.comunicazioneEq || '-', 107,222,84,2,8);
-  drawPanel(doc,12,236,124,34,'Nota del Comandante','user'); writeTextInBox(doc, official.notaComandante || '-', 18,254,110,3,8);
   drawPanel(doc,136,236,62,34,'Responsabile di turno','user'); doc.setFontSize(7.5); setC(doc,C.text); doc.text(official.qualifica || '-',171,253,{align:'center'}); doc.setFont('helvetica','bold'); doc.text(official.ufficiale || '-',171,259,{align:'center'}); doc.line(154,265,188,265);
+  doc.addPage();
+drawHeaderModern(doc,'REPORT UFFICIALE DI TURNO - NOTE',subtitle,C.blue);
+
+drawAutoTextPanel(
+  doc,
+  12,
+  58,
+  186,
+  'Nota del Comandante',
+  'user',
+  official.notaComandante || '-',
+  {
+    minH: 40,
+    fontSize: 8,
+    lineH: 4.2,
+    paddingTop: 16,
+    panelOpts: { noIcon: true }
+  }
+);
   footerModern(doc); return doc;
 }
 function buildServicePdf(report) {
