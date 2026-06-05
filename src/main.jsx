@@ -3259,7 +3259,7 @@ const assenti = assentiList.length;
   'list',
   official.briefing || '-',
   {
-    minH: 44,
+    minH: 52,
     fontSize: 8,
     lineH: 4.2,
     paddingTop: 18
@@ -3279,7 +3279,7 @@ writeTextInBox(
   const noteGeneraliEndY = drawAutoTextPanel(
   doc,
   12,
-  234,
+  226,
   186,
   'Note generali',
   'doc',
