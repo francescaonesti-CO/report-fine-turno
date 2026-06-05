@@ -3150,7 +3150,10 @@ function formatDateIT(value) {
   return s;
 }
 function listFromText(text) {
-  return String(text || '').split(/\n|;/).map(x => x.trim()).filter(x => x && x !== '-');
+  return String(text || '')
+    .split(/\n|;|,/)
+    .map(x => x.trim())
+    .filter(x => x && x !== '-');
 }
 function totalKmFromReports(reports) { return reports.reduce((sum,r)=>sum+getKmTotali(r),0); }
 function totalVehiclesFromReports(reports) { return reports.reduce((sum,r)=>sum+((r.veicoli||[]).filter(v=>v.sigla||v.kmInizio||v.kmFine).length),0); }
@@ -3262,12 +3265,22 @@ const assenti = assentiList.length;
     paddingTop: 18
   }
 );
-  drawPanel(doc,12,166,186,45,'Eventi / anomalie degne di rilievo','warn',{leftStripe:C.orange,bg:[255,251,245],border:[245,208,166],accent:C.orange}); writeTextInBox(doc, `${autoEventi || 'Nessun evento rilevante automatico rilevato.'}${official.anomalie ? '\nAnomalie: '+official.anomalie : ''}`, 18, 184, 172, 5, 8.2);
+drawPanel(doc,12,174,186,52,'Eventi / anomalie degne di rilievo','warn',{leftStripe:C.orange,bg:[255,251,245],border:[245,208,174],accent:C.orange});
+
+writeTextInBox(
+  doc,
+  `${autoEventi || 'Nessun evento rilevante automatico rilevato.'}${official.anomalie ? '\nAnomalie: '+official.anomalie : ''}`,
+  18,
+  192,
+  172,
+  5,
+  8.2
+);
   const noteGeneraliEndY = drawAutoTextPanel(
   doc,
   12,
-  218,
-  90,
+  234,
+  186,
   'Note generali',
   'doc',
   official.noteGenerali || '-',
@@ -3345,7 +3358,35 @@ attiLines.forEach((r, i) => {
   doc.setFont('helvetica', 'bold');
   doc.text(String(n(r[1])), 88, attiY + 18 + i * 7, { align: 'right' });
 });
-  
+const controlliUdt = (official.attivitaIspettive || [])
+  .filter(a => a.tipo || a.reparto || a.luogo || a.orario || a.esito || a.violazioni || a.note);
+
+const controlliY = attiY + 58;
+
+drawPanel(doc, 12, controlliY, 186, 10, "Controlli effettuati dall'UDT", 'list', { noIcon: true });
+
+const controlliRows = controlliUdt.length
+  ? controlliUdt.map(a => [
+      a.tipo || '-',
+      a.reparto || '-',
+      a.luogo || '-',
+      a.orario || '-',
+      a.esito || '-',
+      a.violazioni || '-',
+      a.note || '-'
+    ])
+  : [['-', '-', '-', '-', '-', '-', '-']];
+
+drawModernTable(
+  doc,
+  12,
+  controlliY + 14,
+  186,
+  ['Tipo', 'Pattuglia/Reparto', 'Luogo', 'Orario', 'Esito', 'Criticità', 'Disposizioni'],
+  controlliRows,
+  [28, 34, 25, 18, 24, 27, 30],
+  {}
+);
   doc.addPage();
 drawHeaderModern(doc,'REPORT UFFICIALE DI TURNO - NOTE',subtitle,C.blue);
 let noteY = 58;
