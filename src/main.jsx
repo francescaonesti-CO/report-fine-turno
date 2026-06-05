@@ -3361,38 +3361,7 @@ doc.text(official.ufficiale || '-',167,noteY+23,{align:'center'});
 
 doc.line(149,noteY+29,185,noteY+29);  
 
-drawAutoTextPanel(
-  doc,
-  12,
-  58,
-  186,
-  'Nota per il Comandante',
-  'user',
-  official.notaComandante || '-',
-  {
-    minH: 40,
-    fontSize: 8,
-    lineH: 4.2,
-    paddingTop: 16,
-    panelOpts: { noIcon: true }
-  }
-);
-  drawAutoTextPanel(
-  doc,
-  12,
-  118,
-  186,
-  'Integrazione alla sintesi operativa',
-  'list',
-  official.sintesiManuale || '-',
-  {
-    minH: 40,
-    fontSize: 8,
-    lineH: 4.2,
-    paddingTop: 16,
-    panelOpts: { noIcon: true }
-  }
-);
+
   footerModern(doc); return doc;
 }
 
