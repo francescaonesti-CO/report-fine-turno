@@ -3247,15 +3247,46 @@ const assenti = assentiList.length;
   doc.setDrawColor(C.line[0],C.line[1],C.line[2]); doc.line(18,142,73,142);
   setC(doc,C.text); doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.text('Assenti',18,148); setC(doc,C.red); doc.setFont('helvetica','bold'); doc.text(String(assenti),72,148,{align:'right'});
   if (assentiList.length) { setC(doc,C.muted); doc.setFont('helvetica','normal'); doc.setFontSize(6.6); doc.text(doc.splitTextToSize(assentiList.join(', '),50).slice(0,2),18,153); }
-  drawPanel(doc,84,104,114,55,'Briefing operativo','list'); writeTextInBox(doc, official.briefing || '-', 90, 122, 100, 7, 8);
-  drawPanel(doc,12,166,186,45,'Eventi / anomalie degne di rilievo','warn',{leftStripe:C.orange,bg:[255,251,245],border:[245,208,166],accent:C.orange}); writeTextInBox(doc, `${autoEventi || 'Nessun evento rilevante automatico rilevato.'}${official.anomalie ? '\nAnomalie: '+official.anomalie : ''}`, 18, 184, 172, 5, 8.2);
-  drawPanel(doc,12,218,90,38,'Note generali','doc'); writeTextInBox(doc, official.noteGenerali || '-', 18,236,78,4,8);
-  drawAutoTextPanel(
+  const briefingEndY = drawAutoTextPanel(
   doc,
-  108,
+  84,
+  104,
+  114,
+  'Briefing operativo',
+  'list',
+  official.briefing || '-',
+  {
+    minH: 55,
+    fontSize: 8,
+    lineH: 4.2,
+    paddingTop: 18
+  }
+);
+  drawPanel(doc,12,166,186,45,'Eventi / anomalie degne di rilievo','warn',{leftStripe:C.orange,bg:[255,251,245],border:[245,208,166],accent:C.orange}); writeTextInBox(doc, `${autoEventi || 'Nessun evento rilevante automatico rilevato.'}${official.anomalie ? '\nAnomalie: '+official.anomalie : ''}`, 18, 184, 172, 5, 8.2);
+  const noteGeneraliEndY = drawAutoTextPanel(
+  doc,
+  12,
   218,
   90,
-  'Sintesi operativa',
+  'Note generali',
+  'doc',
+  official.noteGenerali || '-',
+  {
+    minH: 38,
+    fontSize: 8,
+    lineH: 4.2,
+    paddingTop: 18
+  }
+);
+
+const sintesiY = Math.max(noteGeneraliEndY, 218);
+
+drawAutoTextPanel(
+  doc,
+  108,
+  sintesiY,
+  90,
+  'SINTESI OPERATIVA',
   'list',
   `${autoSintesi}\nKm totali veicoli: ${totalKmFromReports(reports)} km`,
   {
