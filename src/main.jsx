@@ -3240,7 +3240,7 @@ const assentiList = cleanPersonaleList(official.assenti);
 const ritardi = ritardiList.length;
 const assenti = assentiList.length;
   doc.setFontSize(8); setC(doc,C.text); doc.setFont('helvetica','normal');
-  doc.text('Presenti',18,121); setC(doc,C.green); doc.setFont('helvetica','bold'); doc.text(String(presenti || '-'),72,121,{align:'right'});
+  doc.text('Presenti',18,121); setC(doc,C.green); doc.setFont('helvetica','bold'); doc.text(String(presenti || 0),72,121,{align:'right'});
   doc.setDrawColor(C.line[0],C.line[1],C.line[2]); doc.line(18,124,73,124);
   setC(doc,C.text); doc.setFont('helvetica','normal'); doc.text('Ritardo',18,130); setC(doc,C.orange); doc.setFont('helvetica','bold'); doc.text(String(ritardi),72,130,{align:'right'});
   if (ritardiList.length) { setC(doc,C.muted); doc.setFont('helvetica','normal'); doc.setFontSize(6.6); doc.text(doc.splitTextToSize(ritardiList.join(', '),50).slice(0,2),18,135); }
