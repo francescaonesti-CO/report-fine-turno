@@ -3279,8 +3279,10 @@ const assenti = assentiList.length;
   }
 );
 
-  doc.addPage(); drawHeaderModern(doc,'REPORT UFFICIALE DI TURNO - DETTAGLIO',subtitle,C.blue);
-  drawAutoTextPanel(
+  doc.addPage();
+drawHeaderModern(doc, 'REPORT UFFICIALE DI TURNO - DETTAGLIO', subtitle, C.blue);
+
+const page2SintesiEndY = drawAutoTextPanel(
   doc,
   12,
   58,
@@ -3289,14 +3291,60 @@ const assenti = assentiList.length;
   'list',
   `${autoSintesi}\nKm totali veicoli: ${totalKmFromReports(reports)} km`,
   {
-    minH: 34,
+    minH: 38,
     fontSize: 7.8,
     lineH: 4,
-    paddingTop: 16
+    paddingTop: 16,
+    gap: 8
   }
 );
- drawPanel(doc,12,page2SintesiEndY,186,10,'Violazioni riscontrate','list', { noIcon: true });
-const rows=buildViolationRows(reports); drawModernTable(doc,12,page2SintesiEndY + 14,186,['Pattuglia','Reparto','Prev.','C.d.S.','Urbana','Annon.','Altre','Tot.'], rows.length?rows:[['-','-','0','0','0','0','0','0']], [42,35,18,18,20,20,18,15], {totalLast:true});  drawPanel(doc,12,168,82,45,'Atti redatti','clip'); const at=attiObjectFromReports(reports); const attiLines=[['Fermi amministrativi',at.fermiAmministrativi],['Sequestri amministrativi',at.sequestriAmministrativi],['Sequestri penali',at.sequestriPenali],['Notizie di reato',at.cnr]]; doc.setFontSize(8); attiLines.forEach((r,i)=>{ setC(doc,C.text); doc.setFont('helvetica','normal'); doc.text(r[0],18,186+i*7); doc.setFont('helvetica','bold'); doc.text(String(n(r[1])),88,186+i*7,{align:'right'}); });
+
+drawPanel(
+  doc,
+  12,
+  page2SintesiEndY,
+  186,
+  10,
+  'Violazioni riscontrate',
+  'list',
+  { noIcon: true }
+);
+
+const rows = buildViolationRows(reports);
+
+drawModernTable(
+  doc,
+  12,
+  page2SintesiEndY + 14,
+  186,
+  ['Pattuglia', 'Reparto', 'Prev.', 'C.d.S.', 'Urbana', 'Annon.', 'Altre', 'Tot.'],
+  rows.length ? rows : [['-', '-', '0', '0', '0', '0', '0', '0']],
+  [42, 35, 18, 18, 20, 20, 18, 15],
+  { totalLast: true }
+);
+
+const attiY = page2SintesiEndY + 110;
+
+drawPanel(doc, 12, attiY, 82, 45, 'Atti redatti', 'clip');
+
+const at = attiObjectFromReports(reports);
+
+const attiLines = [
+  ['Fermi amministrativi', at.fermiAmministrativi],
+  ['Sequestri amministrativi', at.sequestriAmministrativi],
+  ['Sequestri penali', at.sequestriPenali],
+  ['Notizie di reato', at.cnr]
+];
+
+doc.setFontSize(8);
+
+attiLines.forEach((r, i) => {
+  setC(doc, C.text);
+  doc.setFont('helvetica', 'normal');
+  doc.text(r[0], 18, attiY + 18 + i * 7);
+  doc.setFont('helvetica', 'bold');
+  doc.text(String(n(r[1])), 88, attiY + 18 + i * 7, { align: 'right' });
+});
   
   doc.addPage();
 drawHeaderModern(doc,'REPORT UFFICIALE DI TURNO - NOTE',subtitle,C.blue);
