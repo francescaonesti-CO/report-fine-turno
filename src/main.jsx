@@ -3285,7 +3285,7 @@ writeTextInBox(
   'doc',
   official.noteGenerali || '-',
   {
-    minH: 38,
+    minH: 52,
     fontSize: 8,
     lineH: 4.2,
     paddingTop: 18
