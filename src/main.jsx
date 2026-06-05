@@ -3326,7 +3326,7 @@ drawPanel(
 
 const rows = buildViolationRows(reports);
 
-drawModernTable(
+const violazioniEndY = drawModernTable(
   doc,
   12,
   page2SintesiEndY + 14,
@@ -3337,7 +3337,7 @@ drawModernTable(
   { totalLast: true }
 );
 
-const anomalieUdtY = page2SintesiEndY + 62;
+const anomalieUdtY = violazioniEndY + 18;
   
 const anomalieUdtEndY = drawAutoTextPanel(
   doc,
