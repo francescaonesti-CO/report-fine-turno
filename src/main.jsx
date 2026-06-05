@@ -3363,7 +3363,7 @@ const anomalieUdtEndY = drawAutoTextPanel(
 const controlliUdt = (official.attivitaIspettive || [])
   .filter(a => a.tipo || a.reparto || a.luogo || a.orario || a.esito || a.violazioni || a.note);
 
-const controlliY = anomalieUdtEndY;
+const controlliY = anomalieUdtEndY + 8;
   
 drawPanel(doc, 12, controlliY, 186, 10, "Controlli effettuati dall'UDT", 'list', { noIcon: true });
 
@@ -3386,7 +3386,7 @@ drawModernTable(
   186,
   ['Tipo', 'Pattuglia/Reparto', 'Luogo', 'Orario', 'Esito', 'Criticità', 'Disposizioni'],
   controlliRows,
-  [28, 34, 25, 18, 24, 27, 30],
+  [38, 28, 22, 16, 22, 24, 36],
   {}
 );
 const attiBottomY = controlliY + 52;
