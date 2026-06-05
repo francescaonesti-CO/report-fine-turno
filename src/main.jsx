@@ -3097,8 +3097,8 @@ function drawKpiBox(doc,x,y,w,h,icon,label,value,color=[12,47,97]) {
   const C = themeColors(); fillC(doc,[255,255,255]); doc.setDrawColor(C.line[0],C.line[1],C.line[2]); doc.roundedRect(x,y,w,h,1.6,1.6,'FD');
   drawMiniIcon(doc, icon, x+w/2-4, y+5, color);
   doc.setFont('helvetica','bold'); doc.setFontSize(8.2); setC(doc,color); doc.text(label.toUpperCase(), x+w/2, y+20,{align:'center'});
-  doc.setFontSize(20); doc.text(String(value ?? '-'), x+w/2, y+32,{align:'center'});
-  doc.setFont('helvetica','normal'); doc.setFontSize(7.2); setC(doc,themeColors().muted); doc.text('Totali', x+w/2, y+38,{align:'center'});
+  doc.setFontSize(18); doc.text(String(value ?? '-'), x+w/2, y+32,{align:'center'});
+  doc.setFont('helvetica','normal'); doc.setFontSize(7.2); setC(doc,themeColors().muted); doc.text('Totali', x+w/2, y+35,{align:'center'});
 }
 function writeTextInBox(doc, text, x, y, w, maxLines=8, fontSize=8) {
   doc.setFont('helvetica','normal'); doc.setFontSize(fontSize); setC(doc,themeColors().text);
