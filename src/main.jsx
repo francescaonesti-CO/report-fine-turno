@@ -597,7 +597,18 @@ Cordialmente,`
       <h2>9. Note e invio</h2>
       <Field label="Note per UDT / Ufficiale di coordinamento"><Textarea value={report.noteUdt} onChange={v => update({ noteUdt: v })} /></Field>
       <Field label="Email ufficiale destinatario"><Input value={report.destinatario} onChange={v => update({ destinatario: v })} placeholder="es. ufficiale@comune.monza.it" /></Field>
-<div className="actions">
+<div
+  className="muted"
+  style={{
+    marginTop: 12,
+    marginBottom: 10,
+    fontSize: 13,
+    fontWeight: 600
+  }}
+>
+  Promemoria: prima dell’invio verificare di aver inserito i km finali del veicolo.
+</div>
+      <div className="actions">
   <button onClick={generatePdf}>Apri report stampabile</button>
   <button onClick={saveToDatabase} disabled={dbSaving}>
     {dbSaving ? 'Salvataggio...' : 'Salva su database'}
