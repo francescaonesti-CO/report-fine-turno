@@ -3358,11 +3358,35 @@ attiLines.forEach((r, i) => {
   doc.setFont('helvetica', 'bold');
   doc.text(String(n(r[1])), 88, attiY + 18 + i * 7, { align: 'right' });
 });
+const anomalieUdtY = attiY + 58;
+
+const anomalieUdtEndY = drawAutoTextPanel(
+  doc,
+  12,
+  anomalieUdtY,
+  186,
+  'Anomalie riscontrate durante il turno',
+  'warn',
+  official.anomalie || '-',
+  {
+    minH: 34,
+    fontSize: 8,
+    lineH: 4.2,
+    paddingTop: 16,
+    gap: 8,
+    panelOpts: {
+      leftStripe: C.orange,
+      bg: [255, 251, 245],
+      border: [245, 208, 174],
+      accent: C.orange
+    }
+  }
+);  
 const controlliUdt = (official.attivitaIspettive || [])
   .filter(a => a.tipo || a.reparto || a.luogo || a.orario || a.esito || a.violazioni || a.note);
 
-const controlliY = attiY + 58;
-
+const controlliY = anomalieUdtEndY;
+  
 drawPanel(doc, 12, controlliY, 186, 10, "Controlli effettuati dall'UDT", 'list', { noIcon: true });
 
 const controlliRows = controlliUdt.length
