@@ -2255,8 +2255,14 @@ function buildOfficialPrintHtml(aggregate, reports, official, autoSintesi, autoE
   const attiObj = attiObjectFromReports(reports);
   const attiTot = totalAttiFromReports(reports);
   const eventiCount = reports.reduce((s,r)=>s+(r.interventi||[]).filter(isInterventoCritico).length,0) + countTextItems(official.eventiManuali);
-  const assentiList = splitList(official.assenti);
-  const ritardiList = splitList(official.ritardi);
+  const cleanPersonaleList = text =>
+  splitList(text).filter(x => {
+    const v = String(x || '').trim().toLowerCase();
+    return v && !['nessuno', 'nessuna', 'no', 'nulla', '-'].includes(v);
+  });
+
+const assentiList = cleanPersonaleList(official.assenti);
+const ritardiList = cleanPersonaleList(official.ritardi);
   const presenti = reports.length ? new Set(reports.flatMap(r=>operatorNames(r))).size : '-';
   const personaleBody = `${statusList('Presenti', presenti, [], 'green')}${statusList('Ritardo', ritardiList.length, ritardiList, 'orange')}${statusList('Assenti', assentiList.length, assentiList, 'red')}<div class="status-row"><span>Totale</span><strong class="blue">${esc(presenti === '-' ? '-' : Number(presenti)+ritardiList.length+assentiList.length)}</strong></div>`;
   const sintesiText = `${autoSintesi || '-'}${official.sintesiManuale ? '\n\nIntegrazione UDT alla sintesi:\n' + official.sintesiManuale : ''}`;
