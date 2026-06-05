@@ -3304,10 +3304,10 @@ const page2SintesiEndY = drawAutoTextPanel(
   'list',
   `${autoSintesi}\nKm totali veicoli: ${totalKmFromReports(reports)} km`,
   {
-    minH: 38,
+    minH: 30,
     fontSize: 7.8,
     lineH: 4,
-    paddingTop: 16,
+    paddingTop: 14,
     gap: 8
   }
 );
