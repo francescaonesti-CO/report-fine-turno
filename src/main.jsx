@@ -3336,16 +3336,8 @@ drawModernTable(
   { totalLast: true }
 );
 
-const attiY = page2SintesiEndY + 110;
-
-  setC(doc, C.text);
-  doc.setFont('helvetica', 'normal');
-  doc.text(r[0], 18, attiY + 18 + i * 7);
-  doc.setFont('helvetica', 'bold');
-  doc.text(String(n(r[1])), 88, attiY + 18 + i * 7, { align: 'right' });
-});
-const anomalieUdtY = attiY + 58;
-
+const anomalieUdtY = page2SintesiEndY + 110;
+  
 const anomalieUdtEndY = drawAutoTextPanel(
   doc,
   12,
