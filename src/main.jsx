@@ -3089,11 +3089,14 @@ function drawPanel(doc, x,y,w,h,title, icon='list', opts={}) {
   const C = themeColors(); const bg = opts.bg || [255,255,255]; const border = opts.border || C.line; const accent = opts.accent || C.blue;
   fillC(doc,bg); doc.setDrawColor(border[0],border[1],border[2]); doc.setLineWidth(0.35); doc.roundedRect(x,y,w,h,1.6,1.6,'FD');
   if (opts.leftStripe) { fillC(doc, opts.leftStripe); doc.rect(x,y,2.2,h,'F'); }
- drawMiniIcon(doc, icon, x + 5, y + 1.8, accent);
-doc.setFont('helvetica','bold');
+if (!opts.noIcon) {
+  drawMiniIcon(doc, icon, x + 5, y + 1.8, accent);
+}
+
+doc.setFont('helvetica', 'bold');
 doc.setFontSize(8);
-setC(doc,C.blue);
-doc.text(title.toUpperCase(), x + 20, y + 7.2);
+setC(doc, C.blue);
+doc.text(title.toUpperCase(), opts.noIcon ? x + 6 : x + 20, y + 7.2);
   setC(doc,C.text); doc.setFont('helvetica','normal');
 }
 function drawKpiBox(doc,x,y,w,h,icon,label,value,color=[12,47,97]) {
@@ -3225,7 +3228,7 @@ const assenti = assentiList.length;
   drawPanel(doc,108,218,90,38,'Sintesi operativa','list'); writeTextInBox(doc, `${autoSintesi}${official.sintesiManuali ? '\n'+official.sintesiManuali : ''}\nKm totali veicoli: ${totalKmFromReports(reports)} km`, 114,236,78,4,8);
  
   doc.addPage(); drawHeaderModern(doc,'REPORT UFFICIALE DI TURNO - DETTAGLIO',subtitle,C.blue);
-  drawPanel(doc,12,58,186,10,'Violazioni riscontrate','list');
+  drawPanel(doc,12,58,186,10,'Violazioni riscontrate','list', { noIcon: true });
 const rows=buildViolationRows(reports); drawModernTable(doc,12,72,186,['Pattuglia','Reparto','Prev.','C.d.S.','Urbana','Annon.','Altre','Tot.'], rows.length?rows:[['-','-','0','0','0','0','0','0']], [42,35,18,18,20,20,18,15], {totalLast:true});  drawPanel(doc,12,168,82,45,'Atti redatti','clip'); const at=attiObjectFromReports(reports); const attiLines=[['Fermi amministrativi',at.fermiAmministrativi],['Sequestri amministrativi',at.sequestriAmministrativi],['Sequestri penali',at.sequestriPenali],['Notizie di reato',at.cnr]]; doc.setFontSize(8); attiLines.forEach((r,i)=>{ setC(doc,C.text); doc.setFont('helvetica','normal'); doc.text(r[0],18,186+i*7); doc.setFont('helvetica','bold'); doc.text(String(n(r[1])),88,186+i*7,{align:'right'}); });
   drawPanel(doc,101,168,97,30,'Esito turno','check',{bg:[247,253,250],border:[187,223,206],accent:C.green}); writeTextInBox(doc, official.esiti || '-', 107,186,84,3,8);
   drawPanel(doc,101,204,97,25,"Comunicazioni E.Q.",'mail'); writeTextInBox(doc, official.comunicazioneEq || '-', 107,222,84,2,8);
