@@ -3387,7 +3387,7 @@ drawModernTable(
   186,
   ['Tipo', 'Pattuglia/Reparto', 'Luogo', 'Orario', 'Esito', 'Criticità', 'Disposizioni'],
   controlliRows,
-  [38, 28, 22, 16, 22, 24, 36],
+  [46, 24, 20, 16, 20, 20, 34],
   {}
 );
   doc.addPage();
