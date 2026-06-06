@@ -504,7 +504,7 @@ small {
   main {
     width: 100%;
     max-width: 100%;
-    padding: 10px;
+    padding: 8px;
     overflow-x: hidden;
   }
 
@@ -537,7 +537,7 @@ small {
   .card {
     width: 100%;
     max-width: 100%;
-    padding: 18px;
+    padding: 14px;
     border-radius: 22px;
     overflow-x: hidden;
   }
