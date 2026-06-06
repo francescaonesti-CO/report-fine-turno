@@ -1109,18 +1109,34 @@ const filteredReports = useMemo(() => {
   if (!filterDate) return [];
 
   return (reports || [])
-    .map(r => normalizeReportData(r))
+    .map(r => {
+      let payload = r;
+
+      try {
+        if (typeof r.notes === 'string') {
+          payload = JSON.parse(r.notes);
+        }
+      } catch {
+        payload = r;
+      }
+
+      return {
+        ...payload,
+        id: r.id,
+        service_date: r.service_date,
+        start_time: r.start_time,
+        end_time: r.end_time,
+        shift_name: r.shift_name
+      };
+    })
     .filter(r => {
-      const reportDate = String(
+      const data =
         r.service_date ||
         r.data ||
         r.date ||
-        ''
-      ).slice(0, 10);
+        '';
 
-      const selectedDate = String(filterDate || '').slice(0, 10);
-
-      if (reportDate !== selectedDate) return false;
+      if (data !== filterDate) return false;
 
       if (!filterTurno) return true;
 
