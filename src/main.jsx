@@ -1103,36 +1103,31 @@ const getMacroTurno = (turno) => {
 
   return 'altro';
 };
-  const filteredReports = useMemo(() => {
-  return (reports || []).filter(r => {
-    let payload = r;
+ const filteredReports = useMemo(() => {
+  return (reports || [])
+    .map(r => normalizeReportData(r))
+    .filter(r => {
+      if (!filterDate) return false;
 
-    try {
-      if (typeof r.notes === 'string') {
-        payload = JSON.parse(r.notes);
-      }
-    } catch {
-      payload = r;
-    }
-if (!filterDate) return false;
-    const matchDate =
-      r.service_date === filterDate ||
-      r.data === filterDate ||
-      payload.data === filterDate;
+      const reportDate =
+        r.service_date ||
+        r.data ||
+        r.date ||
+        '';
 
-    const reportTurno =
-      payload.turno ||
-      payload.shift_name ||
-      r.turno ||
-      r.shift_name ||
-      '';
+      const matchDate = reportDate === filterDate;
 
-    const matchTurno =
-      !filterTurno ||
-      getMacroTurno(reportTurno) === filterTurno;
+      const reportTurno =
+        r.turno ||
+        r.shift_name ||
+        '';
 
-    return matchDate && matchTurno;
-  });
+      const matchTurno =
+        !filterTurno ||
+        getMacroTurno(reportTurno) === filterTurno;
+
+      return matchDate && matchTurno;
+    });
 }, [reports, filterDate, filterTurno]);
 
   const aggregate = useMemo(() => aggregateReports(filteredReports), [filteredReports]);
