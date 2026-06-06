@@ -3634,7 +3634,7 @@ const firmaCenterX = firmaX + firmaW / 2;
 doc.setFont('helvetica', 'bold');
 doc.setFontSize(8.5);
 setC(doc, C.blue);
-doc.text("L'UFFICIALE DI TURNO", firmaCenterX, noteY + 4, { align: 'center' });
+doc.text("L'UFFICIALE DI TURNO", firmaCenterX, noteY + 8, { align: 'center' });
 
 doc.setFont('helvetica', 'normal');
 doc.setFontSize(8);
@@ -3647,7 +3647,7 @@ doc.text(official.ufficiale || '-', firmaCenterX, noteY + 23, { align: 'center' 
 
 doc.setDrawColor(C.blue[0], C.blue[1], C.blue[2]);
 doc.setLineWidth(0.35);
-doc.line(firmaX + 10, noteY + 31, firmaX + firmaW - 10, noteY + 31);
+doc.line(firmaX + 10, noteY + 36, firmaX + firmaW - 10, noteY + 36);
 
 
   footerModern(doc); return doc;
