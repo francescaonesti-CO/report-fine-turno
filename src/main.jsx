@@ -3413,7 +3413,7 @@ function drawControlloUdtCard(doc, controllo, index, yStart) {
   const linesTipo = doc.splitTextToSize(tipo, 160);
   const linesReparto = doc.splitTextToSize(reparto, 70);
   const linesLuogo = doc.splitTextToSize(luogo, 70);
-  const linesEsito = doc.splitTextToSize(esito, 70);
+  const linesOrarioEsito = doc.splitTextToSize(`${orario} - ${esito}`, 46);
   const linesCriticita = doc.splitTextToSize(criticita, 170);
   const linesDisposizioni = doc.splitTextToSize(disposizioni, 170);
 
@@ -3423,7 +3423,7 @@ function drawControlloUdtCard(doc, controllo, index, yStart) {
     10 +
     linesTipo.length * lineH +
     10 +
-    Math.max(linesReparto.length, linesLuogo.length, linesEsito.length, 1) * lineH +
+    Math.max(linesReparto.length, linesLuogo.length, linesOrarioEsito.length, 1) * lineH +
     10 +
     linesCriticita.length * lineH +
     10 +
@@ -3432,7 +3432,7 @@ function drawControlloUdtCard(doc, controllo, index, yStart) {
 
   const cardH = Math.max(42, contentH);
 
-  if (yStart + cardH > 270) {
+  if (yStart + cardH > 250) {
     doc.addPage();
     drawHeaderModern(doc, 'REPORT UFFICIALE DI TURNO - DETTAGLIO', subtitle, C.blue);
 
@@ -3484,9 +3484,9 @@ function drawControlloUdtCard(doc, controllo, index, yStart) {
 
   doc.text(linesReparto, x + 6, y + 5);
   doc.text(linesLuogo, x + 72, y + 5);
-  doc.text([`${orario} - ${esito}`], x + 132, y + 5, { maxWidth: 46 });
+  doc.text(linesOrarioEsito, x + 132, y + 5);
 
-  y += 9 + Math.max(linesReparto.length, linesLuogo.length, linesEsito.length, 1) * lineH;
+ y += 11 + Math.max(linesReparto.length, linesLuogo.length, linesOrarioEsito.length, 1) * lineH;
 
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(7.2);
