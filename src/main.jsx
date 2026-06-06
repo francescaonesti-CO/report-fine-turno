@@ -2036,7 +2036,17 @@ function printShell(title, pagesHtml) {
     :root{--blue:#0d2b57;--line:#cfd8e3;--soft:#f6f8fb;--text:#111827;--muted:#64748b;--orange:#ea7a1a;--red:#dc2626;--green:#087a47;}
     *{box-sizing:border-box} body{margin:0;background:#e5e7eb;color:var(--text);font-family:Arial,Helvetica,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
     .toolbar{position:sticky;top:0;z-index:10;padding:12px;text-align:center;background:#111827;color:#fff;box-shadow:0 2px 10px #0002}.toolbar button{background:#fff;border:0;border-radius:8px;padding:10px 18px;font-weight:700;cursor:pointer}.toolbar span{margin-left:14px;color:#d1d5db;font-size:13px}
-    .page{width:297mm;height:210mm;margin:14px auto;background:white;position:relative;padding:8mm 9mm 9mm;overflow:hidden;box-shadow:0 3px 18px #0002;page-break-after:always;}
+    .page{
+  width:210mm;
+  min-height:297mm;
+  margin:14px auto;
+  background:white;
+  position:relative;
+  padding:8mm 9mm 9mm;
+  overflow:visible;
+  box-shadow:0 3px 18px #0002;
+  page-break-after:always;
+}
     .header{height:26mm;display:grid;grid-template-columns:25mm 1fr 48mm;gap:8mm;align-items:start;border-bottom:1.6px solid var(--blue);padding-bottom:4mm}.brand-logo{
   width:18mm;
   height:18mm;
@@ -2109,11 +2119,11 @@ function printShell(title, pagesHtml) {
 .detail-grid-2 .panel{
   margin-bottom:10px;
 }
-    @media print{body{background:white}.toolbar{display:none}.page{width:297mm!important;min-height:210mm!important;margin:0;box-shadow:none;page-break-after:always;padding-top:10mm!important;padding-bottom:12mm!important}@page{size:A4 landscape;margin:10mm}}
+    @media print{body{background:white}.toolbar{display:none}.page{width:297mm!important;min-height:210mm!important;margin:0;box-shadow:none;page-break-after:always;padding-top:10mm!important;padding-bottom:12mm!important}@page{size:A4 portrait;margin:10mm}}
   @media print{
  .page{
-  width:297mm!important;
-  min-height:210mm!important;
+  width:210mm!important;
+  min-height:297mm!important;
   height:auto!important;
   overflow:visible!important;
   page-break-after:always;
