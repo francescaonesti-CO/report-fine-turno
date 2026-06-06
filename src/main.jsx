@@ -1626,7 +1626,47 @@ doc.text(official?.ufficiale || 'Comandante Polizia Locale', 143, 270);
   </Select>
 </Field>
     </div>
-<div className="card">
+
+
+</section>
+    
+    <section className="card">
+  <h2>Operatori presenti nei report filtrati</h2>
+
+  {operatorSummary.length === 0 ? (
+    <p className="muted">
+      Nessun operatore presente nei report filtrati.
+    </p>
+  ) : (
+    <div className="tableWrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Operatore</th>
+            <th>Matricola</th>
+            <th>Qualifica</th>
+            <th>Reparto</th>
+            <th>Turno</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {operatorSummary.map((op, idx) => (
+            <tr key={idx}>
+              <td>{op.nome}</td>
+              <td>{op.matricola}</td>
+              <td>{op.qualifica}</td>
+              <td>{op.reparto}</td>
+              <td>{op.turno}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )}
+</section>
+    {/* REPORT AGGREGATO PER PERIODO */}
+    <div className="card">
   <div
   className="section-title"
   style={{ marginBottom: 18 }}
@@ -1928,44 +1968,7 @@ doc.text(official?.ufficiale || 'Comandante Polizia Locale', 143, 270);
   Genera PDF aggregato
 </button>
 </div>
-
-</section>
     
-    <section className="card">
-  <h2>Operatori presenti nei report filtrati</h2>
-
-  {operatorSummary.length === 0 ? (
-    <p className="muted">
-      Nessun operatore presente nei report filtrati.
-    </p>
-  ) : (
-    <div className="tableWrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Operatore</th>
-            <th>Matricola</th>
-            <th>Qualifica</th>
-            <th>Reparto</th>
-            <th>Turno</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          {operatorSummary.map((op, idx) => (
-            <tr key={idx}>
-              <td>{op.nome}</td>
-              <td>{op.matricola}</td>
-              <td>{op.qualifica}</td>
-              <td>{op.reparto}</td>
-              <td>{op.turno}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  )}
-</section>
     <section className="card"><h2>1. Dati report ufficiale</h2><div className="grid four"><Field label="Data"><Input type="date" value={official.data} onChange={v => update({ data: v })} /></Field><Field label="Turno"><Input value={official.turno} onChange={v => update({ turno: v })} placeholder="es. 1° turno" /></Field><Field label="Ufficiale di turno"><Input value={official.ufficiale} onChange={v => update({ ufficiale: v })} /></Field><Field label="Qualifica"><Input value={official.qualifica} onChange={v => update({ qualifica: v })} placeholder="es. Commissario Capo" /></Field></div></section>
 <section className="card"><h2>2. Sintesi automatica</h2><p className="muted">Questa sintesi nasce dai report operatori caricati. Nel PDF viene riportata come quadro iniziale.</p><pre className="miniPreview">{autoSintesi}</pre><Field label="Integrazioni dell'ufficiale alla sintesi"><Textarea value={official.sintesiManuale || ''} onChange={v => update({ sintesiManuale: v })} placeholder="Inserire eventuali elementi aggiuntivi non presenti nei report operatori..." /></Field></section>    <section className="card"><h2>3. Briefing, personale e note</h2><div className="grid two"><Field label="Briefing operativo"><Input value={official.briefing} onChange={v => update({ briefing: v })} placeholder="es. 06.45" /></Field><Field label="Note generali"><Input value={official.noteGenerali} onChange={v => update({ noteGenerali: v })} placeholder="es. Con il personale a disposizione coperte 11 scuole" /></Field></div><div className="grid two" style={{ marginTop: 6 }}><Field label="A.P.L. assenti"><Textarea value={official.assenti} onChange={v => update({ assenti: v })} /></Field><Field label="A.P.L. in ritardo"><Textarea value={official.ritardi} onChange={v => update({ ritardi: v })} /></Field></div></section>
 <section className="card"><h2>4. Eventi degni di rilievo</h2><p className="muted">Eventi rilevanti individuati automaticamente: sinistri con feriti, TSO/ASO, interventi con parole chiave critiche o lunga durata.</p><pre className="miniPreview">{autoEventi || 'Nessun evento rilevante automatico rilevato.'}</pre><Field label="Integrazione dell'ufficiale sugli eventi rilevanti"><Textarea value={official.eventiManuali || ''} onChange={v => update({ eventiManuali: v })} placeholder="Inserire eventuali precisazioni, integrazioni o valutazioni sugli eventi degni di rilievo..." /></Field></section>
