@@ -69,7 +69,7 @@ main {
 }
 
 .card {
-  background: #ff0000 !important;
+  background: white;
   border-radius: 24px;
   padding: 24px;
   margin: 18px 0;
@@ -466,7 +466,6 @@ small {
   padding: 18px;
   border-radius: 22px;
   overflow: hidden;
-  border: 3px solid red !important;
   }
 
   h2 {
@@ -581,6 +580,38 @@ small {
     overflow: hidden;
     text-overflow: ellipsis;
   }
+  .grid,
+.grid.two,
+.grid.three,
+.grid.four,
+.counterGrid,
+.metrics,
+.split {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  width: 100% !important;
+}
+
+input,
+select,
+textarea {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+}
+
+.field {
+  min-width: 0 !important;
+  width: 100% !important;
+}
+
+.card,
+.rowCard,
+.intervento,
+.schoolBox {
+  max-width: 100% !important;
+  overflow-x: hidden !important;
+}
 }
 /* Refinement specifico card intervento */
 .intervento {
