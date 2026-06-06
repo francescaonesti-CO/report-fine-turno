@@ -3378,36 +3378,150 @@ const violazioniEndY = drawModernTable(
   { totalLast: true }
 );
 
-const anomalieUdtEndY = violazioniEndY;
 const controlliUdt = (official.attivitaIspettive || [])
   .filter(a => a.tipo || a.reparto || a.luogo || a.orario || a.esito || a.violazioni || a.note);
 
-const controlliY = violazioniEndY + 12;
-  
-drawPanel(doc, 12, controlliY, 186, 10, "Controlli effettuati dall'UDT", 'list', { noIcon: true });
+let controlliY = violazioniEndY + 12;
 
-const controlliRows = controlliUdt.length
-  ? controlliUdt.map(a => [
-      a.tipo || '-',
-      a.reparto || '-',
-      a.luogo || '-',
-      a.orario || '-',
-      a.esito || '-',
-      a.violazioni || '-',
-      a.note || '-'
-    ])
-  : [['-', '-', '-', '-', '-', '-', '-']];
-
-drawModernTable(
+drawPanel(
   doc,
   12,
-  controlliY + 14,
+  controlliY,
   186,
-  ['Tipo', 'Pattuglia/Reparto', 'Luogo', 'Orario', 'Esito', 'Criticità', 'Disposizioni'],
-  controlliRows,
-  [46, 24, 20, 16, 20, 20, 34],
-  {}
+  10,
+  "Controlli effettuati dall'UDT",
+  'list',
+  { noIcon: true }
 );
+
+controlliY += 14;
+
+function drawControlloUdtCard(doc, controllo, index, yStart) {
+  const C = themeColors();
+  const x = 12;
+  const w = 186;
+
+  const tipo = controllo.tipo || '-';
+  const reparto = controllo.reparto || '-';
+  const luogo = controllo.luogo || '-';
+  const orario = controllo.orario || '-';
+  const esito = controllo.esito || '-';
+  const criticita = controllo.violazioni || '-';
+  const disposizioni = controllo.note || '-';
+
+  const linesTipo = doc.splitTextToSize(tipo, 160);
+  const linesReparto = doc.splitTextToSize(reparto, 70);
+  const linesLuogo = doc.splitTextToSize(luogo, 70);
+  const linesEsito = doc.splitTextToSize(esito, 70);
+  const linesCriticita = doc.splitTextToSize(criticita, 170);
+  const linesDisposizioni = doc.splitTextToSize(disposizioni, 170);
+
+  const lineH = 4.2;
+
+  const contentH =
+    10 +
+    linesTipo.length * lineH +
+    10 +
+    Math.max(linesReparto.length, linesLuogo.length, linesEsito.length, 1) * lineH +
+    10 +
+    linesCriticita.length * lineH +
+    10 +
+    linesDisposizioni.length * lineH +
+    10;
+
+  const cardH = Math.max(42, contentH);
+
+  if (yStart + cardH > 270) {
+    doc.addPage();
+    drawHeaderModern(doc, 'REPORT UFFICIALE DI TURNO - DETTAGLIO', subtitle, C.blue);
+
+    drawPanel(
+      doc,
+      12,
+      58,
+      186,
+      10,
+      "Controlli effettuati dall'UDT",
+      'list',
+      { noIcon: true }
+    );
+
+    yStart = 72;
+  }
+
+  doc.setFillColor(248, 250, 252);
+  doc.setDrawColor(214, 224, 236);
+  doc.roundedRect(x, yStart, w, cardH, 2, 2, 'FD');
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(8);
+  doc.setTextColor(12, 47, 97);
+  doc.text(`CONTROLLO UDT N.${index + 1}`, x + 6, yStart + 8);
+
+  let y = yStart + 15;
+
+  doc.setFontSize(7.2);
+  doc.setTextColor(80, 90, 105);
+  doc.text('Tipologia verifica', x + 6, y);
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  doc.setTextColor(30, 40, 55);
+  doc.text(linesTipo, x + 6, y + 5);
+  y += 7 + linesTipo.length * lineH;
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(7.2);
+  doc.setTextColor(80, 90, 105);
+  doc.text('Pattuglia/Reparto', x + 6, y);
+  doc.text('Luogo', x + 72, y);
+  doc.text('Orario / Esito', x + 132, y);
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  doc.setTextColor(30, 40, 55);
+
+  doc.text(linesReparto, x + 6, y + 5);
+  doc.text(linesLuogo, x + 72, y + 5);
+  doc.text([`${orario} - ${esito}`], x + 132, y + 5, { maxWidth: 46 });
+
+  y += 9 + Math.max(linesReparto.length, linesLuogo.length, linesEsito.length, 1) * lineH;
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(7.2);
+  doc.setTextColor(80, 90, 105);
+  doc.text('Criticità rilevate', x + 6, y);
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  doc.setTextColor(30, 40, 55);
+  doc.text(linesCriticita, x + 6, y + 5);
+  y += 7 + linesCriticita.length * lineH;
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(7.2);
+  doc.setTextColor(80, 90, 105);
+  doc.text('Disposizioni impartite', x + 6, y);
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  doc.setTextColor(30, 40, 55);
+  doc.text(linesDisposizioni, x + 6, y + 5);
+
+  return yStart + cardH + 6;
+}
+
+if (!controlliUdt.length) {
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  doc.setTextColor(80, 90, 105);
+  doc.text('Nessun controllo UDT indicato.', 16, controlliY + 5);
+  controlliY += 12;
+} else {
+  controlliUdt.forEach((controllo, index) => {
+    controlliY = drawControlloUdtCard(doc, controllo, index, controlliY);
+  });
+}
   doc.addPage();
 drawHeaderModern(doc,'REPORT UFFICIALE DI TURNO - NOTE',subtitle,C.blue);
 let noteY = 58;
