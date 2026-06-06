@@ -3432,7 +3432,7 @@ function drawControlloUdtCard(doc, controllo, index, yStart) {
 
   const cardH = Math.max(42, contentH);
 
-  if (yStart + cardH > 250) {
+  if (yStart + cardH > 235) {
     doc.addPage();
     drawHeaderModern(doc, 'REPORT UFFICIALE DI TURNO - DETTAGLIO', subtitle, C.blue);
 
@@ -3520,8 +3520,26 @@ if (!controlliUdt.length) {
   controlliY += 12;
 } else {
   controlliUdt.forEach((controllo, index) => {
-    controlliY = drawControlloUdtCard(doc, controllo, index, controlliY);
-  });
+  if (index > 0) {
+    doc.addPage();
+    drawHeaderModern(doc, 'REPORT UFFICIALE DI TURNO - DETTAGLIO', subtitle, C.blue);
+
+    drawPanel(
+      doc,
+      12,
+      58,
+      186,
+      10,
+      "Controlli effettuati dall'UDT",
+      'list',
+      { noIcon: true }
+    );
+
+    controlliY = 72;
+  }
+
+  controlliY = drawControlloUdtCard(doc, controllo, index, controlliY);
+});
 }
   doc.addPage();
 drawHeaderModern(doc,'REPORT UFFICIALE DI TURNO - NOTE',subtitle,C.blue);
