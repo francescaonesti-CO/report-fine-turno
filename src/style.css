@@ -674,4 +674,43 @@ small {
     padding-left: 16px !important;
     padding-right: 16px !important;
   }
+  /* FIX iOS SAFARI - FORM MOBILE */
+@supports (-webkit-touch-callout: none) {
+  @media (max-width: 900px) {
+    input,
+    select,
+    textarea {
+      -webkit-appearance: none !important;
+      appearance: none !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
+      box-sizing: border-box !important;
+      border-radius: 14px !important;
+      font-size: 16px !important;
+    }
+
+    input[type="date"] {
+      display: block !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
+      height: 54px !important;
+      line-height: 54px !important;
+      padding: 0 12px !important;
+      text-align: center;
+    }
+
+    .field {
+      width: 100% !important;
+      max-width: 100% !important;
+      min-width: 0 !important;
+      overflow: hidden !important;
+    }
+
+    .card {
+      overflow: hidden !important;
+    }
+  }
+}
 }
