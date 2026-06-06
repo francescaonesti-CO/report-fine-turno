@@ -1136,7 +1136,7 @@ const filteredReports = useMemo(() => {
         r.date ||
         '';
 
-      if (data !== filterDate) return false;
+      if (normalizeDateKey(data) !== normalizeDateKey(filterDate)) return false;
 
       if (!filterTurno) return true;
 
@@ -3210,6 +3210,20 @@ function formatDateIT(value) {
   const d = new Date(s);
   if (!isNaN(d.getTime())) return String(d.getDate()).padStart(2,'0') + '/' + String(d.getMonth()+1).padStart(2,'0') + '/' + d.getFullYear();
   return s;
+}
+
+function normalizeDateKey(value) {
+  const s = String(value || '').trim();
+
+  if (!s) return '';
+
+  const iso = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (iso) return `${iso[1]}-${iso[2]}-${iso[3]}`;
+
+  const ita = s.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if (ita) return `${ita[3]}-${ita[2]}-${ita[1]}`;
+
+  return s.slice(0, 10);
 }
 function listFromText(text) {
   return String(text || '')
