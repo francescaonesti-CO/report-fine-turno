@@ -536,6 +536,7 @@ Cordialmente,`
     />
   </Field>
 )}
+      </section>
 
     <section className="card">
       <h2>2. Operatori</h2>
