@@ -3531,7 +3531,7 @@ noteY = drawAutoTextPanel(
   12,
   noteY,
   186,
-  'Esito turno',
+  'Esito turno e criticità riscontrate',
   'check',
   official.esiti || '-',
   {
