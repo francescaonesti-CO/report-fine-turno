@@ -2121,9 +2121,17 @@ function printShell(title, pagesHtml) {
   overflow:visible!important;
 }
 
-.detail-grid,
+.detail-grid{
+  display:grid!important;
+  grid-template-columns:1.1fr .9fr;
+  gap:5mm;
+}
+
 .detail-grid-2{
-  display:block!important;
+  display:grid!important;
+  grid-template-columns:.92fr 1.08fr;
+  gap:5mm;
+  align-items:start;
 }
 
 .detail-grid .panel,
@@ -2157,15 +2165,22 @@ function printShell(title, pagesHtml) {
     overflow:visible!important;
   }
 
-  .detail-grid,
-  .detail-grid-2{
-    display:block!important;
-  }
+  .detail-grid{
+  display:grid!important;
+  grid-template-columns:1.1fr .9fr;
+  gap:5mm;
+}
 
+.detail-grid-2{
+  display:grid!important;
+  grid-template-columns:.92fr 1.08fr;
+  gap:5mm;
+  align-items:start;
+}
   .detail-grid .panel,
-  .detail-grid-2 .panel{
-    margin-bottom:10px;
-  }
+.detail-grid-2 .panel{
+  margin-bottom:4mm;
+}
 
   .bullet-list,
   .small-list,
@@ -2261,7 +2276,7 @@ const attiBody = `<div class="small-list">${[['Relazioni',c.relazioni],['Annotaz
   </div>
 `;
   const page1 = `<section class="page">${headerHtml('REPORT DI SERVIZIO', subtitle)}<div class="kpis">${kpiBox('car','Interventi',interventions.length)}${kpiBox('doc','Violazioni',getTotaleViolazioni(report))}${kpiBox('clip','Atti redatti',atti)}${kpiBox('warn','Eventi',eventi)}</div><div class="grid-3">${panel('Veicoli','car',vehicleBody)}${panel('Carburante','fuel',carburanteBody)}${panel('Anomalie veicolo','warn',`<p>${esc(anomalie)}</p>`)}</div><div class="grid-2">${panel('Note di servizio','clipboard',`<p>${esc(report.noteUdt || '-')}</p>`)}${panel('Operatori','users',`<p><strong>Reparto:</strong> ${esc(repartoLabel(report))}</p><p>${operators}</p>`)}</div>${footerHtml(1)}</section>`;
-const page2 = `<section class="page">${headerHtml('REPORT DI SERVIZIO - DETTAGLIO', subtitle)}<div class="detail-grid">${panel('Interventi effettuati','car',interventiHtml)}${panel('Violazioni contestate','table',violazioniTable + altreNormeText,'tight-panel')}</div><div class="detail-grid-2">${panel('Atti redatti','clip',attiBody)}${panel('Osservazioni','clipboard',`<p>${esc(report.osservazioni || report.noteUdt || 'Nessuna osservazione particolare da segnalare.')}</p>`)}</div><div class="detail-grid-2">${panel('Documenti ritirati','doc',docsBody)}${panel('Operatori','user',`<p class="compact"><strong>${operators}</strong></p>${dichiarazioneFinale}`)}</div>${footerHtml(2)}</section>`;
+const page2 = `<section class="page">${headerHtml('REPORT DI SERVIZIO - DETTAGLIO', subtitle)}<div class="detail-grid">${panel('Interventi effettuati','car',interventiHtml)}${panel('Violazioni contestate','table',violazioniTable + altreNormeText,'tight-panel')}</div><div class="detail-grid-2">${panel('Atti redatti','clip',attiBody)}${panel('Osservazioni','clipboard',`<p>${esc(report.osservazioni || report.noteUdt || 'Nessuna osservazione particolare da segnalare.')}</p>`)}</div><div class="detail-grid-2 compact-row">${panel('Documenti ritirati','doc',docsBody)}${panel('Operatori','user',`<p class="compact"><strong>${operators}</strong></p>${dichiarazioneFinale}`)}</div>${footerHtml(2)}</section>`;
 
 return printShell('Report di servizio', page1 + page2); 
 }
