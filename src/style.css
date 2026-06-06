@@ -443,10 +443,40 @@ small {
 @media (max-width: 900px) {
   main {
     padding: 14px;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .hero {
+    padding: 22px;
+    border-radius: 24px;
   }
 
   .hero h1 {
-    font-size: 34px;
+    font-size: 30px;
+    line-height: 1.15;
+  }
+
+  .hero p {
+    font-size: 15px;
+    line-height: 1.45;
+  }
+
+  .card {
+    padding: 18px;
+    border-radius: 22px;
+    overflow: hidden;
+  }
+
+  h2 {
+    font-size: 28px;
+    line-height: 1.15;
+    overflow-wrap: anywhere;
+  }
+
+  h3 {
+    font-size: 21px;
+    line-height: 1.2;
   }
 
   .grid,
@@ -457,10 +487,63 @@ small {
   .metrics,
   .split {
     grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .field {
+    min-width: 0;
+  }
+
+  input,
+  select,
+  textarea {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    font-size: 16px;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    font-size: 14px;
+    opacity: .65;
+  }
+
+  textarea {
+    min-height: 96px;
+  }
+
+  button,
+  .fileButton {
+    max-width: 100%;
+    white-space: normal;
+    text-align: center;
+  }
+
+  .actions,
+  .tabs,
+  .interventoHead {
+    flex-wrap: wrap;
   }
 
   .counter {
-    grid-template-columns: 1fr 38px 70px 38px;
+    grid-template-columns: 1fr 38px 68px 38px;
+  }
+
+  .tableWrap {
+    overflow-x: auto;
+  }
+
+  table {
+    min-width: 620px;
+  }
+
+  .distList li {
+    flex-direction: column;
+  }
+
+  .schoolBox {
+    padding: 12px;
   }
 }
 /* Refinement specifico card intervento */
