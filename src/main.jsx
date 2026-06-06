@@ -1926,11 +1926,12 @@ doc.text(official?.ufficiale || 'Comandante Polizia Locale', 143, 270);
  <section className="card">
   <h2>6. Esiti e comunicazioni</h2>
 
-  <Field label="Esiti">
-    <Textarea
-      value={official.esiti}
-      onChange={v => update({ esiti: v })}
-    />
+  <Field label="Esito turno e criticità riscontrate">
+   <Textarea
+  value={official.esiti}
+  placeholder="Indicare l'esito generale del servizio ed eventuali criticità operative, organizzative, logistiche o strumentali emerse durante il turno."
+  onChange={v => update({ esiti: v })}
+/>
   </Field>
 
   <div className="grid two" style={{ marginTop: 6 }}>
