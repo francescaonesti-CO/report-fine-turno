@@ -650,4 +650,8 @@ small {
   .metric strong {
     font-size: 32px;
   }
+    input[type="date"] {
+    width: 300px !important;
+    max-width: 100% !important;
+  }
 }
