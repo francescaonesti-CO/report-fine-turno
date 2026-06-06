@@ -3304,7 +3304,7 @@ const violazioniEndY = drawModernTable(
   186,
   ['Pattuglia', 'Reparto', 'Prev.', 'C.d.S.', 'Urbana', 'Annon.', 'Altre', 'Tot.'],
   rows.length ? rows : [['-', '-', '0', '0', '0', '0', '0', '0']],
-  [42, 35, 18, 18, 20, 20, 18, 15],
+  [55, 30, 14, 14, 14, 14, 14, 31],
   { totalLast: true }
 );
 
