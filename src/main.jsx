@@ -1130,9 +1130,6 @@ const filteredReports = useMemo(() => {
       return getMacroTurno(reportTurno) === filterTurno;
     });
 }, [reports, filterDate, filterTurno]);
-return matchDate && matchTurno;
-    });
-}, [reports, filterDate, filterTurno]);
 
   const aggregate = useMemo(() => aggregateReports(filteredReports), [filteredReports]);
   const autoSintesi = useMemo(() => officialSynthesis(aggregate, filteredReports), [aggregate, filteredReports]);
