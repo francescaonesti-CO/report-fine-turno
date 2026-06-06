@@ -1677,7 +1677,7 @@ doc.text(official?.ufficiale || 'Comandante Polizia Locale', 143, 270);
   className="card"
   style={{
     marginTop: 24,
-    background: '#f6f9fd',
+    background: '#eef5fc',
     border: '1px solid #dce7f3',
     boxShadow: '0 8px 20px rgba(13,43,87,0.05)'
   }}
