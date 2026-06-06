@@ -1851,10 +1851,13 @@ doc.text(official?.ufficiale || 'Comandante Polizia Locale', 143, 270);
       borderTop: '1px solid #d6e1ef'
     }}
   >
-    <button
-      type="button"
-      className="ghost"
-      onClick={() => {
+   <button
+  type="button"
+  className="ghost"
+  style={{
+    border: '1px solid #b8cde6'
+  }}
+  onClick={() => {
         window.setTimeout(() => {
           setFilterDate('');
           setFilterTurno('');
