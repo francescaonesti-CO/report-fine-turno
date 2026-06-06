@@ -1123,10 +1123,11 @@ const getMacroTurno = (turno) => {
         '';
 
       const matchTurno =
-        !filterTurno ||
-        getMacroTurno(reportTurno) === filterTurno;
+  !filterTurno ||
+  getMacroTurno(reportTurno) === filterTurno ||
+  reportTurno === filterTurno;
 
-      return matchDate && matchTurno;
+return matchDate && matchTurno;
     });
 }, [reports, filterDate, filterTurno]);
 
