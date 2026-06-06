@@ -2233,8 +2233,15 @@ function buildServicePrintHtml(report) {
   const anomalie = (report.veicoli||[]).map(v=>v.anomaliaVeicolo).filter(Boolean).join('; ') || 'Nessuna anomalia segnalata.';
   const operators = operatorNames(report).join('<br>') || '-';
 const interventiHtml = interventions.length ? `<ul class="bullet-list">${interventions.slice(0,8).map(i=>`<li><strong>${esc(i.tipo)}</strong>${i.oraInizio ? ` — ${esc(i.oraInizio)}` : ''}<br><span class="muted">${esc(i.luogo || '')}</span> ${esc(i.descrizione || i.esito || '')}${i.tipo === 'Servizio scuole' ? `<br><span class="muted">Scuole presidiate:</span> ${esc((i.scuole || []).map(s => `${s.nome || '-'} (${s.momento || '-'}${s.orario ? ', ore ' + s.orario : ''})`).join(' · ') || '-')}` : ''}</li>`).join('')}</ul>` : '<p>Nessun intervento inserito.</p>';  const violazioniRows = [['Codice della Strada', n(c.vdcCds)+n(c.preavvisiCds)], ['Regolamenti comunali', n(c.regPolizia)+n(c.regEdilizio)+n(c.regBenessereAnimali)], ['Annonaria / commercio', n(c.annonaria)], ['Altro', n(c.altreNorme)], ['TOTALE', getTotaleViolazioni(report)]];
+  const altreNormeText = c.altreNormeDescrizione
+  ? `<p class="muted" style="margin-top:2mm;"><strong>Specifiche altre norme:</strong> ${esc(c.altreNormeDescrizione)}</p>`
+  : '';
   const violazioniTable = `<table class="table"><thead><tr><th>Tipo violazione</th><th style="width:22mm">Nr.</th></tr></thead><tbody>${violazioniRows.map((r,idx)=>`<tr class="${idx===violazioniRows.length-1?'total':''}"><td>${esc(r[0])}</td><td class="num">${esc(r[1])}</td></tr>`).join('')}</tbody></table>`;
-  const attiBody = `<div class="small-list">${[['Relazioni',c.relazioni],['Annotazioni',c.annotazioni],['Fermi amm.',c.fermiAmministrativi],['Sequestri amm.',c.sequestriAmministrativi],['Sequestri penali',c.sequestriPenali],['C.N.R.',c.cnr],['Altri atti',c.altriAttiNumero]].map(([l,v])=>`<div class="small-row"><span>${esc(l)}</span><strong>${esc(n(v))}</strong></div>`).join('')}</div>`;
+  const altriAttiText = c.altriAttiDescrizione
+  ? `<p class="muted" style="margin-top:2mm;"><strong>Descrizione altri atti:</strong> ${esc(c.altriAttiDescrizione)}</p>`
+  : '';
+
+const attiBody = `<div class="small-list">${[['Relazioni',c.relazioni],['Annotazioni',c.annotazioni],['Fermi amm.',c.fermiAmministrativi],['Sequestri amm.',c.sequestriAmministrativi],['Sequestri penali',c.sequestriPenali],['C.N.R.',c.cnr],['Altri atti',c.altriAttiNumero]].map(([l,v])=>`<div class="small-row"><span>${esc(l)}</span><strong>${esc(n(v))}</strong></div>`).join('')}</div>${altriAttiText}`;
   const docs = report.documentiRitirati || [];
   const docsBody = docs.length ? `<ul class="bullet-list">${docs.map(d=>`<li>${esc(d.tipo || 'Documento')} — ${esc(d.quantita || 1)} ${d.note?`<br><span class="muted">${esc(d.note)}</span>`:''}</li>`).join('')}</ul>` : '<p>Nessun documento ritirato.</p>';
   const dichiarazioneFinale = `
@@ -2243,7 +2250,7 @@ const interventiHtml = interventions.length ? `<ul class="bullet-list">${interve
   </div>
 `;
   const page1 = `<section class="page">${headerHtml('REPORT DI SERVIZIO', subtitle)}<div class="kpis">${kpiBox('car','Interventi',interventions.length)}${kpiBox('doc','Violazioni',getTotaleViolazioni(report))}${kpiBox('clip','Atti redatti',atti)}${kpiBox('warn','Eventi',eventi)}</div><div class="grid-3">${panel('Veicoli','car',vehicleBody)}${panel('Carburante','fuel',carburanteBody)}${panel('Anomalie veicolo','warn',`<p>${esc(anomalie)}</p>`)}</div><div class="grid-2">${panel('Note di servizio','clipboard',`<p>${esc(report.noteUdt || '-')}</p>`)}${panel('Operatori','users',`<p><strong>Reparto:</strong> ${esc(repartoLabel(report))}</p><p>${operators}</p>`)}</div>${footerHtml(1)}</section>`;
-const page2 = `<section class="page">${headerHtml('REPORT DI SERVIZIO - DETTAGLIO', subtitle)}<div class="detail-grid">${panel('Interventi effettuati','car',interventiHtml)}${panel('Violazioni contestate','table',violazioniTable,'tight-panel')}</div><div class="detail-grid-2">${panel('Atti redatti','clip',attiBody)}${panel('Osservazioni','clipboard',`<p>${esc(report.osservazioni || report.noteUdt || 'Nessuna osservazione particolare da segnalare.')}</p>`)}</div><div class="detail-grid-2">${panel('Documenti ritirati','doc',docsBody)}${panel('Operatori','user',`<p class="compact"><strong>${operators}</strong></p>${dichiarazioneFinale}`)}</div>${footerHtml(2)}</section>`;
+const page2 = `<section class="page">${headerHtml('REPORT DI SERVIZIO - DETTAGLIO', subtitle)}<div class="detail-grid">${panel('Interventi effettuati','car',interventiHtml)}${panel('Violazioni contestate','table',violazioniTable + altreNormeText,'tight-panel')}</div><div class="detail-grid-2">${panel('Atti redatti','clip',attiBody)}${panel('Osservazioni','clipboard',`<p>${esc(report.osservazioni || report.noteUdt || 'Nessuna osservazione particolare da segnalare.')}</p>`)}</div><div class="detail-grid-2">${panel('Documenti ritirati','doc',docsBody)}${panel('Operatori','user',`<p class="compact"><strong>${operators}</strong></p>${dichiarazioneFinale}`)}</div>${footerHtml(2)}</section>`;
 
 return printShell('Report di servizio', page1 + page2); 
 }
