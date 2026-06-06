@@ -3634,7 +3634,7 @@ const firmaCenterX = firmaX + firmaW / 2;
 doc.setFont('helvetica', 'bold');
 doc.setFontSize(8.5);
 setC(doc, C.blue);
-doc.text("L'UFFICIALE DI TURNO", firmaX, noteY + 4);
+doc.text("L'UFFICIALE DI TURNO", firmaCenterX, noteY + 4, { align: 'center' });
 
 doc.setFont('helvetica', 'normal');
 doc.setFontSize(8);
