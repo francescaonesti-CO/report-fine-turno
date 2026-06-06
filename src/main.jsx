@@ -1075,8 +1075,10 @@ return `Nel periodo in esame, dal ${periodStart} al ${periodEnd}, l'attività op
 }, [periodStart, periodEnd, periodReparto, periodReports, periodAggregate]);
   
 const getMacroTurno = (turno) => {
-  const value = String(turno || '').trim();
-
+  const value = String(turno || '')
+  .trim()
+  .replaceAll(':00', '')
+  .replaceAll(':', '.');
   const mattino = [
     '06.00-13.00',
     '06.30-13.30',
@@ -2866,13 +2868,14 @@ function normalizeReportData(report) {
 
   if (typeof report.notes === 'string') {
     try {
-      const parsed = JSON.parse(report.notes);
       return {
-        ...parsed,
-        id: report.id,
-        service_date: report.service_date,
-        shift_name: report.shift_name,
-      };
+  ...parsed,
+  id: report.id,
+  service_date: report.service_date,
+  start_time: report.start_time,
+  end_time: report.end_time,
+  shift_name: report.shift_name,
+};
     } catch {
       return report;
     }
