@@ -3186,11 +3186,78 @@ function buildViolationRows(reports) {
 
   return rows;
 }
-function drawModernTable(doc, x,y,w,headers,rows,widths,opts={}) {
-  const C=themeColors(); const rowH=8; const headerH=10; fillC(doc,C.blue); doc.roundedRect(x,y,w,headerH,1.2,1.2,'F');
-  doc.setFont('helvetica','bold'); doc.setFontSize(7.2); doc.setTextColor(255,255,255); let xx=x;
-  headers.forEach((h,i)=>{ doc.text(String(h), xx+widths[i]/2, y+6.2,{align:'center', maxWidth: widths[i]-2}); xx+=widths[i]; });
-  y+=headerH; doc.setFont('helvetica','normal'); doc.setFontSize(7.2); rows.forEach((row,ri)=>{ if (ri===rows.length-1 && opts.totalLast) { fillC(doc,C.blue); doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); } else { fillC(doc, ri%2 ? [255,255,255] : [248,250,252]); setC(doc,C.text); doc.setFont('helvetica','normal'); } doc.setDrawColor(C.line[0],C.line[1],C.line[2]); doc.rect(x,y,w,rowH,'FD'); let cx=x; row.forEach((cell,i)=>{ const align = i>=2 ? 'center':'left'; doc.text(String(cell ?? '-'), align==='center'?cx+widths[i]/2:cx+2, y+5.4,{align, maxWidth: widths[i]-3}); if (i<row.length-1) { doc.setDrawColor(C.line[0],C.line[1],C.line[2]); doc.line(cx+widths[i],y,cx+widths[i],y+rowH); } cx+=widths[i]; }); y+=rowH; }); setC(doc,C.text); return y;
+function drawModernTable(doc, x, y, w, headers, rows, widths, opts = {}) {
+  const C = themeColors();
+  const headerH = 10;
+  const minRowH = 8;
+  const fontSize = 7.2;
+  const lineH = 3.6;
+
+  fillC(doc, C.blue);
+  doc.roundedRect(x, y, w, headerH, 1.2, 1.2, 'F');
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(fontSize);
+  doc.setTextColor(255, 255, 255);
+
+  let xx = x;
+  headers.forEach((h, i) => {
+    doc.text(String(h), xx + widths[i] / 2, y + 6.2, {
+      align: 'center',
+      maxWidth: widths[i] - 2
+    });
+    xx += widths[i];
+  });
+
+  y += headerH;
+  doc.setFontSize(fontSize);
+
+  rows.forEach((row, ri) => {
+    const wrappedCells = row.map((cell, i) =>
+      doc.splitTextToSize(String(cell ?? '-'), widths[i] - 4)
+    );
+
+    const maxLines = Math.max(...wrappedCells.map(lines => lines.length));
+    const rowH = Math.max(minRowH, 4 + maxLines * lineH);
+
+    if (ri === rows.length - 1 && opts.totalLast) {
+      fillC(doc, C.blue);
+      doc.setTextColor(255, 255, 255);
+      doc.setFont('helvetica', 'bold');
+    } else {
+      fillC(doc, ri % 2 ? [255, 255, 255] : [248, 250, 252]);
+      setC(doc, C.text);
+      doc.setFont('helvetica', 'normal');
+    }
+
+    doc.setDrawColor(C.line[0], C.line[1], C.line[2]);
+    doc.rect(x, y, w, rowH, 'FD');
+
+    let cx = x;
+
+    row.forEach((cell, i) => {
+      const align = i >= 2 ? 'center' : 'left';
+      const textX = align === 'center' ? cx + widths[i] / 2 : cx + 2;
+      const textY = y + 5.4;
+
+      doc.text(wrappedCells[i], textX, textY, {
+        align,
+        maxWidth: widths[i] - 4
+      });
+
+      if (i < row.length - 1) {
+        doc.setDrawColor(C.line[0], C.line[1], C.line[2]);
+        doc.line(cx + widths[i], y, cx + widths[i], y + rowH);
+      }
+
+      cx += widths[i];
+    });
+
+    y += rowH;
+  });
+
+  setC(doc, C.text);
+  return y;
 }
 function newCleanDoc() { const doc = new jsPDF({unit:'mm', format:'a4'}); doc.setProperties({title:'Report Polizia Locale', author:'Polizia Locale'}); return doc; }
 function buildOfficialShiftPdf(aggregate, reports, official, autoSintesi, autoEventi) {
