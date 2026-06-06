@@ -2195,8 +2195,16 @@ function kpiBox(icon, label, value) { return `<div class="kpi"><div class="ico">
 function panel(title, icon, body, extraClass='') { return `<section class="panel ${extraClass}"><div class="panel-title">${iconSvg(icon)}<span>${esc(title)}</span></div><div class="panel-body">${body}</div></section>`; }
 function openPrintWindow(html) { const w = window.open('', '_blank'); if (!w) { alert('Popup bloccato: consenti le finestre popup per stampare il report.'); return; } w.document.open(); w.document.write(html); w.document.close(); setTimeout(() => { try { w.focus(); } catch(e) {} }, 300); }
 function printServiceReport(report) {
-  buildServicePdf(report)
-    .save(`Report_di_servizio_${sanitizeFileName(report.data)}_${sanitizeFileName(turnoLabel(report))}.pdf`);
+  const html = buildServicePrintHtml(report);
+  const win = window.open('', '_blank');
+
+  if (!win) {
+    alert('Impossibile aprire il report. Verificare che il browser non blocchi i popup.');
+    return;
+  }
+
+  win.document.write(html);
+  win.document.close();
 }
 function printOfficialReport(aggregate, reports, official, autoSintesi, autoEventi) {
   buildOfficialShiftPdf(aggregate, reports, official, autoSintesi, autoEventi)
