@@ -1103,30 +1103,33 @@ const getMacroTurno = (turno) => {
 
   return 'altro';
 };
- const filteredReports = useMemo(() => {
+const filteredReports = useMemo(() => {
+  if (!filterDate) return [];
+
   return (reports || [])
     .map(r => normalizeReportData(r))
     .filter(r => {
-      if (!filterDate) return false;
-
-      const reportDate =
+      const reportDate = String(
         r.service_date ||
         r.data ||
         r.date ||
-        '';
+        ''
+      ).slice(0, 10);
 
-      const matchDate = reportDate === filterDate;
+      const selectedDate = String(filterDate || '').slice(0, 10);
+
+      if (reportDate !== selectedDate) return false;
+
+      if (!filterTurno) return true;
 
       const reportTurno =
         r.turno ||
         r.shift_name ||
-        '';
+        `${r.start_time || ''}-${r.end_time || ''}`;
 
-      const matchTurno =
-  !filterTurno ||
-  getMacroTurno(reportTurno) === filterTurno ||
-  reportTurno === filterTurno;
-
+      return getMacroTurno(reportTurno) === filterTurno;
+    });
+}, [reports, filterDate, filterTurno]);
 return matchDate && matchTurno;
     });
 }, [reports, filterDate, filterTurno]);
