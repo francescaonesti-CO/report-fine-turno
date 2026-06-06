@@ -198,7 +198,7 @@ const emptyAttivitaIspettiva = () => ({ tipo: '', reparto: '', luogo: '', orario
 function baseOfficialReport() {
   return {
     data: today(), turno: '1° turno', ufficiale: '', qualifica: '', briefing: '', assenti: '', ritardi: '', noteGenerali: '',
-    sintesiManuale: '', eventiManuali: '', anomalie: '', attivitaIspettive: [emptyAttivitaIspettiva()], esiti: '', comunicazioneEq: '', notaComandante: ''
+    sintesiManuale: '', eventiManuali: '', attivitaIspettive: [emptyAttivitaIspettiva()], esiti: '', comunicazioneEq: '', notaComandante: ''
   };
 }
 
@@ -1874,9 +1874,7 @@ doc.text(official?.ufficiale || 'Comandante Polizia Locale', 143, 270);
 <section className="card">
   <h2>5. Supervisione e controlli UDT</h2>
 
-  <Field label="Anomalie riscontrate durante il turno">
-    <Textarea value={official.anomalie} onChange={v => update({ anomalie: v })} />
-  </Field>
+
 
   <h3 style={{ marginTop: 8 }}>
   Controlli effettuati dall'UDT
@@ -2250,7 +2248,6 @@ const ritardiList = cleanPersonaleList(official.ritardi);
 
 const eventiText = `${autoEventi || 'Nessun evento rilevante automatico rilevato.'}${official.eventiManuali ? '\n\nIntegrazione UDT sugli eventi:\n' + official.eventiManuali : ''}`;
 
-const anomalieText = official.anomalie || '-';
   const page1 = `<section class="page">
   ${headerHtml('REPORT UFFICIALE DI TURNO', subtitle)}
 
@@ -3312,7 +3309,7 @@ drawPanel(doc,12,168,186,52,'Eventi / anomalie degne di rilievo','warn',{leftStr
 
 writeTextInBox(
   doc,
-  `${autoEventi || 'Nessun evento rilevante automatico rilevato.'}${official.anomalie ? '\nAnomalie: '+official.anomalie : ''}`,
+ `${autoEventi || 'Nessun evento rilevante automatico rilevato.'}`,
   18,
   186,
   172,
