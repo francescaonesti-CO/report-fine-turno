@@ -1673,8 +1673,16 @@ doc.text(official?.ufficiale || 'Comandante Polizia Locale', 143, 270);
   )}
 </section>
 {/* REPORT AGGREGATO PER PERIODO */}
-<section className="card" style={{ marginTop: 24 }}>
-  <h2>2. Report aggregato per periodo</h2>
+<section
+  className="card"
+  style={{
+    marginTop: 24,
+    background: '#f6f9fd',
+    border: '1px solid #dce7f3',
+    boxShadow: '0 8px 20px rgba(13,43,87,0.05)'
+  }}
+>
+  <h2>Report aggregato per periodo</h2>
 
   <div className="grid three" style={{ marginTop: 18 }}>
     <Field label="Data iniziale">
@@ -1715,7 +1723,7 @@ doc.text(official?.ufficiale || 'Comandante Polizia Locale', 143, 270);
       padding: 22,
       border: '1px solid #d6e1ef',
       borderRadius: 14,
-      background: '#fbfdff'
+      background: '#ffffff'
     }}
   >
     <div className="miniStat">
