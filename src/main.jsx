@@ -2271,10 +2271,7 @@ const anomalieText = official.anomalie || '-';
     ${panel('Briefing operativo','clipboard',`<p>${esc(official.briefing || '-')}</p>`)}
   </div>
 
-  <div class="executive-block">
-    <h3>Anomalie riscontrate durante il turno</h3>
-    <p>${esc(anomalieText)}</p>
-  </div>
+
 
   ${footerHtml(1)}
 </section>`;
@@ -2924,7 +2921,7 @@ function officialEventsText(reports) {
 }
 function officialReportText(aggregate, reports, official, autoSintesi, autoEventi) {
   const attivita = (official.attivitaIspettive || []).filter(a => a.tipo || a.reparto || a.luogo || a.esito || a.note).map((a, idx) => `${idx + 1}. ${a.tipo || '-'} | ${a.reparto || '-'} | ${a.luogo || '-'} | ${a.orario || '-'} | Esito: ${a.esito || '-'} | Violazioni: ${a.violazioni || '-'} | Note: ${a.note || '-'}`).join('\n') || '- Nessuna attività ispettiva indicata';
-  return `REPORT UFFICIALE DI TURNO\n\nDATA E TURNO\n${official.data || aggregate.dateLabel} ${official.turno || ''}\n\nBRIEFING OPERATIVO\n${official.briefing || '-'}\n\nA.P.L. ASSENTI\n${official.assenti || '-'}\n\nA.P.L. IN RITARDO\n${official.ritardi || '-'}\n\nNOTE\n${official.noteGenerali || '-'}\n\nSINTESI OPERATIVA\n${autoSintesi}\n${official.sintesiManuale ? '\nIntegrazioni: ' + official.sintesiManuali : ''}\n\nEVENTI DEGNI DI RILIEVO\n${autoEventi || '- Nessun evento rilevante automatico rilevato'}${official.eventiManuali ? '\n\nIntegrazione UDT:\n' + official.eventiManuali : ''}\n\nANOMALIE RISCONTRATE DURANTE IL TURNO\n${official.anomalie || '-'}\n\nATTIVITÀ ISPETTIVE\n${attivita}\n\nESITI\n${official.esiti || '-'}\n\nCOMUNICAZIONE ALL'E.Q. DI TURNO\n${official.comunicazioneEq || '-'}\n\nNOTA PER IL COMANDANTE\n${official.notaComandante || '-'}\n\nVIOLAZIONI RISCONTRATE\nTotale violazioni: ${aggregate.totaleViolazioni}\n\nFIRMA\n${official.qualifica || ''}\n${official.ufficiale || ''}`;
+  return `REPORT UFFICIALE DI TURNO\n\nDATA E TURNO\n${official.data || aggregate.dateLabel} ${official.turno || ''}\n\nBRIEFING OPERATIVO\n${official.briefing || '-'}\n\nA.P.L. ASSENTI\n${official.assenti || '-'}\n\nA.P.L. IN RITARDO\n${official.ritardi || '-'}\n\nNOTE\n${official.noteGenerali || '-'}\n\nSINTESI OPERATIVA\n${autoSintesi}\n${official.sintesiManuale ? '\nIntegrazioni: ' + official.sintesiManuali : ''}\n\nEVENTI DEGNI DI RILIEVO\n${autoEventi || '- Nessun evento rilevante automatico rilevato'}${official.eventiManuali ? '\n\nIntegrazione UDT:\n' + official.eventiManuali : ''}\n\nATTIVITÀ ISPETTIVE\n${attivita}\n\nESITI\n${official.esiti || '-'}\n\nCOMUNICAZIONE ALL'E.Q. DI TURNO\n${official.comunicazioneEq || '-'}\n\nNOTA PER IL COMANDANTE\n${official.notaComandante || '-'}\n\nVIOLAZIONI RISCONTRATE\nTotale violazioni: ${aggregate.totaleViolazioni}\n\nFIRMA\n${official.qualifica || ''}\n${official.ufficiale || ''}`;
 }
 function buildOfficialShiftPdf_old(aggregate, reports, official, autoSintesi, autoEventi) {
   const title = 'REPORT UFFICIALE DI TURNO';
@@ -2984,7 +2981,6 @@ y = kvGrid(doc, [
   { label: 'A.P.L. in ritardo', value: official.ritardi || '-' },
   { label: 'Note generali', value: official.noteGenerali || '-' }
 ], y, 1, title, subtitle) + 2;
-  y = section(doc, 'Anomalie riscontrate durante il turno', y, title, subtitle); y = paragraph(doc, official.anomalie || '-', y, title, subtitle);
   y = section(doc, 'Attività ispettive', y, title, subtitle);
   const attivitaRows = (official.attivitaIspettive || []).filter(a => a.tipo || a.reparto || a.luogo || a.esito || a.note).map(a => [a.tipo || '-', a.reparto || '-', a.luogo || '-', a.orario || '-', a.esito || '-', a.violazioni || '-', a.note || '-']);
   y = simpleTable(doc, ['Tipo', 'Reparto', 'Luogo', 'Orario', 'Esito', 'Viol.', 'Note'], attivitaRows.length ? attivitaRows : [['-', '-', '-', '-', '-', '-', '-']], y, [28, 30, 28, 18, 30, 18, 34], title, subtitle);
