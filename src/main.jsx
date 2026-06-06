@@ -3627,16 +3627,27 @@ noteY = drawAutoTextPanel(
   }
 );
   
-drawPanel(doc,136,noteY,62,34,'Responsabile di turno','user');
+const firmaX = 136;
+const firmaW = 62;
+const firmaCenterX = firmaX + firmaW / 2;
 
-doc.setFontSize(7.5);
-setC(doc,C.text);
-doc.text(official.qualifica || '-',167,noteY+17,{align:'center'});
+doc.setFont('helvetica', 'bold');
+doc.setFontSize(8.5);
+setC(doc, C.blue);
+doc.text("L'UFFICIALE DI TURNO", firmaX, noteY + 4);
 
-doc.setFont('helvetica','bold');
-doc.text(official.ufficiale || '-',167,noteY+23,{align:'center'});
+doc.setFont('helvetica', 'normal');
+doc.setFontSize(8);
+setC(doc, C.text);
+doc.text(official.qualifica || '-', firmaCenterX, noteY + 16, { align: 'center' });
 
-doc.line(149,noteY+29,185,noteY+29);  
+doc.setFont('helvetica', 'bold');
+doc.setFontSize(8.2);
+doc.text(official.ufficiale || '-', firmaCenterX, noteY + 23, { align: 'center' });
+
+doc.setDrawColor(C.blue[0], C.blue[1], C.blue[2]);
+doc.setLineWidth(0.35);
+doc.line(firmaX + 10, noteY + 31, firmaX + firmaW - 10, noteY + 31);
 
 
   footerModern(doc); return doc;
