@@ -205,7 +205,7 @@ function baseOfficialReport() {
 
 const REPORT_DRAFT_KEY = 'reportTurnoPoliziaLocale_draft_operatore_v1';
 const OFFICIAL_DRAFT_KEY = 'reportTurnoPoliziaLocale_draft_ufficiale_v1';
-
+const PERIOD_SYNTHESIS_DRAFT_KEY = 'reportTurnoPoliziaLocale_period_synthesis_v1';
 function loadReportDraft() {
   if (typeof window === 'undefined') return baseReport();
   try {
@@ -939,7 +939,14 @@ function OfficialReport({ reports, setReports, official, setOfficial }) {
   const [periodStart, setPeriodStart] = useState('');
   const [periodEnd, setPeriodEnd] = useState('');
   const [periodReparto, setPeriodReparto] = useState('');
-  const [periodSintesiManuale, setPeriodSintesiManuale] = useState('');
+  const [periodSintesiManuale, setPeriodSintesiManuale] = useState(() => {
+  if (typeof window === 'undefined') return '';
+  return window.localStorage.getItem(PERIOD_SYNTHESIS_DRAFT_KEY) || '';
+});
+  useEffect(() => {
+  if (typeof window === 'undefined') return;
+  window.localStorage.setItem(PERIOD_SYNTHESIS_DRAFT_KEY, periodSintesiManuale);
+}, [periodSintesiManuale]);
   const periodReports = useMemo(() => {
   if (!periodStart || !periodEnd) return [];
 
