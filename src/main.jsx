@@ -3294,7 +3294,7 @@ const assenti = assentiList.length;
   'list',
   official.briefing || '-',
   {
-    minH: 52,
+    minH: 58,
     fontSize: 8,
     lineH: 4.2,
     paddingTop: 18
