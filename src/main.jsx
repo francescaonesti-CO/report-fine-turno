@@ -527,8 +527,15 @@ Cordialmente,`
       </div>
       {report.turno === 'Altro orario' && <div className="grid two"><Field label="Ora inizio"><Input value={report.altroTurnoInizio} onChange={v => update({ altroTurnoInizio: v })} placeholder="es. 10.00" /></Field><Field label="Ora fine"><Input value={report.altroTurnoFine} onChange={v => update({ altroTurnoFine: v })} placeholder="es. 17.00" /></Field></div>}
       {report.reparto === 'Altri servizi' && <Field label="Specificare altro servizio"><Input value={report.altroServizio} onChange={v => update({ altroServizio: v })} /></Field>}
-      {richiedeZonaServizio(report.reparto) && <Field label="Zona di servizio"><Input value={report.zonaServizio || ''} onChange={v => update({ zonaServizio: v })} placeholder="es. Pattuglia Infortunistica 1, Pattuglia Radiomobile 2, Presidio mercato, area centro - zona 1" /></Field>}
-    </section>
+      {richiedeZonaServizio(report.reparto) && (
+  <Field label="Zona di servizio">
+    <Textarea
+      value={report.zonaServizio || ''}
+      onChange={v => update({ zonaServizio: v })}
+      placeholder="es. Pattuglia Infortunistica 1, Pattuglia Radiomobile 2, Presidio mercato, area centro - zona 1"
+    />
+  </Field>
+)}
 
     <section className="card">
       <h2>2. Operatori</h2>
