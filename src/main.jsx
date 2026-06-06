@@ -2109,11 +2109,12 @@ function printShell(title, pagesHtml) {
 .detail-grid-2 .panel{
   margin-bottom:10px;
 }
-    @media print{body{background:white}.toolbar{display:none}.page{margin:0;box-shadow:none;page-break-after:always;padding-top:10mm!important;padding-bottom:12mm!important}@page{size:A4 portrait;margin:10mm}}
+    @media print{body{background:white}.toolbar{display:none}.page{width:297mm!important;min-height:210mm!important;margin:0;box-shadow:none;page-break-after:always;padding-top:10mm!important;padding-bottom:12mm!important}@page{size:A4 landscape;margin:10mm}}
   @media print{
-  .page{
+ .page{
+  width:297mm!important;
+  min-height:210mm!important;
   height:auto!important;
-  min-height:auto!important;
   overflow:visible!important;
   page-break-after:always;
   padding-top:10mm!important;
