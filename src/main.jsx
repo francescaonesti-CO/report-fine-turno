@@ -1665,16 +1665,11 @@ doc.text(official?.ufficiale || 'Comandante Polizia Locale', 143, 270);
     </div>
   )}
 </section>
-    {/* REPORT AGGREGATO PER PERIODO */}
-    <div className="card">
-  <div
-  className="section-title"
-  style={{ marginBottom: 18 }}
->
-  Report aggregato per periodo
-</div>
+{/* REPORT AGGREGATO PER PERIODO */}
+<section className="card" style={{ marginTop: 24 }}>
+  <h2>2. Report aggregato per periodo</h2>
 
-  <div className="grid three">
+  <div className="grid three" style={{ marginTop: 18 }}>
     <Field label="Data iniziale">
       <Input
         type="date"
@@ -1706,268 +1701,165 @@ doc.text(official?.ufficiale || 'Comandante Polizia Locale', 143, 270);
     </Field>
   </div>
 
-  <div className="grid four" style={{ marginTop: 16 }}>
- <div className="miniStat">
   <div
+    className="grid four"
     style={{
-      fontSize: 22,
-      fontWeight: 700,
-      lineHeight: 1
+      marginTop: 24,
+      padding: 22,
+      border: '1px solid #d6e1ef',
+      borderRadius: 14,
+      background: '#fbfdff'
     }}
   >
-    {periodAggregate.totaleReport}
-  </div>
-
-  <div
-    style={{
-      fontSize: 12,
-      opacity: 0.7,
-      marginTop: 4,
-      textTransform: 'uppercase',
-      letterSpacing: 0.5
-    }}
-  >
-    Report
-  </div>
-</div>
-
- <div className="miniStat">
-  <div
-    style={{
-      fontSize: 22,
-      fontWeight: 700,
-      lineHeight: 1
-    }}
-  >
-    {periodAggregate.totaleInterventi}
-  </div>
-
-  <div
-    style={{
-      fontSize: 12,
-      opacity: 0.7,
-      marginTop: 4,
-      textTransform: 'uppercase',
-      letterSpacing: 0.5
-    }}
-  >
-    Interventi
-  </div>
-</div>
-
-  <div className="miniStat">
-  <div
-    style={{
-      fontSize: 22,
-      fontWeight: 700,
-      lineHeight: 1
-    }}
-  >
-    {periodAggregate.totaleViolazioni}
-  </div>
-
-  <div
-    style={{
-      fontSize: 12,
-      opacity: 0.7,
-      marginTop: 4,
-      textTransform: 'uppercase',
-      letterSpacing: 0.5
-    }}
-  >
-    Violazioni
-  </div>
-</div>
-
- <div className="miniStat">
-  <div
-    style={{
-      fontSize: 22,
-      fontWeight: 700,
-      lineHeight: 1
-    }}
-  >
-    {periodAggregate.totaleOperatori}
-  </div>
-
-  <div
-    style={{
-      fontSize: 12,
-      opacity: 0.7,
-      marginTop: 4,
-      textTransform: 'uppercase',
-      letterSpacing: 0.5
-    }}
-  >
-    Operatori
-  </div>
-</div>
-</div>
-</div>
-<div
-  className="grid two"
-  style={{
-    marginTop: 20,
-    alignItems: 'start'
-  }}
->
-
-  <div
-  className="card"
-  style={{
-    minHeight: 90,
-    padding: 24
-  }}
->
-    <div className="section-title">
-      Interventi per tipologia
-    </div>
-
-    {Object.entries(periodAggregate.interventiPerTipo).length === 0 ? (
-      <div
-  className="muted"
-  style={{
-    fontSize: 13,
-    marginTop: 4
-  }}
->
-  Nessun dato disponibile
-</div>
-    ) : (
-      Object.entries(periodAggregate.interventiPerTipo)
-        .sort((a, b) => b[1] - a[1])
-        .map(([tipo, totale]) => (
-          <div
-            key={tipo}
-            className="rowBetween"
-            style={{ marginBottom: 8 }}
-          >
-            <span>{tipo}</span>
-            <b style={{ marginLeft: 6 }}>({totale})</b>
-          </div>
-        ))
-    )}
-  </div>
-
-  <div
-  className="card"
-  style={{
-    minHeight: 90,
-    padding: 24
-  }}
->
-    <div className="section-title">
-      Report per reparto
-    </div>
-
-    {Object.entries(periodAggregate.reportPerReparto).length === 0 ? (
-     <div
-  className="muted"
-  style={{
-    fontSize: 13,
-    marginTop: 4
-  }}
->
-  Nessun dato disponibile
-</div>
-    ) : (
-      Object.entries(periodAggregate.reportPerReparto)
-        .sort((a, b) => b[1] - a[1])
-        .map(([reparto, totale]) => (
-          <div
-            key={reparto}
-            className="rowBetween"
-            style={{ marginBottom: 8 }}
-          >
-            <span>{reparto}</span>
-            <b style={{ marginLeft: 6 }}>({totale})</b>
-          </div>
-        ))
-    )}
-  </div>
-
-</div>
-
-<div
-  className="card"
-  style={{
-    marginTop: 20,
-    minHeight: 80,
-    padding: 24
-  }}
->
-  <div className="section-title">
-    Eventi e annotazioni rilevanti
-  </div>
-
-  {periodAggregate.eventiRilievo.length === 0 ? (
-    <div
-  className="muted"
-  style={{
-    fontSize: 13,
-    marginTop: 4
-  }}
->
-  Nessun evento rilevante nel periodo selezionato
-</div>
-  ) : (
-    periodAggregate.eventiRilievo.map((e, idx) => (
-      <div
-        key={idx}
-        className="rowCard"
-        style={{ marginBottom: 10 }}
-      >
-        <div style={{ fontSize: 12, opacity: 0.7 }}>
-          {e.data} — {e.reparto}
-        </div>
-
-        <div style={{ marginTop: 4 }}>
-          {e.testo}
-        </div>
+    <div className="miniStat">
+      <div style={{ fontSize: 24, fontWeight: 800, lineHeight: 1 }}>
+        {periodAggregate.totaleReport}
       </div>
-    ))
-  )}
-</div>    
-    <div className="card" style={{ marginTop: 20 }}>
-  <div className="section-title">
-    Sintesi operativa del periodo
+      <div style={{ fontSize: 12, opacity: 0.7, marginTop: 6, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+        Report
+      </div>
+    </div>
+
+    <div className="miniStat">
+      <div style={{ fontSize: 24, fontWeight: 800, lineHeight: 1 }}>
+        {periodAggregate.totaleInterventi}
+      </div>
+      <div style={{ fontSize: 12, opacity: 0.7, marginTop: 6, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+        Interventi
+      </div>
+    </div>
+
+    <div className="miniStat">
+      <div style={{ fontSize: 24, fontWeight: 800, lineHeight: 1 }}>
+        {periodAggregate.totaleViolazioni}
+      </div>
+      <div style={{ fontSize: 12, opacity: 0.7, marginTop: 6, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+        Violazioni
+      </div>
+    </div>
+
+    <div className="miniStat">
+      <div style={{ fontSize: 24, fontWeight: 800, lineHeight: 1 }}>
+        {periodAggregate.totaleOperatori}
+      </div>
+      <div style={{ fontSize: 12, opacity: 0.7, marginTop: 6, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+        Operatori
+      </div>
+    </div>
   </div>
 
-  <p className="muted" style={{ marginBottom: 10 }}>
-    Testo generato automaticamente dal sistema. L'ufficiale può modificarlo,
-    integrarlo o sostituirlo prima della generazione del PDF aggregato.
-  </p>
+  <div
+    className="grid two"
+    style={{
+      marginTop: 28,
+      alignItems: 'start'
+    }}
+  >
+    <div>
+      <h3>Interventi per tipologia</h3>
 
-  <Textarea
-    value={periodSintesiManuale || periodAutoSintesi}
-    onChange={v => setPeriodSintesiManuale(v)}
-    placeholder="Sintesi operativa del periodo..."
-  />
-</div>
-    <div className="actions">
-  <button
-  type="button"
-  className="ghost"
-  onClick={() => {
-    window.setTimeout(() => {
-      setFilterDate('');
-      setFilterTurno('');
-      setPeriodStart('');
-      setPeriodEnd('');
-      setPeriodReparto('');
-    }, 0);
-  }}
->
-   Reset filtri
-</button>
+      {Object.entries(periodAggregate.interventiPerTipo).length === 0 ? (
+        <p className="muted">Nessun dato disponibile</p>
+      ) : (
+        Object.entries(periodAggregate.interventiPerTipo)
+          .sort((a, b) => b[1] - a[1])
+          .map(([tipo, totale]) => (
+            <div key={tipo} className="rowBetween" style={{ marginBottom: 8 }}>
+              <span>{tipo}</span>
+              <b style={{ marginLeft: 6 }}>({totale})</b>
+            </div>
+          ))
+      )}
+    </div>
 
-<button
-  type="button"
-  onClick={generatePeriodPdf}
->
-  Genera PDF aggregato
-</button>
-</div>
+    <div>
+      <h3>Report per reparto</h3>
+
+      {Object.entries(periodAggregate.reportPerReparto).length === 0 ? (
+        <p className="muted">Nessun dato disponibile</p>
+      ) : (
+        Object.entries(periodAggregate.reportPerReparto)
+          .sort((a, b) => b[1] - a[1])
+          .map(([reparto, totale]) => (
+            <div key={reparto} className="rowBetween" style={{ marginBottom: 8 }}>
+              <span>{reparto}</span>
+              <b style={{ marginLeft: 6 }}>({totale})</b>
+            </div>
+          ))
+      )}
+    </div>
+  </div>
+
+  <hr style={{ margin: '28px 0', border: 0, borderTop: '1px solid #d6e1ef' }} />
+
+  <div>
+    <h3>Eventi e annotazioni rilevanti</h3>
+
+    {periodAggregate.eventiRilievo.length === 0 ? (
+      <p className="muted">Nessun evento rilevante nel periodo selezionato</p>
+    ) : (
+      periodAggregate.eventiRilievo.map((e, idx) => (
+        <div key={idx} className="rowCard" style={{ marginBottom: 10 }}>
+          <div style={{ fontSize: 12, opacity: 0.7 }}>
+            {e.data} — {e.reparto}
+          </div>
+          <div style={{ marginTop: 4 }}>
+            {e.testo}
+          </div>
+        </div>
+      ))
+    )}
+  </div>
+
+  <hr style={{ margin: '28px 0', border: 0, borderTop: '1px solid #d6e1ef' }} />
+
+  <div>
+    <h3>Sintesi operativa del periodo</h3>
+
+    <p className="muted" style={{ marginBottom: 10 }}>
+      Testo generato automaticamente dal sistema. L'ufficiale può modificarlo,
+      integrarlo o sostituirlo prima della generazione del PDF aggregato.
+    </p>
+
+    <Textarea
+      value={periodSintesiManuale || periodAutoSintesi}
+      onChange={v => setPeriodSintesiManuale(v)}
+      placeholder="Sintesi operativa del periodo..."
+    />
+  </div>
+
+  <div
+    className="actions"
+    style={{
+      marginTop: 24,
+      paddingTop: 18,
+      borderTop: '1px solid #d6e1ef'
+    }}
+  >
+    <button
+      type="button"
+      className="ghost"
+      onClick={() => {
+        window.setTimeout(() => {
+          setFilterDate('');
+          setFilterTurno('');
+          setPeriodStart('');
+          setPeriodEnd('');
+          setPeriodReparto('');
+        }, 0);
+      }}
+    >
+      Reset filtri
+    </button>
+
+    <button
+      type="button"
+      onClick={generatePeriodPdf}
+    >
+      Genera PDF aggregato
+    </button>
+  </div>
+</section>
     
     <section className="card"><h2>1. Dati report ufficiale</h2><div className="grid four"><Field label="Data"><Input type="date" value={official.data} onChange={v => update({ data: v })} /></Field><Field label="Turno"><Input value={official.turno} onChange={v => update({ turno: v })} placeholder="es. 1° turno" /></Field><Field label="Ufficiale di turno"><Input value={official.ufficiale} onChange={v => update({ ufficiale: v })} /></Field><Field label="Qualifica"><Input value={official.qualifica} onChange={v => update({ qualifica: v })} placeholder="es. Commissario Capo" /></Field></div></section>
 <section className="card"><h2>2. Sintesi automatica</h2><p className="muted">Questa sintesi nasce dai report operatori caricati. Nel PDF viene riportata come quadro iniziale.</p><pre className="miniPreview">{autoSintesi}</pre><Field label="Integrazioni dell'ufficiale alla sintesi"><Textarea value={official.sintesiManuale || ''} onChange={v => update({ sintesiManuale: v })} placeholder="Inserire eventuali elementi aggiuntivi non presenti nei report operatori..." /></Field></section>    <section className="card"><h2>3. Briefing, personale e note</h2><div className="grid two"><Field label="Briefing operativo"><Input value={official.briefing} onChange={v => update({ briefing: v })} placeholder="es. 06.45" /></Field><Field label="Note generali"><Input value={official.noteGenerali} onChange={v => update({ noteGenerali: v })} placeholder="es. Con il personale a disposizione coperte 11 scuole" /></Field></div><div className="grid two" style={{ marginTop: 6 }}><Field label="A.P.L. assenti"><Textarea value={official.assenti} onChange={v => update({ assenti: v })} /></Field><Field label="A.P.L. in ritardo"><Textarea value={official.ritardi} onChange={v => update({ ritardi: v })} /></Field></div></section>
