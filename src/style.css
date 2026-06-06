@@ -8,8 +8,16 @@
   box-sizing: border-box;
 }
 
+html,
 body {
   margin: 0;
+  width: 100%;
+  min-height: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  background: #eef3f8;
 }
 
 main {
@@ -18,6 +26,7 @@ main {
   padding: 24px;
 }
 
+/* HERO */
 .hero {
   background: linear-gradient(135deg, #15233d, #274f78);
   color: white;
@@ -51,6 +60,7 @@ main {
   opacity: .72;
 }
 
+/* TABS */
 .tabs {
   display: flex;
   gap: 10px;
@@ -68,6 +78,7 @@ main {
   color: #15233d;
 }
 
+/* CARD */
 .card {
   background: white;
   border-radius: 24px;
@@ -81,6 +92,7 @@ main {
   border-left: 8px solid #274f78;
 }
 
+/* TITOLI */
 h2 {
   margin: 0 0 18px;
   font-size: 24px;
@@ -136,6 +148,8 @@ input,
 select,
 textarea {
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   box-sizing: border-box;
   border: 1px solid #cfd8e5;
   border-radius: 14px;
@@ -300,6 +314,7 @@ button.ghost {
   margin: 12px 0;
 }
 
+/* METRICHE */
 .metrics {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -328,6 +343,7 @@ button.ghost {
   margin-top: 8px;
 }
 
+/* TABELLE */
 .tableWrap {
   overflow-x: auto;
 }
@@ -439,181 +455,7 @@ small {
   font-weight: 700;
 }
 
-/* RESPONSIVE */
-@media (max-width: 900px) {
-  main {
-    padding: 14px;
-    max-width: 100%;
-    overflow-x: hidden;
-  }
-
-  .hero {
-    padding: 22px;
-    border-radius: 24px;
-  }
-
-  .hero h1 {
-    font-size: 30px;
-    line-height: 1.15;
-  }
-
-  .hero p {
-    font-size: 15px;
-    line-height: 1.45;
-  }
-
- .card {
-  padding: 18px;
-  border-radius: 22px;
-  overflow: hidden;
-  }
-
-  h2 {
-    font-size: 28px;
-    line-height: 1.15;
-    overflow-wrap: anywhere;
-  }
-
-  h3 {
-    font-size: 21px;
-    line-height: 1.2;
-  }
-
-  .grid,
-  .grid.two,
-  .grid.three,
-  .grid.four,
-  .counterGrid,
-  .metrics,
-  .split {
-    grid-template-columns: 1fr;
-    gap: 16px;
-  }
-
-  .field {
-    min-width: 0;
-  }
-
-  input,
-  select,
-  textarea {
-    width: 100%;
-    max-width: 100%;
-    min-width: 0;
-    font-size: 16px;
-  }
-
-  input::placeholder,
-  textarea::placeholder {
-    font-size: 14px;
-    opacity: .65;
-  }
-
-  textarea {
-    min-height: 96px;
-  }
-
-  button,
-  .fileButton {
-    max-width: 100%;
-    white-space: normal;
-    text-align: center;
-  }
-
-  .actions,
-  .tabs,
-  .interventoHead {
-    flex-wrap: wrap;
-  }
-
-  .counter {
-    grid-template-columns: 1fr 38px 68px 38px;
-  }
-
-  .tableWrap {
-    overflow-x: auto;
-  }
-
-  table {
-    min-width: 620px;
-  }
-
-  .distList li {
-    flex-direction: column;
-  }
-
-  .schoolBox {
-    padding: 12px;
-  }
-    body {
-    overflow-x: hidden;
-  }
-
-  main {
-    width: 100%;
-    padding-left: 10px;
-    padding-right: 10px;
-  }
-
-  .card {
-    width: 100%;
-    max-width: 100%;
-  }
-
-  .field {
-    width: 100%;
-    max-width: 100%;
-  }
-
-  .rowCard,
-  .intervento,
-  .schoolBox {
-    width: 100%;
-    max-width: 100%;
-    overflow: hidden;
-  }
-
-  input,
-  select,
-  textarea {
-    display: block;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .grid,
-.grid.two,
-.grid.three,
-.grid.four,
-.counterGrid,
-.metrics,
-.split {
-  display: grid !important;
-  grid-template-columns: minmax(0, 1fr) !important;
-  width: 100% !important;
-}
-
-input,
-select,
-textarea {
-  width: 100% !important;
-  max-width: 100% !important;
-  min-width: 0 !important;
-}
-
-.field {
-  min-width: 0 !important;
-  width: 100% !important;
-}
-
-.card,
-.rowCard,
-.intervento,
-.schoolBox {
-  max-width: 100% !important;
-  overflow-x: hidden !important;
-}
-}
-/* Refinement specifico card intervento */
+/* REFINEMENT SPECIFICO CARD INTERVENTO */
 .intervento {
   padding: 20px !important;
 }
@@ -640,7 +482,8 @@ textarea {
 .intervento .grid.three:last-of-type {
   align-items: end !important;
 }
-/* Refinement sezione Atti redatti */
+
+/* REFINEMENT SEZIONE ATTI REDATTI */
 .counterGrid > .field {
   margin-top: 14px;
 }
@@ -649,8 +492,162 @@ textarea {
 .counterGrid input[type="text"] {
   min-height: 40px;
 }
-/* Allineamento riga "Altri atti" */
+
+/* ALLINEAMENTO RIGA "ALTRI ATTI" */
 .grid.two > .counter {
   width: 100%;
   min-height: 56px;
+}
+
+/* RESPONSIVE MOBILE */
+@media (max-width: 900px) {
+  main {
+    width: 100%;
+    max-width: 100%;
+    padding: 10px;
+    overflow-x: hidden;
+  }
+
+  .hero {
+    padding: 20px;
+    border-radius: 22px;
+    gap: 16px;
+  }
+
+  .hero h1 {
+    font-size: 30px;
+    line-height: 1.15;
+    letter-spacing: -.03em;
+  }
+
+  .hero p {
+    font-size: 15px;
+    line-height: 1.45;
+  }
+
+  .tabs {
+    width: 100%;
+  }
+
+  .tabs button {
+    flex: 1 1 auto;
+    min-width: 120px;
+  }
+
+  .card {
+    width: 100%;
+    max-width: 100%;
+    padding: 18px;
+    border-radius: 22px;
+    overflow-x: hidden;
+  }
+
+  .rowCard,
+  .intervento,
+  .schoolBox {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  p,
+  span,
+  label,
+  small,
+  strong {
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+
+  h2 {
+    font-size: 26px;
+    line-height: 1.15;
+  }
+
+  h3 {
+    font-size: 21px;
+    line-height: 1.2;
+  }
+
+  .grid,
+  .grid.two,
+  .grid.three,
+  .grid.four,
+  .counterGrid,
+  .metrics,
+  .split {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 16px !important;
+    width: 100% !important;
+  }
+
+  .field {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0 !important;
+  }
+
+  input,
+  select,
+  textarea {
+    display: block;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    font-size: 16px;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    font-size: 14px;
+    opacity: .65;
+    white-space: normal;
+  }
+
+  textarea {
+    min-height: 96px;
+  }
+
+  button,
+  .fileButton {
+    max-width: 100%;
+    white-space: normal;
+    text-align: center;
+  }
+
+  .actions,
+  .interventoHead {
+    flex-wrap: wrap;
+  }
+
+  .actions button,
+  .actions .fileButton {
+    flex: 1 1 100%;
+  }
+
+  .counter {
+    grid-template-columns: 1fr 38px 68px 38px;
+  }
+
+  .tableWrap {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  table {
+    min-width: 620px;
+  }
+
+  .distList li {
+    flex-direction: column;
+  }
+
+  .metric strong {
+    font-size: 32px;
+  }
 }
