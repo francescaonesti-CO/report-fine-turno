@@ -714,3 +714,20 @@ small {
   }
 }
 }
+@media (max-width: 900px) {
+  input[type="date"] {
+    -webkit-appearance: none;
+    appearance: none;
+    display: block;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    box-sizing: border-box;
+  }
+
+  input[type="date"]::-webkit-date-and-time-value {
+    width: 100%;
+    text-align: center;
+  }
+}
