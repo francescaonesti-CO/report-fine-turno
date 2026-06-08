@@ -3365,16 +3365,30 @@ const assenti = assentiList.length;
     paddingTop: 18
   }
 );
-drawPanel(doc,12,168,186,52,'Eventi / anomalie degne di rilievo','warn',{leftStripe:C.orange,bg:[255,251,245],border:[245,208,174],accent:C.orange});
+const eventiCompleti = `${autoEventi || 'Nessun evento rilevante automatico rilevato.'}${
+  official.eventiManuali
+    ? '\n\nIntegrazione dell\'ufficiale sugli eventi rilevanti:\n' + official.eventiManuali
+    : ''
+}`;
 
-writeTextInBox(
+const eventiEndY = drawAutoTextPanel(
   doc,
- `${autoEventi || 'Nessun evento rilevante automatico rilevato.'}`,
-  18,
+  12,
+  168,
   186,
-  172,
-  5,
-  8.2
+  'Eventi / anomalie degne di rilievo',
+  'warn',
+  eventiCompleti,
+  {
+    minH: 52,
+    fontSize: 7.8,
+    lineH: 4,
+    paddingTop: 18,
+    leftStripe: C.orange,
+    bg: [255, 251, 245],
+    border: [245, 208, 174],
+    accent: C.orange
+  }
 );
   const noteGeneraliEndY = drawAutoTextPanel(
   doc,
