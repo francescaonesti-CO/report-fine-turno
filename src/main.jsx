@@ -3387,10 +3387,12 @@ const eventiEndY = drawAutoTextPanel(
     fontSize: 7.8,
     lineH: 4,
     paddingTop: 18,
-    leftStripe: C.orange,
-    bg: [255, 251, 245],
-    border: [245, 208, 174],
-    accent: C.orange
+    panelOpts: {
+      leftStripe: C.orange,
+      bg: [255, 251, 245],
+      border: [245, 208, 174],
+      accent: C.orange
+    }
   }
 );
 const noteGeneraliEndY = drawAutoTextPanel(
