@@ -3390,10 +3390,10 @@ const eventiEndY = drawAutoTextPanel(
     accent: C.orange
   }
 );
-  const noteGeneraliEndY = drawAutoTextPanel(
+const noteGeneraliEndY = drawAutoTextPanel(
   doc,
   12,
-  226,
+  eventiEndY,
   186,
   'Note generali',
   'doc',
