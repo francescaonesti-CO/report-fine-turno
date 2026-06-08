@@ -3374,27 +3374,91 @@ const eventiCompleti = [
     : ''
 ].filter(Boolean).join('\n\n');
 
-const eventiEndY = drawAutoTextPanel(
-  doc,
-  12,
-  168,
-  186,
-  'Eventi / anomalie degne di rilievo',
-  'warn',
-  eventiCompleti,
-  {
-    minH: 52,
-    fontSize: 7.8,
-    lineH: 4,
-    paddingTop: 18,
-    panelOpts: {
-      leftStripe: C.orange,
-      bg: [255, 251, 245],
-      border: [245, 208, 174],
-      accent: C.orange
-    }
-  }
+const eventiPreviewLines = doc.splitTextToSize(
+  String(eventiCompleti || '-'),
+  174
 );
+
+const eventiTroppoLunghi = eventiPreviewLines.length > 24;
+
+let eventiEndY;
+
+if (eventiTroppoLunghi) {
+  eventiEndY = drawAutoTextPanel(
+    doc,
+    12,
+    168,
+    186,
+    'Eventi / anomalie degne di rilievo',
+    'warn',
+    'Sono presenti eventi o anomalie degne di rilievo. Per il dettaglio completo si rinvia alla pagina dedicata.',
+    {
+      minH: 34,
+      fontSize: 8,
+      lineH: 4.2,
+      paddingTop: 18,
+      panelOpts: {
+        leftStripe: C.orange,
+        bg: [255, 251, 245],
+        border: [245, 208, 174],
+        accent: C.orange
+      }
+    }
+  );
+
+  doc.addPage();
+
+  drawHeaderModern(
+    doc,
+    'REPORT UFFICIALE DI TURNO - EVENTI RILEVANTI',
+    subtitle,
+    C.blue
+  );
+
+  drawAutoTextPanel(
+    doc,
+    12,
+    58,
+    186,
+    'Eventi / anomalie degne di rilievo',
+    'warn',
+    eventiCompleti,
+    {
+      minH: 52,
+      fontSize: 7.8,
+      lineH: 4,
+      paddingTop: 18,
+      panelOpts: {
+        leftStripe: C.orange,
+        bg: [255, 251, 245],
+        border: [245, 208, 174],
+        accent: C.orange
+      }
+    }
+  );
+} else {
+  eventiEndY = drawAutoTextPanel(
+    doc,
+    12,
+    168,
+    186,
+    'Eventi / anomalie degne di rilievo',
+    'warn',
+    eventiCompleti,
+    {
+      minH: 52,
+      fontSize: 7.8,
+      lineH: 4,
+      paddingTop: 18,
+      panelOpts: {
+        leftStripe: C.orange,
+        bg: [255, 251, 245],
+        border: [245, 208, 174],
+        accent: C.orange
+      }
+    }
+  );
+}
 const noteGeneraliEndY = drawAutoTextPanel(
   doc,
   12,
