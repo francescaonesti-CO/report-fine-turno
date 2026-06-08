@@ -3462,7 +3462,7 @@ if (eventiTroppoLunghi) {
 const noteGeneraliEndY = drawAutoTextPanel(
   doc,
   12,
-  eventiEndY,
+  eventiEndY + 12,
   186,
   'Note generali',
   'doc',
