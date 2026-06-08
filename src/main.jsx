@@ -3365,11 +3365,14 @@ const assenti = assentiList.length;
     paddingTop: 18
   }
 );
-const eventiCompleti = `${autoEventi || 'Nessun evento rilevante automatico rilevato.'}${
-  official.eventiManuali
-    ? '\n\nIntegrazione dell\'ufficiale sugli eventi rilevanti:\n' + official.eventiManuali
+const eventiManualiText = String(official.eventiManuali || '').trim();
+
+const eventiCompleti = [
+  autoEventi || 'Nessun evento rilevante automatico rilevato.',
+  eventiManualiText
+    ? `Integrazione dell'ufficiale sugli eventi rilevanti:\n${eventiManualiText}`
     : ''
-}`;
+].filter(Boolean).join('\n\n');
 
 const eventiEndY = drawAutoTextPanel(
   doc,
