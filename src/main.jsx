@@ -2146,18 +2146,22 @@ function printShell(title, pagesHtml) {
 .detail-grid-2 .panel{
   margin-bottom:10px;
 }
-    @media print{body{background:white}.toolbar{display:none}.page{width:297mm!important;min-height:210mm!important;margin:0;box-shadow:none;page-break-after:always;padding-top:10mm!important;padding-bottom:12mm!important}@page{size:A4 portrait;margin:10mm}}
+    
   @media print{
  .page{
   width:210mm!important;
   min-height:297mm!important;
   height:auto!important;
   overflow:visible!important;
-  page-break-after:always;
+  break-after: page;
+  page-break-after: always;
   padding-top:10mm!important;
   padding-bottom:12mm!important;
 }
-
+.page:last-of-type{
+  break-after: auto;
+  page-break-after: auto;
+}
   .panel{
     height:auto!important;
     min-height:0!important;
