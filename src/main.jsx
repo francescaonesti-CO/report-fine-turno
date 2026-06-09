@@ -2154,15 +2154,15 @@ function printShell(title, pagesHtml) {
   min-height:auto!important;
   height:auto!important;
   overflow:visible!important;
-  break-after: page;
-  page-break-after: always;
+  break-after: auto;
+  page-break-after: auto;
   padding-top:10mm!important;
   padding-bottom:12mm!important;
   box-sizing:border-box!important;
 }
-.page:last-of-type{
-  break-after: auto;
-  page-break-after: auto;
+.page + .page{
+  break-before: page;
+  page-break-before: always;
 }
   .panel{
     height:auto!important;
