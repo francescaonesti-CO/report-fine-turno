@@ -2146,18 +2146,24 @@ function printShell(title, pagesHtml) {
 .detail-grid-2 .panel{
   margin-bottom:10px;
 }
-    @media print{body{background:white}.toolbar{display:none}.page{width:297mm!important;min-height:210mm!important;margin:0;box-shadow:none;page-break-after:always;padding-top:10mm!important;padding-bottom:12mm!important}@page{size:A4 portrait;margin:10mm}}
+    
   @media print{
  .page{
+ .page{
   width:210mm!important;
-  min-height:297mm!important;
+  min-height:auto!important;
   height:auto!important;
   overflow:visible!important;
-  page-break-after:always;
+  break-after: auto;
+  page-break-after: auto;
   padding-top:10mm!important;
   padding-bottom:12mm!important;
+  box-sizing:border-box!important;
 }
-
+.page + .page{
+  break-before: page;
+  page-break-before: always;
+}
   .panel{
     height:auto!important;
     min-height:0!important;
@@ -2266,7 +2272,16 @@ function buildServicePrintHtml(report) {
   const carburanteBody = (report.veicoli||[]).some(v=>v.carburante==='Sì') ? (report.veicoli||[]).map(v=>`<div class="small-row"><span>${esc(v.sigla||'Veicolo')}</span><strong>${esc(v.importoCarburante||'-')}</strong></div>`).join('') : '<p>Nessun rifornimento indicato.</p>';
   const anomalie = (report.veicoli||[]).map(v=>v.anomaliaVeicolo).filter(Boolean).join('; ') || 'Nessuna anomalia segnalata.';
   const operators = operatorNames(report).join('<br>') || '-';
-const interventiHtml = interventions.length ? `<ul class="bullet-list">${interventions.slice(0,8).map(i=>`<li><strong>${esc(i.tipo)}</strong>${i.oraInizio ? ` — ${esc(i.oraInizio)}` : ''}<br><span class="muted">${esc(i.luogo || '')}</span> ${esc(i.descrizione || i.esito || '')}${i.tipo === 'Servizio scuole' ? `<br><span class="muted">Scuole presidiate:</span> ${esc((i.scuole || []).map(s => `${s.nome || '-'} (${s.momento || '-'}${s.orario ? ', ore ' + s.orario : ''})`).join(' · ') || '-')}` : ''}</li>`).join('')}</ul>` : '<p>Nessun intervento inserito.</p>';  const violazioniRows = [['Codice della Strada', n(c.vdcCds)+n(c.preavvisiCds)], ['Regolamenti comunali', n(c.regPolizia)+n(c.regEdilizio)+n(c.regBenessereAnimali)], ['Annonaria / commercio', n(c.annonaria)], ['Altro', n(c.altreNorme)], ['TOTALE', getTotaleViolazioni(report)]];
+const interventiHtml = interventions.length ? `<ul class="bullet-list">${interventions.slice(0,8).map(i=>`<li><strong>${esc(i.tipo)}</strong>${i.oraInizio ? ` — ${esc(i.oraInizio)}` : ''}<br><span class="muted">${esc(i.luogo || '')}</span> ${esc(i.descrizione || i.esito || '')}${i.tipo === 'Servizio scuole' ? `<br><span class="muted">Scuole presidiate:</span> ${esc((i.scuole || []).map(s => `${s.nome || '-'} (${s.momento || '-'}${s.orario ? ', ore ' + s.orario : ''})`).join(' · ') || '-')}` : ''}</li>`).join('')}</ul>` : '<p>Nessun intervento inserito.</p>';  const violazioniRows = [
+  ['Preavvisi CdS', n(c.preavvisiCds)],
+  ['VdC CdS', n(c.vdcCds)],
+  ['Regolamento Polizia', n(c.regPolizia)],
+  ['Regolamento Edilizio', n(c.regEdilizio)],
+  ['Regolamento Benessere Animali', n(c.regBenessereAnimali)],
+  ['Annonaria / commercio', n(c.annonaria)],
+  ['Altre norme', n(c.altreNorme)],
+  ['TOTALE', getTotaleViolazioni(report)]
+];
   const altreNormeText = c.altreNormeDescrizione
   ? `<p class="muted" style="margin-top:2mm;"><strong>Specifiche altre norme:</strong> ${esc(c.altreNormeDescrizione)}</p>`
   : '';
@@ -2285,8 +2300,22 @@ const attiBody = `<div class="small-list">${[['Relazioni',c.relazioni],['Annotaz
 `;
   const page1 = `<section class="page">${headerHtml('REPORT DI SERVIZIO', subtitle)}<div class="kpis">${kpiBox('car','Interventi',interventions.length)}${kpiBox('doc','Violazioni',getTotaleViolazioni(report))}${kpiBox('clip','Atti redatti',atti)}${kpiBox('warn','Eventi',eventi)}</div><div class="grid-3">${panel('Veicoli','car',vehicleBody)}${panel('Carburante','fuel',carburanteBody)}${panel('Anomalie veicolo','warn',`<p>${esc(anomalie)}</p>`)}</div><div class="grid-2">${panel('Note di servizio','clipboard',`<p>${esc(report.noteUdt || '-')}</p>`)}${panel('Operatori','users',`<p><strong>Reparto:</strong> ${esc(repartoLabel(report))}</p><p>${operators}</p>`)}</div>${footerHtml(1)}</section>`;
 const page2 = `<section class="page">${headerHtml('REPORT DI SERVIZIO - DETTAGLIO', subtitle)}<div class="detail-grid">${panel('Interventi effettuati','car',interventiHtml)}${panel('Violazioni contestate','table',violazioniTable + altreNormeText,'tight-panel')}</div><div class="detail-grid-2">${panel('Atti redatti','clip',attiBody)}${panel('Osservazioni','clipboard',`<p>${esc(report.osservazioni || report.noteUdt || 'Nessuna osservazione particolare da segnalare.')}</p>`)}</div><div class="detail-grid-2 compact-row">${panel('Documenti ritirati','doc',docsBody)}${panel('Operatori','user',`<p class="compact"><strong>${operators}</strong></p>${dichiarazioneFinale}`)}</div>${footerHtml(2)}</section>`;
+  
+const compilatore = report.operatori?.[0];
 
-return printShell('Report di servizio', page1 + page2); 
+const nomeCompilatore = compilatore
+  ? `${compilatore.nome || ''}`.trim()
+  : 'operatore';
+
+const safeNomeCompilatore = nomeCompilatore
+  .replace(/\s+/g, '_')
+  .replace(/[^\wÀ-ÿ-]/g, '');
+
+const safeDate = String(report.data || report.service_date || '')
+  .replaceAll('/', '-');
+
+const fileTitle = `Report_servizio_${safeDate}_${safeNomeCompilatore}`;
+return printShell(fileTitle, page1 + page2); 
 }
 function buildOfficialPrintHtml(aggregate, reports, official, autoSintesi, autoEventi) {
   const date = formatDateIT(official.data || aggregate.dateLabel);
@@ -3829,7 +3858,7 @@ function buildServicePdf(report) {
   yy += 5;
 }); 
   if (!(report.interventi||[]).length) writeTextInBox(doc,'Nessun intervento inserito.',18,77,75,3,8);
-  drawPanel(doc,108,58,90,58,'Violazioni contestate','doc',{accent:C.green}); drawModernTable(doc,114,75,78,['Tipo violazione','Nr.'],[['Codice della Strada',n(c.preavvisiCds)+n(c.vdcCds)],['Regolamenti comunali',n(c.regPolizia)+n(c.regEdilizio)+n(c.regBenessereAnimali)],['Annonaria / commercio',n(c.annonaria)],['Altro',n(c.altreNorme)],['TOTALE',violazioni]],[58,20],{totalLast:true});
+  drawPanel(doc,108,58,90,68,'Violazioni contestate','doc',{accent:C.green}); drawModernTable(doc,114,75,78,['Tipo violazione','Nr.'],[['Preavvisi CdS',n(c.preavvisiCds)],['VdC CdS',n(c.vdcCds)],['Regolamento Polizia',n(c.regPolizia)],['Regolamento Edilizio',n(c.regEdilizio)],['Regolamento Benessere Animali',n(c.regBenessereAnimali)],['Annonaria / commercio',n(c.annonaria)],['Altre norme',n(c.altreNorme)],['TOTALE',violazioni]],[58,20],{totalLast:true});
   drawPanel(doc,108,125,90,48,'Atti redatti','clip',{accent:C.green}); const serviceAtti=[['Relazioni',c.relazioni],['Annotazioni',c.annotazioni],['Fermi amministrativi',c.fermiAmministrativi],['Sequestri amministrativi',c.sequestriAmministrativi],['Sequestri penali',c.sequestriPenali],['C.N.R.',c.cnr]].filter(r=>n(r[1])>0); doc.setFontSize(8); (serviceAtti.length?serviceAtti:[['Nessun atto redatto',0]]).slice(0,5).forEach((r,i)=>{ setC(doc,C.text); doc.setFont('helvetica','normal'); doc.text(r[0],114,143+i*6.5); doc.setFont('helvetica','bold'); doc.text(String(r[1]),191,143+i*6.5,{align:'right'}); });
   drawPanel(doc,12,188,112,40,'Osservazioni','list',{accent:C.green}); writeTextInBox(doc, report.noteUdt || 'Nessuna osservazione particolare da segnalare.',18,206,100,4,8);
   drawPanel(doc,132,188,66,40,'Firma agente','user',{accent:C.green}); const names=operatorNames(report).join(' / ') || '-'; doc.setFontSize(7.4); setC(doc,C.text); doc.text(doc.splitTextToSize(names,54).slice(0,2),138,206); doc.line(142,221,190,221);
