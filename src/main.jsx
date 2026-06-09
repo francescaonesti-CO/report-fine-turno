@@ -2266,7 +2266,16 @@ function buildServicePrintHtml(report) {
   const carburanteBody = (report.veicoli||[]).some(v=>v.carburante==='Sì') ? (report.veicoli||[]).map(v=>`<div class="small-row"><span>${esc(v.sigla||'Veicolo')}</span><strong>${esc(v.importoCarburante||'-')}</strong></div>`).join('') : '<p>Nessun rifornimento indicato.</p>';
   const anomalie = (report.veicoli||[]).map(v=>v.anomaliaVeicolo).filter(Boolean).join('; ') || 'Nessuna anomalia segnalata.';
   const operators = operatorNames(report).join('<br>') || '-';
-const interventiHtml = interventions.length ? `<ul class="bullet-list">${interventions.slice(0,8).map(i=>`<li><strong>${esc(i.tipo)}</strong>${i.oraInizio ? ` — ${esc(i.oraInizio)}` : ''}<br><span class="muted">${esc(i.luogo || '')}</span> ${esc(i.descrizione || i.esito || '')}${i.tipo === 'Servizio scuole' ? `<br><span class="muted">Scuole presidiate:</span> ${esc((i.scuole || []).map(s => `${s.nome || '-'} (${s.momento || '-'}${s.orario ? ', ore ' + s.orario : ''})`).join(' · ') || '-')}` : ''}</li>`).join('')}</ul>` : '<p>Nessun intervento inserito.</p>';  const violazioniRows = [['Codice della Strada', n(c.vdcCds)+n(c.preavvisiCds)], ['Regolamenti comunali', n(c.regPolizia)+n(c.regEdilizio)+n(c.regBenessereAnimali)], ['Annonaria / commercio', n(c.annonaria)], ['Altro', n(c.altreNorme)], ['TOTALE', getTotaleViolazioni(report)]];
+const interventiHtml = interventions.length ? `<ul class="bullet-list">${interventions.slice(0,8).map(i=>`<li><strong>${esc(i.tipo)}</strong>${i.oraInizio ? ` — ${esc(i.oraInizio)}` : ''}<br><span class="muted">${esc(i.luogo || '')}</span> ${esc(i.descrizione || i.esito || '')}${i.tipo === 'Servizio scuole' ? `<br><span class="muted">Scuole presidiate:</span> ${esc((i.scuole || []).map(s => `${s.nome || '-'} (${s.momento || '-'}${s.orario ? ', ore ' + s.orario : ''})`).join(' · ') || '-')}` : ''}</li>`).join('')}</ul>` : '<p>Nessun intervento inserito.</p>';  const violazioniRows = [
+  ['Preavvisi CdS', n(c.preavvisiCds)],
+  ['VdC CdS', n(c.vdcCds)],
+  ['Regolamento Polizia', n(c.regPolizia)],
+  ['Regolamento Edilizio', n(c.regEdilizio)],
+  ['Regolamento Benessere Animali', n(c.regBenessereAnimali)],
+  ['Annonaria / commercio', n(c.annonaria)],
+  ['Altre norme', n(c.altreNorme)],
+  ['TOTALE', getTotaleViolazioni(report)]
+];
   const altreNormeText = c.altreNormeDescrizione
   ? `<p class="muted" style="margin-top:2mm;"><strong>Specifiche altre norme:</strong> ${esc(c.altreNormeDescrizione)}</p>`
   : '';
