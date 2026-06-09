@@ -2149,14 +2149,16 @@ function printShell(title, pagesHtml) {
     
   @media print{
  .page{
+ .page{
   width:210mm!important;
-  min-height:297mm!important;
+  min-height:auto!important;
   height:auto!important;
   overflow:visible!important;
   break-after: page;
   page-break-after: always;
   padding-top:10mm!important;
   padding-bottom:12mm!important;
+  box-sizing:border-box!important;
 }
 .page:last-of-type{
   break-after: auto;
