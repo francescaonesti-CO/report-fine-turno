@@ -412,6 +412,7 @@ return <main><img id="pdfLogo" src="/POLIZIA.png" alt="Logo Polizia Locale" styl
 }
   function OperatorReport({ report, setReport, lastSaved, resetReport, command }) { 
   const [dbSaving, setDbSaving] = useState(false);
+  const [savedReportId, setSavedReportId] = useState(null);
   const update = (patch) => setReport(prev => ({ ...prev, ...patch }));
   const updateArray = (key, index, patch) => setReport(prev => ({ ...prev, [key]: prev[key].map((x, i) => i === index ? { ...x, ...patch } : x) }));
   const addArray = (key, item) => setReport(prev => ({ ...prev, [key]: [...prev[key], item] }));
@@ -434,33 +435,88 @@ return <main><img id="pdfLogo" src="/POLIZIA.png" alt="Logo Polizia Locale" styl
     a.click();
     URL.revokeObjectURL(url);
   }
-  async function saveToDatabase() {
+ async function saveToDatabase() {
+  if (dbSaving) return;
+
   try {
     setDbSaving(true);
 
     const times = getShiftTimes(report);
 
-    console.log('COMMAND:', command)
-console.log('COMMAND DATA:', COMMANDS[command])
-    const { data: savedReport, error: reportError } = await supabase
-      .from('reports')
-      .insert([
-        {
-          command_id: COMMANDS[command].id,
-          service_date: report.data,
-          start_time: times.start_time,
-          end_time: times.end_time,
-          status: 'inviato',
-          notes: JSON.stringify(report),
-        },
-      ])
-      .select()
-      .single();
+    const reportPayload = {
+      command_id: COMMANDS[command].id,
+      service_date: report.data,
+      start_time: times.start_time,
+      end_time: times.end_time,
+      status: 'inviato',
+      notes: JSON.stringify(report),
+    };
 
-    if (reportError) {
-  console.error('Errore Supabase:', reportError);
-  alert(`Errore durante il salvataggio: ${reportError.message}`);
-  return;
+    let currentReportId = savedReportId;
+
+    if (currentReportId) {
+      const { error: updateError } = await supabase
+        .from('reports')
+        .update(reportPayload)
+        .eq('id', currentReportId);
+
+      if (updateError) {
+        console.error('Errore aggiornamento Supabase:', updateError);
+        alert(`Errore durante l'aggiornamento: ${updateError.message}`);
+        return;
+      }
+
+      await supabase
+        .from('interventions')
+        .delete()
+        .eq('report_id', currentReportId);
+
+    } else {
+      const { data: savedReport, error: reportError } = await supabase
+        .from('reports')
+        .insert([reportPayload])
+        .select()
+        .single();
+
+      if (reportError) {
+        console.error('Errore Supabase:', reportError);
+        alert(`Errore durante il salvataggio: ${reportError.message}`);
+        return;
+      }
+
+      currentReportId = savedReport.id;
+      setSavedReportId(savedReport.id);
+    }
+
+    const interventionsToInsert = (report.interventi || []).map(i => ({
+      report_id: currentReportId,
+      intervention_time: normalizeTime(i.oraInizio),
+      location: i.luogo || null,
+      description: `${i.tipo || ''} - ${i.descrizione || ''}`.trim(),
+      outcome: i.esito || null,
+      notes: JSON.stringify(i),
+    }));
+
+    if (interventionsToInsert.length > 0) {
+      const { error: interventionsError } = await supabase
+        .from('interventions')
+        .insert(interventionsToInsert);
+
+      if (interventionsError) {
+        console.error(interventionsError);
+        alert('Report salvato, ma errore nel salvataggio degli interventi.');
+        return;
+      }
+    }
+
+    alert(savedReportId ? 'Report aggiornato correttamente nel database.' : 'Report salvato correttamente nel database.');
+
+  } catch (err) {
+    console.error('Errore imprevisto salvataggio:', err);
+    alert(`Errore imprevisto durante il salvataggio: ${err.message || err}`);
+  } finally {
+    setDbSaving(false);
+  }
 }
 
     const interventionsToInsert = (report.interventi || []).map(i => ({
@@ -666,8 +722,12 @@ Cordialmente,`
       <div className="actions">
   <button onClick={generatePdf}>Apri report stampabile</button>
   <button onClick={saveToDatabase} disabled={dbSaving}>
-    {dbSaving ? 'Salvataggio...' : 'Salva su database'}
-  </button>
+  {dbSaving
+    ? 'Salvataggio...'
+    : savedReportId
+      ? 'Aggiorna report salvato'
+      : 'Salva su database'}
+</button>
   <button className="primary" onClick={sendMail}>Invia email precompilata</button>
 </div>
     </section>
