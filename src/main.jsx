@@ -519,36 +519,6 @@ return <main><img id="pdfLogo" src="/POLIZIA.png" alt="Logo Polizia Locale" styl
   }
 }
 
-    const interventionsToInsert = (report.interventi || []).map(i => ({
-      report_id: savedReport.id,
-      intervention_time: normalizeTime(i.oraInizio),
-      location: i.luogo || null,
-      description: `${i.tipo || ''} - ${i.descrizione || ''}`.trim(),
-      outcome: i.esito || null,
-      notes: JSON.stringify(i),
-    }));
-
-    if (interventionsToInsert.length > 0) {
-      const { error: interventionsError } = await supabase
-        .from('interventions')
-        .insert(interventionsToInsert);
-
-      if (interventionsError) {
-        console.error(interventionsError);
-        alert('Report salvato, ma errore nel salvataggio degli interventi.');
-        return;
-      }
-    }
-
-    alert('Report salvato correttamente nel database.');
-  } catch (err) {
-  console.error('Errore imprevisto salvataggio:', err);
-  alert(`Errore imprevisto durante il salvataggio: ${err.message || err}`);
-} finally {
-    setDbSaving(false);
-  }
-}
-
   function sendMail() {
     const subject = encodeURIComponent(
   `Report di servizio - ${report.data} - ${turnoLabel(report)}`
