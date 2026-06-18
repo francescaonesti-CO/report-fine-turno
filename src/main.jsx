@@ -692,8 +692,12 @@ Cordialmente,`
       <div className="actions">
   <button onClick={generatePdf}>Apri report stampabile</button>
   <button onClick={saveToDatabase} disabled={dbSaving}>
-    {dbSaving ? 'Salvataggio...' : 'Salva su database'}
-  </button>
+  {dbSaving
+    ? 'Salvataggio...'
+    : savedReportId
+      ? 'Aggiorna report salvato'
+      : 'Salva su database'}
+</button>
   <button className="primary" onClick={sendMail}>Invia email precompilata</button>
 </div>
     </section>
