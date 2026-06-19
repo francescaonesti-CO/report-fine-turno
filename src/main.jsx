@@ -95,7 +95,7 @@ const DETTAGLI_CODICE_STRADA = [
   'Guasto semaforo'
 ];
 
-const ORIGINI = ['Centrale Operativa', 'UDT', 'Di iniziativa', 'Altro'];
+const ORIGINI = ['Centrale Operativa', 'UDT', 'ODS', 'Di iniziativa', 'Altro'];
 
 
 const PERSONALE = [
