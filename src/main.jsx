@@ -132,7 +132,9 @@ const emptyCounters = () => ({
   relazioni: 0, annotazioni: 0, verbaliCds: 0, verbaliRegolamenti: 0, sequestriAmministrativi: 0,
   fermiAmministrativi: 0, sequestriPenali: 0, cnr: 0, altriAttiNumero: 0, altriAttiDescrizione: '',
   preavvisiCds: 0, vdcCds: 0, regPolizia: 0, regEdilizio: 0, regBenessereAnimali: 0,
-  annonaria: 0, altreNorme: 0, altreNormeDescrizione: '', fermi: 0, sequestri: 0
+  annonaria: 0, altreNorme: 0, altreNormeDescrizione: '', fermi: 0, sequestri: 0,
+totaleVeicoliControllati: 0,
+totalePersoneControllate: 0
 });
 
 const LABELS = {
@@ -667,12 +669,48 @@ Cordialmente,`
       <button onClick={() => addArray('documentiRitirati', emptyDocumentoRitirato())}>+ Aggiungi documento ritirato</button>
     </section>
 
-    <section className="card">
-      <h2>8. Distinta verbali</h2>
-      <p className="muted">La distinta viene generata automaticamente dai numeri inseriti nella sezione “Violazioni”. Non serve compilare i singoli verbali uno per uno.</p>
-      <div className="totalBox">Totale distinta: <strong>{totaleViolazioni}</strong></div>
-      <div className="actions"><button onClick={() => buildVerbaliPdf(report).save(`distinta-verbali-${sanitizeFileName(report.data)}-${sanitizeFileName(turnoLabel(report))}.pdf`)}>Scarica PDF distinta verbali</button></div>
-    </section>
+   <section className="card">
+  <h2>8. Riepilogo controlli</h2>
+
+  <p className="muted">
+    Inserire il totale complessivo dei controlli effettuati durante il turno,
+    anche se non riferiti a un singolo intervento specifico.
+  </p>
+
+  <div className="counterGrid">
+    <Counter
+      label="Totale veicoli controllati"
+      value={report.counters.totaleVeicoliControllati}
+      onChange={v =>
+        update({
+          counters: {
+            ...report.counters,
+            totaleVeicoliControllati: v
+          }
+        })
+      }
+    />
+
+    <Counter
+      label="Totale persone controllate"
+      value={report.counters.totalePersoneControllate}
+      onChange={v =>
+        update({
+          counters: {
+            ...report.counters,
+            totalePersoneControllate: v
+          }
+        })
+      }
+    />
+  </div>
+
+  <div className="totalBox">
+    Totale controlli: <strong>
+      {n(report.counters.totaleVeicoliControllati) + n(report.counters.totalePersoneControllate)}
+    </strong>
+  </div>
+</section>
 
     <section className="card">
       <h2>9. Note e invio</h2>
@@ -2351,6 +2389,22 @@ const interventiHtml = interventions.length
   : '';
 
 const attiBody = `<div class="small-list">${[['Relazioni',c.relazioni],['Annotazioni',c.annotazioni],['Fermi amm.',c.fermiAmministrativi],['Sequestri amm.',c.sequestriAmministrativi],['Sequestri penali',c.sequestriPenali],['C.N.R.',c.cnr],['Altri atti',c.altriAttiNumero]].map(([l,v])=>`<div class="small-row"><span>${esc(l)}</span><strong>${esc(n(v))}</strong></div>`).join('')}</div>${altriAttiText}`;
+  const controlliBody = `
+  <div class="small-list">
+    <div class="small-row">
+      <span>Veicoli controllati</span>
+      <strong>${esc(n(c.totaleVeicoliControllati))}</strong>
+    </div>
+    <div class="small-row">
+      <span>Persone controllate</span>
+      <strong>${esc(n(c.totalePersoneControllate))}</strong>
+    </div>
+    <div class="small-row">
+      <span>Totale controlli</span>
+      <strong>${esc(n(c.totaleVeicoliControllati) + n(c.totalePersoneControllate))}</strong>
+    </div>
+  </div>
+`;
   const docs = report.documentiRitirati || [];
   const docsBody = docs.length ? `<ul class="bullet-list">${docs.map(d=>`<li>${esc(d.tipo || 'Documento')} — ${esc(d.quantita || 1)} ${d.note?`<br><span class="muted">${esc(d.note)}</span>`:''}</li>`).join('')}</ul>` : '<p>Nessun documento ritirato.</p>';
   const dichiarazioneFinale = `
@@ -2359,7 +2413,7 @@ const attiBody = `<div class="small-list">${[['Relazioni',c.relazioni],['Annotaz
   </div>
 `;
   const page1 = `<section class="page">${headerHtml('REPORT DI SERVIZIO', subtitle)}<div class="kpis">${kpiBox('car','Interventi',interventions.length)}${kpiBox('doc','Violazioni',getTotaleViolazioni(report))}${kpiBox('clip','Atti redatti',atti)}${kpiBox('warn','Eventi',eventi)}</div><div class="grid-3">${panel('Veicoli','car',vehicleBody)}${panel('Carburante','fuel',carburanteBody)}${panel('Anomalie veicolo','warn',`<p>${esc(anomalie)}</p>`)}</div><div class="grid-2">${panel('Note di servizio','clipboard',`<p>${esc(report.noteUdt || '-')}</p>`)}${panel('Operatori','users',`<p><strong>Reparto:</strong> ${esc(repartoLabel(report))}</p><p>${operators}</p>`)}</div>${footerHtml(1)}</section>`;
-const page2 = `<section class="page">${headerHtml('REPORT DI SERVIZIO - DETTAGLIO', subtitle)}<div class="detail-grid">${panel('Interventi effettuati','car',interventiHtml)}${panel('Violazioni contestate','table',violazioniTable + altreNormeText,'tight-panel')}</div><div class="detail-grid-2">${panel('Atti redatti','clip',attiBody)}${panel('Osservazioni','clipboard',`<p>${esc(report.osservazioni || report.noteUdt || 'Nessuna osservazione particolare da segnalare.')}</p>`)}</div><div class="detail-grid-2 compact-row">${panel('Documenti ritirati','doc',docsBody)}${panel('Operatori','user',`<p class="compact"><strong>${operators}</strong></p>${dichiarazioneFinale}`)}</div>${footerHtml(2)}</section>`;
+const page2 = `<section class="page">${headerHtml('REPORT DI SERVIZIO - DETTAGLIO', subtitle)}<div class="detail-grid">${panel('Interventi effettuati','car',interventiHtml)}${panel('Violazioni contestate','table',violazioniTable + altreNormeText,'tight-panel')}</div><div class="detail-grid-2">${panel('Atti redatti','clip',attiBody)}${panel('Osservazioni','clipboard',`<p>${esc(report.osservazioni || report.noteUdt || 'Nessuna osservazione particolare da segnalare.')}</p>`)}</div><div class="detail-grid-2 compact-row">${panel('Riepilogo controlli','check',controlliBody)}${panel('Documenti ritirati','doc',docsBody)}</div>${panel('Operatori','user',`<p class="compact"><strong>${operators}</strong></p>${dichiarazioneFinale}`)}${footerHtml(2)}</section>`;
   
 const compilatore = report.operatori?.[0];
 
