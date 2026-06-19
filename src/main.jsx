@@ -679,15 +679,20 @@ Cordialmente,`
       <Field label="Note per UDT / Ufficiale di coordinamento"><Textarea value={report.noteUdt} onChange={v => update({ noteUdt: v })} /></Field>
       <Field label="Email ufficiale destinatario"><Input value={report.destinatario} onChange={v => update({ destinatario: v })} placeholder="es. ufficiale@comune.monza.it" /></Field>
 <div
-  className="muted"
   style={{
-    marginTop: 12,
-    marginBottom: 10,
-    fontSize: 13,
-    fontWeight: 600
+    marginTop: 14,
+    marginBottom: 12,
+    padding: '12px 14px',
+    borderRadius: 12,
+    border: '1px solid #fca5a5',
+    background: '#fef2f2',
+    color: '#991b1b',
+    fontSize: 14,
+    fontWeight: 800,
+    lineHeight: 1.35
   }}
 >
-  Promemoria: prima dell’invio verificare di aver inserito i km finali del veicolo.
+  ⚠️ ATTENZIONE: prima dell’invio verificare di aver inserito i km finali del veicolo.
 </div>
       <div className="actions">
   <button onClick={generatePdf}>Apri report stampabile</button>
