@@ -132,7 +132,8 @@ const emptyCounters = () => ({
   relazioni: 0, annotazioni: 0, verbaliCds: 0, verbaliRegolamenti: 0, sequestriAmministrativi: 0,
   fermiAmministrativi: 0, sequestriPenali: 0, cnr: 0, altriAttiNumero: 0, altriAttiDescrizione: '',
   preavvisiCds: 0, vdcCds: 0, regPolizia: 0, regEdilizio: 0, regBenessereAnimali: 0,
-  annonaria: 0, altreNorme: 0, altreNormeDescrizione: '', fermi: 0, sequestri: 0
+  annonaria: 0, altreNorme: 0, altreNormeDescrizione: '', fermi: 0, sequestri: 0,
+  totaleVeicoliControllati: 0, totalePersoneControllate: 0
 });
 
 const LABELS = {
@@ -668,11 +669,47 @@ Cordialmente,`
     </section>
 
     <section className="card">
-      <h2>8. Distinta verbali</h2>
-      <p className="muted">La distinta viene generata automaticamente dai numeri inseriti nella sezione “Violazioni”. Non serve compilare i singoli verbali uno per uno.</p>
-      <div className="totalBox">Totale distinta: <strong>{totaleViolazioni}</strong></div>
-      <div className="actions"><button onClick={() => buildVerbaliPdf(report).save(`distinta-verbali-${sanitizeFileName(report.data)}-${sanitizeFileName(turnoLabel(report))}.pdf`)}>Scarica PDF distinta verbali</button></div>
-    </section>
+  <h2>8. Riepilogo controlli</h2>
+
+  <p className="muted">
+    Inserire il totale complessivo dei controlli effettuati durante il turno,
+    anche se non riferiti a un singolo intervento specifico.
+  </p>
+
+  <div className="counterGrid">
+    <Counter
+      label="Totale veicoli controllati"
+      value={report.counters.totaleVeicoliControllati}
+      onChange={v =>
+        update({
+          counters: {
+            ...report.counters,
+            totaleVeicoliControllati: v
+          }
+        })
+      }
+    />
+
+    <Counter
+      label="Totale persone controllate"
+      value={report.counters.totalePersoneControllate}
+      onChange={v =>
+        update({
+          counters: {
+            ...report.counters,
+            totalePersoneControllate: v
+          }
+        })
+      }
+    />
+  </div>
+
+  <div className="totalBox">
+    Totale controlli: <strong>
+      {n(report.counters.totaleVeicoliControllati) + n(report.counters.totalePersoneControllate)}
+    </strong>
+  </div>
+</section>
 
     <section className="card">
       <h2>9. Note e invio</h2>
