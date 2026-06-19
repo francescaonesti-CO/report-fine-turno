@@ -2301,7 +2301,33 @@ function buildServicePrintHtml(report) {
   const carburanteBody = (report.veicoli||[]).some(v=>v.carburante==='Sì') ? (report.veicoli||[]).map(v=>`<div class="small-row"><span>${esc(v.sigla||'Veicolo')}</span><strong>${esc(v.importoCarburante||'-')}</strong></div>`).join('') : '<p>Nessun rifornimento indicato.</p>';
   const anomalie = (report.veicoli||[]).map(v=>v.anomaliaVeicolo).filter(Boolean).join('; ') || 'Nessuna anomalia segnalata.';
   const operators = operatorNames(report).join('<br>') || '-';
-const interventiHtml = interventions.length ? `<ul class="bullet-list">${interventions.slice(0,8).map(i=>`<li><strong>${esc(getTipoInterventoReport(i))}</strong>${i.oraInizio ? ` — ${esc(i.oraInizio)}` : ''}<br><span class="muted">${esc(i.luogo || '')}</span> ${esc(i.descrizione || i.esito || '')}${i.tipo === 'Servizio scuole' ? `<br><span class="muted">Scuole presidiate:</span> ${esc((i.scuole || []).map(s => `${s.nome || '-'} (${s.momento || '-'}${s.orario ? ', ore ' + s.orario : ''})`).join(' · ') || '-')}` : ''}</li>`).join('')}</ul>` : '<p>Nessun intervento inserito.</p>';  const violazioniRows = [
+const interventiHtml = interventions.length
+  ? `<ul class="bullet-list">${interventions.slice(0,8).map(i => {
+
+      const dettagliSinistro = i.tipo === 'Sinistro stradale'
+        ? `<br><span class="muted">Feriti:</span> ${esc(i.conFeriti || '-')}
+           <br><span class="muted">Veicoli coinvolti:</span> ${esc(i.veicoliCoinvolti || '-')}
+           <br><span class="muted">Rilievi effettuati:</span> ${esc(i.rilievi || '-')}`
+        : '';
+
+      const dettagliScuole = i.tipo === 'Servizio scuole'
+        ? `<br><span class="muted">Scuole presidiate:</span> ${esc((i.scuole || []).map(s => `${s.nome || '-'} (${s.momento || '-'}${s.orario ? ', ore ' + s.orario : ''})`).join(' · ') || '-')}`
+        : '';
+
+      return `<li>
+        <strong>${esc(getTipoInterventoReport(i))}</strong>
+        <br><span class="muted">Orario:</span> ${esc(i.oraInizio || '-')} - ${esc(i.oraFine || '-')}
+        <br><span class="muted">Luogo:</span> ${esc(i.luogo || '-')}
+        <br><span class="muted">Descrizione:</span> ${esc(i.descrizione || '-')}
+        <br><span class="muted">Esito:</span> ${esc(i.esito || '-')}
+        ${dettagliSinistro}
+        ${dettagliScuole}
+        ${i.note ? `<br><span class="muted">Note:</span> ${esc(i.note)}` : ''}
+      </li>`;
+
+    }).join('')}</ul>`
+  : '<p>Nessun intervento inserito.</p>';
+  const violazioniRows = [
   ['Preavvisi CdS', n(c.preavvisiCds)],
   ['VdC CdS', n(c.vdcCds)],
   ['Regolamento Polizia', n(c.regPolizia)],
