@@ -95,7 +95,7 @@ const DETTAGLI_CODICE_STRADA = [
   'Guasto semaforo'
 ];
 
-const ORIGINI = ['Centrale Operativa', 'UDT', 'Di iniziativa', 'Altro'];
+const ORIGINI = ['Centrale Operativa', 'UDT', 'ODS', 'Di iniziativa', 'Altro'];
 
 
 const PERSONALE = [
@@ -2347,6 +2347,10 @@ function buildServicePrintHtml(report) {
 const interventiHtml = interventions.length
   ? `<ul class="bullet-list">${interventions.slice(0,8).map(i => {
 
+      const origineIntervento = i.origine === 'Altro'
+        ? `Altro${i.origineAltro ? ': ' + i.origineAltro : ''}`
+        : (i.origine || '-');
+
       const dettagliSinistro = i.tipo === 'Sinistro stradale'
         ? `<br><span class="muted">Feriti:</span> ${esc(i.conFeriti || '-')}
            <br><span class="muted">Veicoli coinvolti:</span> ${esc(i.veicoliCoinvolti || '-')}
@@ -2357,14 +2361,28 @@ const interventiHtml = interventions.length
         ? `<br><span class="muted">Scuole presidiate:</span> ${esc((i.scuole || []).map(s => `${s.nome || '-'} (${s.momento || '-'}${s.orario ? ', ore ' + s.orario : ''})`).join(' · ') || '-')}`
         : '';
 
+      const dettagliPostoControllo = i.tipo === 'Posto di controllo'
+        ? `<br><span class="muted">Veicoli controllati:</span> ${esc(i.veicoliControllati || '-')}
+           <br><span class="muted">Persone controllate:</span> ${esc(i.personeControllate || '-')}
+           <br><span class="muted">Verbali elevati:</span> ${esc(i.verbaliElevati || '-')}
+           <br><span class="muted">Fermi/sequestri:</span> ${esc(i.fermiSequestri || '-')}`
+        : '';
+
+      const dettagliExtra = extraDetails(i)
+        ? `<br><span class="muted">Dettagli:</span> ${esc(extraDetails(i))}`
+        : '';
+
       return `<li>
         <strong>${esc(getTipoInterventoReport(i))}</strong>
+        <br><span class="muted">Origine:</span> ${esc(origineIntervento)}
         <br><span class="muted">Orario:</span> ${esc(i.oraInizio || '-')} - ${esc(i.oraFine || '-')}
         <br><span class="muted">Luogo:</span> ${esc(i.luogo || '-')}
         <br><span class="muted">Descrizione:</span> ${esc(i.descrizione || '-')}
         <br><span class="muted">Esito:</span> ${esc(i.esito || '-')}
         ${dettagliSinistro}
         ${dettagliScuole}
+        ${dettagliPostoControllo}
+        ${dettagliExtra}
         ${i.note ? `<br><span class="muted">Note:</span> ${esc(i.note)}` : ''}
       </li>`;
 
