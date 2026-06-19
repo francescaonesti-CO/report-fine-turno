@@ -1053,13 +1053,12 @@ const periodAggregate = useMemo(() => {
     aggregate.totaleVeicoli += veicoli.length;
     aggregate.totaleInterventi += interventi.length;
 
-    interventi.forEach(i => {
-      const tipo = i.tipo || 'Altro';
+   interventi.forEach(i => {
+  const tipo = getTipoInterventoReport(i);
 
-      aggregate.interventiPerTipo[tipo] =
-        (aggregate.interventiPerTipo[tipo] || 0) + 1;
-    });
-
+  aggregate.interventiPerTipo[tipo] =
+    (aggregate.interventiPerTipo[tipo] || 0) + 1;
+});
     const counters = payload.counters || {};
 
     aggregate.totaleViolazioni +=
@@ -2302,7 +2301,7 @@ function buildServicePrintHtml(report) {
   const carburanteBody = (report.veicoli||[]).some(v=>v.carburante==='Sì') ? (report.veicoli||[]).map(v=>`<div class="small-row"><span>${esc(v.sigla||'Veicolo')}</span><strong>${esc(v.importoCarburante||'-')}</strong></div>`).join('') : '<p>Nessun rifornimento indicato.</p>';
   const anomalie = (report.veicoli||[]).map(v=>v.anomaliaVeicolo).filter(Boolean).join('; ') || 'Nessuna anomalia segnalata.';
   const operators = operatorNames(report).join('<br>') || '-';
-const interventiHtml = interventions.length ? `<ul class="bullet-list">${interventions.slice(0,8).map(i=>`<li><strong>${esc(i.tipo)}</strong>${i.oraInizio ? ` — ${esc(i.oraInizio)}` : ''}<br><span class="muted">${esc(i.luogo || '')}</span> ${esc(i.descrizione || i.esito || '')}${i.tipo === 'Servizio scuole' ? `<br><span class="muted">Scuole presidiate:</span> ${esc((i.scuole || []).map(s => `${s.nome || '-'} (${s.momento || '-'}${s.orario ? ', ore ' + s.orario : ''})`).join(' · ') || '-')}` : ''}</li>`).join('')}</ul>` : '<p>Nessun intervento inserito.</p>';  const violazioniRows = [
+const interventiHtml = interventions.length ? `<ul class="bullet-list">${interventions.slice(0,8).map(i=>`<li><strong>${esc(getTipoInterventoReport(i))}</strong>${i.oraInizio ? ` — ${esc(i.oraInizio)}` : ''}<br><span class="muted">${esc(i.luogo || '')}</span> ${esc(i.descrizione || i.esito || '')}${i.tipo === 'Servizio scuole' ? `<br><span class="muted">Scuole presidiate:</span> ${esc((i.scuole || []).map(s => `${s.nome || '-'} (${s.momento || '-'}${s.orario ? ', ore ' + s.orario : ''})`).join(' · ') || '-')}` : ''}</li>`).join('')}</ul>` : '<p>Nessun intervento inserito.</p>';  const violazioniRows = [
   ['Preavvisi CdS', n(c.preavvisiCds)],
   ['VdC CdS', n(c.vdcCds)],
   ['Regolamento Polizia', n(c.regPolizia)],
@@ -2922,6 +2921,19 @@ function getTotaleViolazioni(report) {
   return ['preavvisiCds','vdcCds','regPolizia','regEdilizio','regBenessereAnimali','annonaria','altreNorme'].reduce((s, k) => s + n(c[k]), 0);
 }
 function operatorNames(report) { return (report.operatori || []).filter(o => o.nome || o.matricola || o.qualifica).map(o => `${o.nome || 'Operatore'}${o.matricola ? ` mtr. ${o.matricola}` : ''}`); }
+function getTipoInterventoReport(i) {
+  if (i?.tipo === 'Sinistro stradale') {
+    if (i.conFeriti === 'Con feriti') {
+      return 'Sinistro stradale con feriti';
+    }
+
+    if (i.conFeriti === 'Senza feriti') {
+      return 'Sinistro stradale senza feriti';
+    }
+  }
+
+  return i?.tipo || 'Intervento';
+}
 function extraDetails(i) {
   if (i.tipo === 'Codice della strada') {
     const dettaglio = i.cdsDettaglio || 'Non specificato';
@@ -2962,7 +2974,7 @@ function reportText(report) {
   const mezzi = (report.veicoli || []).map(v => `- ${v.sigla || 'Veicolo'} | Km inizio ${v.kmInizio || '-'} | Km fine ${v.kmFine || '-'} | Km percorsi ${km(v)}`).join('\n');
   const interventi = (report.interventi || []).map((i, idx) => {
     const scuole = i.tipo === 'Servizio scuole' ? (i.scuole || []).map((s, pos) => `   Scuola ${pos+1}: ${s.nome || '-'} | ${s.momento || '-'} | ${s.orario || '-'} | Criticità: ${s.criticita || '-'}`).join('\n') : '';
-    return `${idx + 1}. ${i.tipo} | ${i.origine}${i.origine === 'Altro' ? ': ' + (i.origineAltro || '-') : ''}\n   Orario: ${i.oraInizio || '-'} - ${i.oraFine || '-'} | Luogo: ${i.luogo || '-'}\n   Descrizione: ${i.descrizione || '-'}\n   Esito: ${i.esito || '-'}\n${extraDetails(i)}${scuole ? '\n' + scuole : ''}\n   Note: ${i.note || '-'}`;
+    return `${idx + 1}. ${getTipoInterventoReport(i)} | ${i.origine}${i.origine === 'Altro' ? ': ' + (i.origineAltro || '-') : ''}\n   Orario: ${i.oraInizio || '-'} - ${i.oraFine || '-'} | Luogo: ${i.luogo || '-'}\n   Descrizione: ${i.descrizione || '-'}\n   Esito: ${i.esito || '-'}\n${extraDetails(i)}${scuole ? '\n' + scuole : ''}\n   Note: ${i.note || '-'}`;
   }).join('\n\n') || '- Nessun intervento inserito';
   const c = report.counters || emptyCounters();
   return `REPORT DI SERVIZIO - POLIZIA LOCALE\n\nDATA: ${report.data}\nTURNO: ${turnoLabel(report)} (${report.orarioTipo})\nREPARTO: ${repartoLabel(report)}${report.zonaServizio ? '\nZONA DI SERVIZIO: ' + report.zonaServizio : ''}\n\nOPERATORI\n${ops}\n\nVEICOLI\n${mezzi || '- Non indicati'}\nTotale km percorsi: ${getKmTotali(report)}\n\nINTERVENTI EFFETTUATI\n${interventi}\n\nATTI REDATTI\nRelazioni: ${c.relazioni}\nAnnotazioni: ${c.annotazioni}\nSequestri amministrativi: ${c.sequestriAmministrativi}\nFermi amministrativi: ${c.fermiAmministrativi}\nSequestri penali: ${c.sequestriPenali}\nCNR: ${c.cnr}\nAltri atti: ${c.altriAttiNumero} ${c.altriAttiDescrizione || ''}\n\nVIOLAZIONI / PROVVEDIMENTI\nPreavvisi CdS: ${c.preavvisiCds}\nVdC CdS: ${c.vdcCds}\nRegolamento Polizia: ${c.regPolizia}\nRegolamento Edilizio: ${c.regEdilizio}\nRegolamento Benessere Animali: ${c.regBenessereAnimali}\nAnnonaria / commercio: ${c.annonaria}\nAltre norme: ${c.altreNorme} ${c.altreNormeDescrizione || ''}\nFermi: ${c.fermi}\nSequestri: ${c.sequestri}\nTOTALE: ${getTotaleViolazioni(report)}\n\nNOTE PER UDT / UFFICIALE DI COORDINAMENTO\n${report.noteUdt || '-'}\n\nDICHIARAZIONE\nGli operatori dichiarano che quanto riportato corrisponde fedelmente alle attività effettivamente svolte e riscontrate durante il turno di servizio.\n`;
@@ -2977,7 +2989,10 @@ function aggregateReports(reports) {
     aggregate.kmTotali += getKmTotali(r);
     aggregate.byReparto[repartoLabel(r)] = n(aggregate.byReparto[repartoLabel(r)]) + 1;
     (r.interventi || []).forEach(i => {
-      const tipoAggregato = i.tipo === 'Codice della strada' && i.cdsDettaglio ? `Codice della strada - ${i.cdsDettaglio}` : (i.tipo || 'Non indicato');
+      const tipoAggregato =
+  i.tipo === 'Codice della strada' && i.cdsDettaglio
+    ? `Codice della strada - ${i.cdsDettaglio}`
+    : getTipoInterventoReport(i);
       aggregate.byTipo[tipoAggregato] = n(aggregate.byTipo[tipoAggregato]) + 1;
       const origine = i.origine === 'Altro' ? `Altro: ${i.origineAltro || '-'}` : (i.origine || 'Non indicata');
       aggregate.byOrigine[origine] = n(aggregate.byOrigine[origine]) + 1;
@@ -3868,7 +3883,7 @@ function buildServicePdf(report) {
   fillC(doc, c.green);
   doc.circle(18, yy - 1.5, 0.9, 'F');
 
-  let testo = i.tipo || 'intervento';
+  let testo = getTipoInterventoReport(i);
 
   if (i.tipo === 'Controllo autobus') {
     const n = i.autobusControllati || '-';
