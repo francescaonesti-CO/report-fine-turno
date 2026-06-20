@@ -1844,7 +1844,7 @@ doc.text(official?.ufficiale || 'Comandante Polizia Locale', 143, 270);
     </Field>
   </div>
 
-  <div
+   <div
     className="grid four"
     style={{
       marginTop: 24,
@@ -1854,41 +1854,41 @@ doc.text(official?.ufficiale || 'Comandante Polizia Locale', 143, 270);
       background: '#ffffff'
     }}
   >
-    <div className="miniStat">
-      <div style={{ fontSize: 24, fontWeight: 800, lineHeight: 1 }}>
-        {periodAggregate.totaleReport}
+    {[
+      ['Report acquisiti', periodAggregate.totaleReport],
+      ['Operatori impiegati', periodAggregate.totaleOperatori],
+      ['Veicoli impiegati', periodAggregate.totaleVeicoli],
+      ['Km percorsi', `${periodAggregate.kmTotali} km`],
+      ['Interventi totali', periodAggregate.totaleInterventi],
+      ['Violazioni totali', periodAggregate.totaleViolazioni],
+      ['Atti redatti', periodAggregate.totaleAtti],
+      ['Veicoli controllati', periodAggregate.totaleVeicoliControllati],
+      ['Persone controllate', periodAggregate.totalePersoneControllate]
+    ].map(([label, value]) => (
+      <div
+        key={label}
+        className="miniStat"
+        style={{
+          padding: 14,
+          border: '1px solid #e1e8f0',
+          borderRadius: 12,
+          background: '#f8fbff'
+        }}
+      >
+        <div style={{ fontSize: 24, fontWeight: 800, lineHeight: 1 }}>
+          {value}
+        </div>
+        <div style={{
+          fontSize: 12,
+          opacity: 0.7,
+          marginTop: 6,
+          textTransform: 'uppercase',
+          letterSpacing: 0.5
+        }}>
+          {label}
+        </div>
       </div>
-      <div style={{ fontSize: 12, opacity: 0.7, marginTop: 6, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-        Report
-      </div>
-    </div>
-
-    <div className="miniStat">
-      <div style={{ fontSize: 24, fontWeight: 800, lineHeight: 1 }}>
-        {periodAggregate.totaleInterventi}
-      </div>
-      <div style={{ fontSize: 12, opacity: 0.7, marginTop: 6, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-        Interventi
-      </div>
-    </div>
-
-    <div className="miniStat">
-      <div style={{ fontSize: 24, fontWeight: 800, lineHeight: 1 }}>
-        {periodAggregate.totaleViolazioni}
-      </div>
-      <div style={{ fontSize: 12, opacity: 0.7, marginTop: 6, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-        Violazioni
-      </div>
-    </div>
-
-    <div className="miniStat">
-      <div style={{ fontSize: 24, fontWeight: 800, lineHeight: 1 }}>
-        {periodAggregate.totaleOperatori}
-      </div>
-      <div style={{ fontSize: 12, opacity: 0.7, marginTop: 6, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-        Operatori
-      </div>
-    </div>
+    ))}
   </div>
 
   <div
