@@ -1932,7 +1932,70 @@ doc.text(official?.ufficiale || 'Comandante Polizia Locale', 143, 270);
       )}
     </div>
   </div>
+  <hr style={{ margin: '28px 0', border: 0, borderTop: '1px solid #d6e1ef' }} />
 
+  <div
+    className="grid three"
+    style={{
+      alignItems: 'start'
+    }}
+  >
+    <div>
+      <h3>Violazioni contestate</h3>
+
+      {[
+        ['Preavvisi CdS', periodAggregate.violazioni.preavvisiCds],
+        ['VdC CdS', periodAggregate.violazioni.vdcCds],
+        ['Regolamento Polizia', periodAggregate.violazioni.regPolizia],
+        ['Regolamento Edilizio', periodAggregate.violazioni.regEdilizio],
+        ['Reg. Benessere Animali', periodAggregate.violazioni.regBenessereAnimali],
+        ['Annonaria / commercio', periodAggregate.violazioni.annonaria],
+        ['Altre norme', periodAggregate.violazioni.altreNorme]
+      ].map(([label, value]) => (
+        <div key={label} className="rowBetween" style={{ marginBottom: 8 }}>
+          <span>{label}</span>
+          <b style={{ marginLeft: 6 }}>({value})</b>
+        </div>
+      ))}
+    </div>
+
+    <div>
+      <h3>Atti redatti</h3>
+
+      {[
+        ['Relazioni', periodAggregate.atti.relazioni],
+        ['Annotazioni', periodAggregate.atti.annotazioni],
+        ['Fermi amministrativi', periodAggregate.atti.fermiAmministrativi],
+        ['Sequestri amministrativi', periodAggregate.atti.sequestriAmministrativi],
+        ['Sequestri penali', periodAggregate.atti.sequestriPenali],
+        ['C.N.R.', periodAggregate.atti.cnr],
+        ['Altri atti', periodAggregate.atti.altriAttiNumero]
+      ].map(([label, value]) => (
+        <div key={label} className="rowBetween" style={{ marginBottom: 8 }}>
+          <span>{label}</span>
+          <b style={{ marginLeft: 6 }}>({value})</b>
+        </div>
+      ))}
+    </div>
+
+    <div>
+      <h3>Attività di controllo</h3>
+
+      {[
+        ['Veicoli controllati', periodAggregate.totaleVeicoliControllati],
+        ['Persone controllate', periodAggregate.totalePersoneControllate],
+        ['Veicoli da posti di controllo', periodAggregate.controlliPostoControllo.veicoli],
+        ['Persone da posti di controllo', periodAggregate.controlliPostoControllo.persone],
+        ['Verbali da posti di controllo', periodAggregate.controlliPostoControllo.verbali],
+        ['Fermi/sequestri da posti di controllo', periodAggregate.controlliPostoControllo.fermiSequestri]
+      ].map(([label, value]) => (
+        <div key={label} className="rowBetween" style={{ marginBottom: 8 }}>
+          <span>{label}</span>
+          <b style={{ marginLeft: 6 }}>({value})</b>
+        </div>
+      ))}
+    </div>
+  </div>
   <hr style={{ margin: '28px 0', border: 0, borderTop: '1px solid #d6e1ef' }} />
 
   <div>
