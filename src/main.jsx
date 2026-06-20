@@ -1057,80 +1057,128 @@ return (reports || []).filter(r => {
 
 const periodAggregate = useMemo(() => {
   const aggregate = {
-    totaleReport: periodReports.length,
-    totaleInterventi: 0,
-    totaleViolazioni: 0,
-    totaleOperatori: 0,
-    totaleVeicoli: 0,
-    interventiPerTipo: {},
-    reportPerReparto: {},
-    eventiRilievo: []
-  };
+  totaleReport: periodReports.length,
+  totaleInterventi: 0,
+  totaleViolazioni: 0,
+  totaleAtti: 0,
+  totaleOperatori: 0,
+  totaleVeicoli: 0,
+  kmTotali: 0,
+  totaleVeicoliControllati: 0,
+  totalePersoneControllate: 0,
+  interventiPerTipo: {},
+  reportPerReparto: {},
+  violazioni: {
+    preavvisiCds: 0,
+    vdcCds: 0,
+    regPolizia: 0,
+    regEdilizio: 0,
+    regBenessereAnimali: 0,
+    annonaria: 0,
+    altreNorme: 0
+  },
+  atti: {
+    relazioni: 0,
+    annotazioni: 0,
+    sequestriAmministrativi: 0,
+    fermiAmministrativi: 0,
+    sequestriPenali: 0,
+    cnr: 0,
+    altriAttiNumero: 0
+  },
+  controlliPostoControllo: {
+    veicoli: 0,
+    persone: 0,
+    verbali: 0,
+    fermiSequestri: 0
+  },
+  eventiRilievo: []
+};
+periodReports.forEach(r => {
+  let payload = r;
 
-  periodReports.forEach(r => {
-    let payload = r;
-
-    try {
-      if (typeof r.notes === 'string') {
-        payload = JSON.parse(r.notes);
-      }
-    } catch {
-      payload = r;
+  try {
+    if (typeof r.notes === 'string') {
+      payload = JSON.parse(r.notes);
     }
+  } catch {
+    payload = r;
+  }
 
-    const reparto =
-      payload.reparto ||
-      r.reparto ||
-      r.department ||
-      'Non indicato';
+  const reparto =
+    payload.reparto ||
+    r.reparto ||
+    r.department ||
+    'Non indicato';
 
-    aggregate.reportPerReparto[reparto] =
-      (aggregate.reportPerReparto[reparto] || 0) + 1;
+  aggregate.reportPerReparto[reparto] =
+    (aggregate.reportPerReparto[reparto] || 0) + 1;
 
-    const operatori = payload.operatori || [];
-    const veicoli = payload.veicoli || [];
-    const interventi = payload.interventi || [];
+  const operatori = payload.operatori || [];
+  const veicoli = payload.veicoli || [];
+  const interventi = payload.interventi || [];
+  const counters = payload.counters || {};
 
-    aggregate.totaleOperatori += operatori.length;
-    aggregate.totaleVeicoli += veicoli.length;
-    aggregate.totaleInterventi += interventi.length;
+  aggregate.totaleOperatori += operatori.length;
+  aggregate.totaleVeicoli += veicoli.length;
+  aggregate.totaleInterventi += interventi.length;
+  aggregate.kmTotali += getKmTotali(payload);
 
-    interventi.forEach(i => {
-      const tipo = i.tipo || 'Altro';
+  aggregate.totaleVeicoliControllati += n(counters.totaleVeicoliControllati);
+  aggregate.totalePersoneControllate += n(counters.totalePersoneControllate);
 
-      aggregate.interventiPerTipo[tipo] =
-        (aggregate.interventiPerTipo[tipo] || 0) + 1;
-    });
+  interventi.forEach(i => {
+    const tipo = getTipoInterventoReport(i);
 
-    const counters = payload.counters || {};
+    aggregate.interventiPerTipo[tipo] =
+      (aggregate.interventiPerTipo[tipo] || 0) + 1;
 
-    aggregate.totaleViolazioni +=
-      Number(counters.violazioni || 0) ||
-      Number(counters.totaleViolazioni || 0) ||
-      0;
-
-    if (payload.eventiRilievo) {
-      aggregate.eventiRilievo.push({
-        data:
-          r.service_date ||
-          payload.data ||
-          '',
-        reparto,
-        testo: payload.eventiRilievo
-      });
-    }
-
-    if (payload.noteUdt) {
-      aggregate.eventiRilievo.push({
-        data:
-          r.service_date ||
-          payload.data ||
-          '',
-        reparto,
-        testo: payload.noteUdt
-      });
+    if (i.tipo === 'Posto di controllo') {
+      aggregate.controlliPostoControllo.veicoli += n(i.veicoliControllati);
+      aggregate.controlliPostoControllo.persone += n(i.personeControllate);
+      aggregate.controlliPostoControllo.verbali += n(i.verbaliElevati);
+      aggregate.controlliPostoControllo.fermiSequestri += n(i.fermiSequestri);
     }
   });
+
+  ['preavvisiCds','vdcCds','regPolizia','regEdilizio','regBenessereAnimali','annonaria','altreNorme']
+    .forEach(key => {
+      aggregate.violazioni[key] += n(counters[key]);
+    });
+
+  aggregate.totaleViolazioni = Object.values(aggregate.violazioni)
+    .reduce((sum, value) => sum + n(value), 0);
+
+  ['relazioni','annotazioni','sequestriAmministrativi','fermiAmministrativi','sequestriPenali','cnr','altriAttiNumero']
+    .forEach(key => {
+      aggregate.atti[key] += n(counters[key]);
+    });
+
+  aggregate.totaleAtti = Object.values(aggregate.atti)
+    .reduce((sum, value) => sum + n(value), 0);
+
+  if (payload.eventiRilievo) {
+    aggregate.eventiRilievo.push({
+      data:
+        r.service_date ||
+        payload.data ||
+        '',
+      reparto,
+      testo: payload.eventiRilievo
+    });
+  }
+
+  if (payload.noteUdt) {
+    aggregate.eventiRilievo.push({
+      data:
+        r.service_date ||
+        payload.data ||
+        '',
+      reparto,
+      testo: payload.noteUdt
+    });
+  }
+});
 
   return aggregate;
 }, [periodReports]);
