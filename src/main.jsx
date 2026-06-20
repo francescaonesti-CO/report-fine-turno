@@ -146,7 +146,21 @@ const LABELS = {
 
 function today() { return new Date().toISOString().slice(0, 10); }
 function n(value) { return Number(value || 0); }
-function km(v) { return Math.max(0, n(v.kmFine) - n(v.kmInizio)); }
+function km(v) {
+  const inizio = Number(v.kmInizio);
+  const fine = Number(v.kmFine);
+
+  if (!Number.isFinite(inizio) || !Number.isFinite(fine)) return 0;
+  if (inizio <= 0 || fine <= 0) return 0;
+  if (fine < inizio) return 0;
+
+  const percorsi = fine - inizio;
+
+  // filtro valori palesemente errati
+  if (percorsi > 500) return 0;
+
+  return percorsi;
+}
 function turnoLabel(report) { return report.turno === 'Altro orario' ? `${report.altroTurnoInizio || '?'}-${report.altroTurnoFine || '?'}` : report.turno; }
 function repartoLabel(report) { return report.reparto === 'Altri servizi' ? `${report.reparto}: ${report.altroServizio || '-'}` : report.reparto; }
 function sanitizeFileName(s) { return String(s || 'report').replace(/[^a-z0-9._-]+/gi, '-').replace(/-+/g, '-'); }
