@@ -1876,8 +1876,8 @@ doc.text(official?.ufficiale || 'Comandante Polizia Locale', 143, 270);
       ['Interventi totali', periodAggregate.totaleInterventi],
       ['Violazioni totali', periodAggregate.totaleViolazioni],
       ['Atti redatti', periodAggregate.totaleAtti],
-      ['Veicoli controllati', periodAggregate.totaleVeicoliControllati],
-      ['Persone controllate', periodAggregate.totalePersoneControllate]
+      ['Veicoli controllati', periodAggregate.totaleVeicoliControllati || periodAggregate.controlliPostoControllo.veicoli],
+['Persone controllate', periodAggregate.totalePersoneControllate || periodAggregate.controlliPostoControllo.persone]
     ].map(([label, value]) => (
       <div
         key={label}
