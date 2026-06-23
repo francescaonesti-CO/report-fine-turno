@@ -1491,10 +1491,7 @@ const generatePeriodPdf = () => {
   let iy = 193;
 
   interventiEntries.slice(0, 5).forEach(([tipo, totale], idx) => {
-    const perc = totaleInterventi
-      ? Math.round((totale / totaleInterventi) * 100)
-      : 0;
-
+   
     const colors = [
       [102, 153, 220],
       [255, 170, 110],
@@ -1518,7 +1515,7 @@ const generatePeriodPdf = () => {
 
     doc.setFont('helvetica', 'bold');
     setText(C.blue);
-    doc.text(`${totale} (${perc}%)`, 96, iy, { align: 'right' });
+    doc.text(String(totale), 96, iy, { align: 'right' });
 
     iy += 8;
   });
