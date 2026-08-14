@@ -1356,8 +1356,8 @@ const generatePeriodPdf = () => {
   ];
 
   const controlliEntries = [
-    ['Veicoli controllati', periodAggregate.totaleVeicoliControllati],
-    ['Persone controllate', periodAggregate.totalePersoneControllate],
+    ['Veicoli controllati', periodAggregate.controlliPostoControllo.veicoli],
+    ['Persone controllate', periodAggregate.controlliPostoControllo.persone]
     ['Veicoli da posti di controllo', periodAggregate.controlliPostoControllo.veicoli],
     ['Persone da posti di controllo', periodAggregate.controlliPostoControllo.persone],
     ['Verbali da posti di controllo', periodAggregate.controlliPostoControllo.verbali],
@@ -2056,13 +2056,12 @@ const generatePeriodPdf = () => {
     <h3>Attività di controllo</h3>
 
     {[
-      ['Veicoli controllati', periodAggregate.totaleVeicoliControllati],
-      ['Persone controllate', periodAggregate.totalePersoneControllate],
-      ['Veicoli da posti di controllo', periodAggregate.controlliPostoControllo.veicoli],
-      ['Persone da posti di controllo', periodAggregate.controlliPostoControllo.persone],
-      ['Verbali da posti di controllo', periodAggregate.controlliPostoControllo.verbali],
-      ['Fermi/sequestri da posti di controllo', periodAggregate.controlliPostoControllo.fermiSequestri]
-    ].map(([label, value]) => (
+  ['Posti di controllo effettuati', periodAggregate.interventiPerTipo['Posto di controllo'] || 0],
+  ['Veicoli controllati', periodAggregate.controlliPostoControllo.veicoli],
+  ['Persone controllate', periodAggregate.controlliPostoControllo.persone],
+  ['Verbali elevati', periodAggregate.controlliPostoControllo.verbali],
+  ['Fermi/sequestri', periodAggregate.controlliPostoControllo.fermiSequestri]
+].map(([label, value]) => (
       <div key={label} className="rowBetween" style={{ marginBottom: 8 }}>
         <span>{label}</span>
         <b style={{ marginLeft: 6 }}>({value})</b>
