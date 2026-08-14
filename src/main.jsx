@@ -1285,50 +1285,84 @@ const generatePeriodPdf = () => {
 
   const C = {
     blue: [12, 47, 97],
-    lightBlue: [235, 243, 255],
     border: [214, 224, 236],
     text: [30, 40, 55],
     muted: [80, 90, 105],
     orange: [234, 126, 0],
     red: [190, 30, 45],
     green: [22, 145, 90],
-    soft: [248, 250, 252],
+    soft: [248, 250, 252]
   };
 
-  const setText = (color) => doc.setTextColor(...color);
-  const setFill = (color) => doc.setFillColor(...color);
-  const setDraw = (color) => doc.setDrawColor(...color);
+  const setText = color => doc.setTextColor(...color);
+  const setFill = color => doc.setFillColor(...color);
+  const setDraw = color => doc.setDrawColor(...color);
 
-  const formatDate = (dateString) => {
+  const formatDate = dateString => {
     if (!dateString) return '-';
+
     const [year, month, day] = String(dateString).split('-');
+
     if (!year || !month || !day) return dateString;
+
     return `${day}/${month}/${year}`;
   };
 
   const formatDateTime = () => {
     const now = new Date();
-    return now.toLocaleDateString('it-IT') + ' ' + now.toLocaleTimeString('it-IT', {
-      hour: '2-digit',
-      minute: '2-digit',
-    });
+
+    return (
+      now.toLocaleDateString('it-IT') +
+      ' ' +
+      now.toLocaleTimeString('it-IT', {
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+    );
   };
 
-  const sintesiFinale = periodSintesiManuale?.trim()
-    ? periodSintesiManuale
-    : periodAutoSintesi;
+  const periodo =
+    `${formatDate(periodStart)} - ${formatDate(periodEnd)}`;
 
-  const periodo = `${formatDate(periodStart)} - ${formatDate(periodEnd)}`;
-  const reparto = periodReparto || 'Tutti i reparti';
+  const reparto =
+    periodReparto || 'Tutti i reparti';
 
-  const totaleInterventi = periodAggregate.totaleInterventi || 0;
-  const interventiEntries = Object.entries(periodAggregate.interventiPerTipo || {})
-    .sort((a, b) => b[1] - a[1]);
+  const interventiEntries =
+    Object.entries(periodAggregate.interventiPerTipo || {})
+      .sort((a, b) => b[1] - a[1]);
 
-  const repartiEntries = Object.entries(periodAggregate.reportPerReparto || {})
-    .sort((a, b) => b[1] - a[1]);
+  const repartiEntries =
+    Object.entries(periodAggregate.reportPerReparto || {})
+      .sort((a, b) => b[1] - a[1]);
 
-  const eventi = periodAggregate.eventiRilievo || [];
+  const violazioniEntries = [
+    ['Preavvisi CdS', periodAggregate.violazioni.preavvisiCds],
+    ['VdC CdS', periodAggregate.violazioni.vdcCds],
+    ['Regolamento Polizia', periodAggregate.violazioni.regPolizia],
+    ['Regolamento Edilizio', periodAggregate.violazioni.regEdilizio],
+    ['Reg. Benessere Animali', periodAggregate.violazioni.regBenessereAnimali],
+    ['Annonaria / commercio', periodAggregate.violazioni.annonaria],
+    ['Altre norme', periodAggregate.violazioni.altreNorme]
+  ];
+
+  const attiEntries = [
+    ['Relazioni', periodAggregate.atti.relazioni],
+    ['Annotazioni', periodAggregate.atti.annotazioni],
+    ['Fermi amministrativi', periodAggregate.atti.fermiAmministrativi],
+    ['Sequestri amministrativi', periodAggregate.atti.sequestriAmministrativi],
+    ['Sequestri penali', periodAggregate.atti.sequestriPenali],
+    ['C.N.R.', periodAggregate.atti.cnr],
+    ['Altri atti', periodAggregate.atti.altriAttiNumero]
+  ];
+
+  const controlliEntries = [
+    ['Veicoli controllati', periodAggregate.totaleVeicoliControllati],
+    ['Persone controllate', periodAggregate.totalePersoneControllate],
+    ['Veicoli da posti di controllo', periodAggregate.controlliPostoControllo.veicoli],
+    ['Persone da posti di controllo', periodAggregate.controlliPostoControllo.persone],
+    ['Verbali da posti di controllo', periodAggregate.controlliPostoControllo.verbali],
+    ['Fermi/sequestri da posti di controllo', periodAggregate.controlliPostoControllo.fermiSequestri]
+  ];
 
   function card(x, y, w, h) {
     doc.setFillColor(255, 255, 255);
@@ -1342,7 +1376,7 @@ const generatePeriodPdf = () => {
     doc.rect(x, y - 7, 2, 8, 'F');
 
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(11);
+    doc.setFontSize(10);
     setText(C.blue);
     doc.text(title.toUpperCase(), x + 5, y);
   }
@@ -1350,6 +1384,7 @@ const generatePeriodPdf = () => {
   function drawHeader() {
     try {
       const img = document.getElementById('pdfLogo');
+
       if (img && img.complete) {
         doc.addImage(img, 'PNG', 14, 8, 18, 18);
       }
@@ -1365,11 +1400,16 @@ const generatePeriodPdf = () => {
     doc.text('COMUNE DI MONZA', 42, 15);
 
     doc.setFontSize(9);
-    doc.text('Settore Polizia Locale, Protezione Civile', 42, 22);
+    doc.text(
+      'Settore Polizia Locale, Protezione Civile',
+      42,
+      22
+    );
 
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(8);
     setText(C.text);
+
     doc.text('Via Marsala 13 - 20900 Monza', 145, 14);
     doc.text('Tel. 039 28161', 145, 21);
 
@@ -1379,271 +1419,318 @@ const generatePeriodPdf = () => {
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(13);
     doc.setTextColor(255, 255, 255);
-    doc.text('REPORT AGGREGATO PER PERIODO', 105, 42, { align: 'center' });
 
-    card(14, 48, 88, 16);
-    card(108, 48, 88, 16);
+    doc.text(
+      'REPORT AGGREGATO PER PERIODO',
+      105,
+      42,
+      { align: 'center' }
+    );
 
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(9);
+    card(14, 49, 88, 16);
+    card(108, 49, 88, 16);
+
+    doc.setFontSize(8);
     setText(C.blue);
-    doc.text('Periodo:', 24, 58);
-    doc.text('Reparto:', 119, 58);
+    doc.setFont('helvetica', 'bold');
+
+    doc.text('Periodo:', 20, 59);
+    doc.text('Reparto:', 114, 59);
 
     doc.setFont('helvetica', 'normal');
     setText(C.text);
-    doc.text(periodo, 42, 58);
-    doc.text(reparto, 137, 58);
+
+    doc.text(periodo, 38, 59);
+    doc.text(reparto, 132, 59);
   }
 
-  function drawKpi(x, y, w, label, value, color) {
-    card(x, y, w, 30);
-
-    doc.setFillColor(color[0], color[1], color[2], 0.12);
-    doc.circle(x + 13, y + 13, 6, 'F');
+  function drawKpi(x, y, w, label, value) {
+    card(x, y, w, 25);
 
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(20);
-    doc.setTextColor(...color);
-    doc.text(String(value), x + w - 13, y + 16, { align: 'right' });
+    doc.setFontSize(17);
+    setText(C.blue);
 
-    doc.setFontSize(8);
-    doc.text(label.toUpperCase(), x + w - 13, y + 24, { align: 'right' });
+    doc.text(
+      String(value ?? 0),
+      x + w / 2,
+      y + 12,
+      { align: 'center' }
+    );
+
+    doc.setFontSize(6.8);
+    setText(C.muted);
+
+    doc.text(
+      label.toUpperCase(),
+      x + w / 2,
+      y + 19,
+      { align: 'center' }
+    );
   }
 
-  function drawFooter(page, total) {
+  function drawListBox(title, entries, x, y, w, h) {
+    card(x, y, w, h);
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8.5);
+    setText(C.blue);
+
+    doc.text(title.toUpperCase(), x + 6, y + 9);
+
+    let yy = y + 17;
+
+    entries.forEach(([label, value]) => {
+      if (yy > y + h - 5) return;
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(7);
+      setText(C.text);
+
+      doc.text(
+        String(label),
+        x + 6,
+        yy,
+        { maxWidth: w - 24 }
+      );
+
+      doc.setFont('helvetica', 'bold');
+      setText(C.blue);
+
+      doc.text(
+        String(value ?? 0),
+        x + w - 6,
+        yy,
+        { align: 'right' }
+      );
+
+      yy += 7;
+    });
+  }
+
+  function drawFooter() {
     setDraw(C.blue);
     doc.setLineWidth(0.4);
     doc.line(14, 282, 196, 282);
 
-    doc.setFont('helvetica', 'bold');
+    doc.setFont('helvetica', 'normal');
     doc.setFontSize(7);
     setText(C.blue);
-    doc.text(`Pagina ${page} di ${total}`, 190, 290, { align: 'right' });
-  }
 
-  // =========================
-  // PAGINA 1
-  // =========================
+    doc.text(
+      `Generato il ${formatDateTime()}`,
+      14,
+      289
+    );
+
+    doc.text(
+      'Polizia Locale - Comune di Monza',
+      105,
+      289,
+      { align: 'center' }
+    );
+
+    doc.text(
+      'Pag. 1 di 1',
+      196,
+      289,
+      { align: 'right' }
+    );
+  }
 
   drawHeader();
 
-  sectionTitle('Sintesi operativa', 14, 78);
+  sectionTitle('Sintesi numerica', 14, 77);
 
-  card(14, 82, 182, 32);
-  setDraw([150, 185, 230]);
-  setFill([246, 250, 255]);
-  doc.roundedRect(14, 82, 182, 32, 2, 2, 'FD');
+  drawKpi(
+    14,
+    83,
+    42,
+    'Report',
+    periodAggregate.totaleReport
+  );
 
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8.5);
-  setText(C.text);
+  drawKpi(
+    61,
+    83,
+    42,
+    'Operatori',
+    periodAggregate.totaleOperatori
+  );
 
-  const sintesiLines = doc.splitTextToSize(sintesiFinale, 165);
-  doc.text(sintesiLines.slice(0, 5), 20, 91);
+  drawKpi(
+    108,
+    83,
+    42,
+    'Veicoli',
+    periodAggregate.totaleVeicoli
+  );
 
-  sectionTitle('Sintesi numerica', 14, 126);
+  drawKpi(
+    155,
+    83,
+    41,
+    'Km percorsi',
+    periodAggregate.kmTotali
+  );
 
-  drawKpi(14, 132, 42, 'Report', periodAggregate.totaleReport || 0, [0, 86, 179]);
-  drawKpi(61, 132, 42, 'Interventi', periodAggregate.totaleInterventi || 0, [234, 126, 0]);
-  drawKpi(108, 132, 42, 'Violazioni', periodAggregate.totaleViolazioni || 0, [185, 28, 28]);
-  drawKpi(155, 132, 41, 'Operatori', periodAggregate.totaleOperatori || 0, [22, 145, 90]);
+  drawKpi(
+    14,
+    113,
+    42,
+    'Interventi',
+    periodAggregate.totaleInterventi
+  );
 
-  // BOX INTERVENTI
-  card(14, 170, 88, 58);
+  drawKpi(
+    61,
+    113,
+    42,
+    'Violazioni',
+    periodAggregate.totaleViolazioni
+  );
 
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(9);
-  setText(C.blue);
-  doc.text('INTERVENTI PER TIPOLOGIA', 20, 180);
+  drawKpi(
+    108,
+    113,
+    42,
+    'Atti',
+    periodAggregate.totaleAtti
+  );
 
-  let iy = 193;
+  drawKpi(
+    155,
+    113,
+    41,
+    'Veicoli controllati',
+    periodAggregate.totaleVeicoliControllati
+  );
 
-  interventiEntries.slice(0, 5).forEach(([tipo, totale], idx) => {
-    const perc = totaleInterventi
-      ? Math.round((totale / totaleInterventi) * 100)
-      : 0;
+  sectionTitle(
+    'Distribuzione attività',
+    14,
+    151
+  );
 
-    const colors = [
-      [102, 153, 220],
-      [255, 170, 110],
-      [125, 190, 150],
-      [150, 130, 210],
-      [230, 160, 80],
-    ];
+  drawListBox(
+    'Interventi per tipologia',
+    interventiEntries.slice(0, 10),
+    14,
+    157,
+    88,
+    84
+  );
 
-    setFill(colors[idx] || C.blue);
-    doc.rect(21, iy - 3, 3, 3, 'F');
+  drawListBox(
+    'Report per reparto',
+    repartiEntries.slice(0, 10),
+    108,
+    157,
+    88,
+    84
+  );
 
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(7.5);
-    setText(C.text);
-    doc.text(String(tipo), 27, iy, { maxWidth: 45 });
-
-    setDraw([170, 180, 195]);
-    doc.setLineDashPattern([1, 1], 0);
-    doc.line(60, iy - 1, 83, iy - 1);
-    doc.setLineDashPattern([], 0);
-
-    doc.setFont('helvetica', 'bold');
-    setText(C.blue);
-    doc.text(`${totale} (${perc}%)`, 96, iy, { align: 'right' });
-
-    iy += 8;
-  });
-
-  // BOX REPARTI
-  card(108, 170, 88, 58);
-
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(9);
-  setText(C.blue);
-  doc.text('REPORT PER REPARTO', 114, 180);
-
-  let ry = 196;
-  const maxReparto = Math.max(1, ...repartiEntries.map(([, v]) => v));
-
-  repartiEntries.slice(0, 4).forEach(([rep, totale]) => {
-    const barW = Math.max(8, (totale / maxReparto) * 50);
-
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(7.5);
-    setText(C.text);
-    doc.text(rep, 114, ry, { maxWidth: 24 });
-
-    setFill([205, 225, 248]);
-doc.rect(145, ry - 5, barW, 5, 'F');
-
-doc.setFont('helvetica', 'bold');
-doc.setFontSize(7.5);
-setText(C.blue);
-doc.text(String(totale), 190, ry - 1, { align: 'right' });
-
-    ry += 11;
-  });
-
-  drawFooter(1, 2);
-
-  // =========================
-  // PAGINA 2
-  // =========================
+  drawFooter();
 
   doc.addPage();
 
-  sectionTitle('Eventi e annotazioni rilevanti', 14, 26);
+  sectionTitle(
+    'Violazioni, atti e controlli',
+    14,
+    26
+  );
 
-  let y = 42;
+  drawListBox(
+    'Violazioni contestate',
+    violazioniEntries,
+    14,
+    32,
+    56,
+    80
+  );
 
-  eventi.slice(0, 6).forEach((e) => {
-  const eventTextLines = doc.splitTextToSize(String(e.testo || '-'), 82);
-  const cardH = Math.max(24, 17 + eventTextLines.length * 4);
+  drawListBox(
+    'Atti redatti',
+    attiEntries,
+    77,
+    32,
+    56,
+    80
+  );
 
-  card(14, y, 112, cardH);
+  drawListBox(
+    'Attività di controllo',
+    controlliEntries,
+    140,
+    32,
+    56,
+    80
+  );
 
-  setFill([225, 70, 70]);
-  doc.rect(30, y + 4, 1.2, cardH - 8, 'F');
+  drawKpi(
+    14,
+    126,
+    56,
+    'Persone controllate',
+    periodAggregate.totalePersoneControllate
+  );
 
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(9);
-  setText(C.red);
-  doc.text(formatDate(e.data), 36, y + 9);
+  drawKpi(
+    77,
+    126,
+    56,
+    'Veicoli PDC',
+    periodAggregate.controlliPostoControllo.veicoli
+  );
 
-  doc.setFontSize(8);
-  setText(C.blue);
-  doc.text(e.reparto || '-', 36, y + 14);
+  drawKpi(
+    140,
+    126,
+    56,
+    'Persone PDC',
+    periodAggregate.controlliPostoControllo.persone
+  );
 
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(7.5);
-  setText(C.text);
-  doc.text(eventTextLines, 36, y + 19);
-
-  y += cardH + 5;
-});
-
-  // VALUTAZIONE OPERATIVA
-  card(134, 26, 62, 44);
-
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(9);
-  setText(C.blue);
-  doc.text('VALUTAZIONE OPERATIVA', 165, 36, { align: 'center' });
-
-  setFill([225, 245, 235]);
-  doc.circle(165, 49, 8, 'F');
-
-  doc.setFontSize(11);
-  setText(C.green);
-  doc.text('ORDINARIO', 165, 63, { align: 'center' });
+  setDraw(C.blue);
+  doc.setLineWidth(0.4);
+  doc.line(14, 282, 196, 282);
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(7);
-  setText(C.muted);
+  setText(C.blue);
+
   doc.text(
-    doc.splitTextToSize(
-      'Attività operativa svolta in condizioni di regolarità, senza criticità rilevanti.',
-      48
-    ),
-    141,
-    75
+    `Generato il ${formatDateTime()}`,
+    14,
+    289
   );
 
-  // LEGENDA
-  card(134, 88, 62, 58);
+  doc.text(
+    'Polizia Locale - Comune di Monza',
+    105,
+    289,
+    { align: 'center' }
+  );
 
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(8);
-  setText(C.blue);
-  doc.text('LEGENDA VALUTAZIONE', 165, 98, { align: 'center' });
+  doc.text(
+    'Pag. 2 di 2',
+    196,
+    289,
+    { align: 'right' }
+  );
 
-  const legenda = [
-    ['ORDINARIO', 'Attività regolare', C.green],
-    ['MODERATO', 'Criticità sotto controllo', [245, 170, 20]],
-    ['CRITICO', 'Criticità rilevanti', C.orange],
-    ['ALTA PRESSIONE', 'Situazione critica', C.red],
-  ];
+  doc.setPage(1);
 
-  let ly = 108;
+  doc.text(
+    'Pag. 1 di 2',
+    196,
+    289,
+    { align: 'right' }
+  );
 
-  legenda.forEach(([label, descr, color]) => {
-    setFill(color);
-    doc.circle(142, ly - 1, 2, 'F');
-
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(6.8);
-    setText(color);
-    doc.text(label, 148, ly);
-
-    doc.setFont('helvetica', 'normal');
-    setText(C.text);
-    doc.text(descr, 148, ly + 3.5, { maxWidth: 38 });
-
-ly += 9;
-  });
-
- // FOOTER DETTAGLIATO PAGINA 2
-setDraw(C.blue);
-doc.setLineWidth(0.4);
-doc.line(14, 254, 196, 254);
-
-doc.setFont('helvetica', 'bold');
-doc.setFontSize(8);
-setText(C.blue);
-
-doc.text('Data generazione:', 25, 264);
-doc.text('Sistema di reportistica', 83, 264);
-doc.text('Ufficiale responsabile', 143, 264);
-
-doc.setFont('helvetica', 'normal');
-doc.setFontSize(8);
-setText(C.text);
-
-doc.text(formatDateTime(), 25, 270);
-doc.text('Polizia Locale - Monza', 83, 270);
-doc.text(official?.ufficiale || 'Comandante Polizia Locale', 143, 270);
-
-  drawFooter(2, 2);
-
-  doc.save(`Report_aggregato_${periodStart || 'inizio'}_${periodEnd || 'fine'}.pdf`);
+  doc.save(
+    `Report_aggregato_${periodStart}_${periodEnd}.pdf`
+  );
 };
   const operatorSummary = useMemo(() => {
   const rows = [];
