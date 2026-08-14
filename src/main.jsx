@@ -1602,7 +1602,7 @@ const generatePeriodPdf = () => {
     113,
     41,
     'Veicoli controllati',
-    periodAggregate.totaleVeicoliControllati
+    periodAggregate.controlliPostoControllo.veicoli
   );
 
   sectionTitle(
