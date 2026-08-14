@@ -2882,39 +2882,109 @@ function serviceSummaryBox(doc, report, y, pdfTitle = '', subtitle = '') {
 
 function serviceInterventionCard(doc, i, idx, y, pdfTitle = '', subtitle = '') {
   const critic = isInterventoCritico(i);
-  y = ensureSpace(doc, y, 30, pdfTitle, subtitle);
+
+  const origine = i.origine === 'Altro'
+    ? `Altro: ${i.origineAltro || '-'}`
+    : (i.origine || '-');
+
+  const scuole = i.tipo === 'Servizio scuole'
+    ? (i.scuole || [])
+        .filter(s => s.nome || s.momento || s.orario || s.criticita)
+        .map(
+          (s, pos) =>
+            `Scuola ${pos + 1}: ${s.nome || '-'} (${s.momento || '-'} ${s.orario || '-'}) Criticità: ${s.criticita || '-'}`
+        )
+        .join('\n')
+    : '';
+
+  const dettagli = extraDetails(i)
+    .replace(/\n/g, ' ')
+    .trim();
+
+  const body =
+    `Descrizione: ${i.descrizione || '-'}` +
+    `${dettagli ? '\n' + dettagli : ''}` +
+    `${scuole ? '\n' + scuole : ''}`;
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8.2);
+
+  const lines = doc.splitTextToSize(body, 176);
+
+  const headerH = 13;
+  const bodyH = Math.max(14, lines.length * 4.4 + 7);
+  const totalH = headerH + bodyH + 4;
+
+  // Prima controlliamo se tutto l'intervento entra nella pagina
+  y = ensureSpace(
+    doc,
+    y,
+    totalH,
+    pdfTitle,
+    subtitle
+  );
+
+  // Intestazione intervento
   doc.setFillColor(255, 255, 255);
   doc.setDrawColor(214, 222, 232);
   doc.roundedRect(12, y, 186, 0.1, 1, 1, 'S');
-  const startY = y;
-  doc.setFillColor(critic ? 254 : 245, critic ? 242 : 248, critic ? 242 : 252);
+
+  doc.setFillColor(
+    critic ? 254 : 245,
+    critic ? 242 : 248,
+    critic ? 242 : 252
+  );
+
   doc.roundedRect(12, y, 186, 10, 1.4, 1.4, 'F');
+
   doc.setFillColor(12, 47, 97);
   doc.roundedRect(15, y + 2.1, 18, 5.8, 1.2, 1.2, 'F');
+
   doc.setTextColor(255, 255, 255);
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(7.5);
-  doc.text(`${i.oraInizio || '--'}-${i.oraFine || '--'}`, 24, y + 6.1, { align: 'center' });
+
+  doc.text(
+    `${i.oraInizio || '--'}-${i.oraFine || '--'}`,
+    24,
+    y + 6.1,
+    { align: 'center' }
+  );
+
   doc.setTextColor(12, 47, 97);
   doc.setFontSize(9.2);
-  doc.text(`${idx + 1}. ${i.tipo || 'Intervento'}`, 38, y + 6.3);
+
+  doc.text(
+    `${idx + 1}. ${i.tipo || 'Intervento'}`,
+    38,
+    y + 6.3
+  );
+
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(65, 75, 90);
-  const origine = i.origine === 'Altro' ? `Altro: ${i.origineAltro || '-'}` : (i.origine || '-');
-  doc.text(`Origine: ${origine} | Luogo: ${i.luogo || '-'}`, 98, y + 6.3, { maxWidth: 96 });
-  y += 13;
-  const scuole = i.tipo === 'Servizio scuole' ? (i.scuole || []).filter(s => s.nome || s.momento || s.orario || s.criticita).map((s, pos) => `Scuola ${pos + 1}: ${s.nome || '-'} (${s.momento || '-'} ${s.orario || '-'}) Criticità: ${s.criticita || '-'}`).join('\n') : '';
-  const dettagli = extraDetails(i).replace(/\n/g, ' ').trim();
-  const body = `Descrizione: ${i.descrizione || '-'}${dettagli ? '\n' + dettagli : ''}${scuole ? '\n' + scuole : ''}`;  const lines = doc.splitTextToSize(body, 176);
-  const h = Math.max(14, lines.length * 4.4 + 7);
-  y = ensureSpace(doc, startY, 13 + h, pdfTitle, subtitle) + 13;
+
+  doc.text(
+    `Origine: ${origine} | Luogo: ${i.luogo || '-'}`,
+    98,
+    y + 6.3,
+    { maxWidth: 96 }
+  );
+
+  y += headerH;
+
+  // Corpo intervento
   doc.setTextColor(15, 23, 42);
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8.2);
-  doc.text(lines, 18, y + 3.5);
-  return y + h + 4;
-}
 
+  doc.text(
+    lines,
+    18,
+    y + 3.5
+  );
+
+  return y + bodyH + 4;
+}
 function buildVerbaliPdf(report) {
   const title = 'DISTINTA VIOLAZIONI DEL TURNO';
   const subtitle = `${report.data} | Turno ${turnoLabel(report)} | ${repartoLabel(report)}`;
