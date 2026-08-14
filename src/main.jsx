@@ -1945,44 +1945,6 @@ doc.text(official?.ufficiale || 'Comandante Polizia Locale', 143, 270);
     </div>
   </div>
 
-  <hr style={{ margin: '28px 0', border: 0, borderTop: '1px solid #d6e1ef' }} />
-
-  <div>
-    <h3>Eventi e annotazioni rilevanti</h3>
-
-    {periodAggregate.eventiRilievo.length === 0 ? (
-      <p className="muted">Nessun evento rilevante nel periodo selezionato</p>
-    ) : (
-      periodAggregate.eventiRilievo.map((e, idx) => (
-        <div key={idx} className="rowCard" style={{ marginBottom: 10 }}>
-          <div style={{ fontSize: 12, opacity: 0.7 }}>
-            {e.data} — {e.reparto}
-          </div>
-          <div style={{ marginTop: 4 }}>
-            {e.testo}
-          </div>
-        </div>
-      ))
-    )}
-  </div>
-
-  <hr style={{ margin: '28px 0', border: 0, borderTop: '1px solid #d6e1ef' }} />
-
-  <div>
-    <h3>Sintesi operativa del periodo</h3>
-
-    <p className="muted" style={{ marginBottom: 10 }}>
-      Testo generato automaticamente dal sistema. L'ufficiale può modificarlo,
-      integrarlo o sostituirlo prima della generazione del PDF aggregato.
-    </p>
-
-    <Textarea
-      value={periodSintesiManuale || periodAutoSintesi}
-      onChange={v => setPeriodSintesiManuale(v)}
-      placeholder="Sintesi operativa del periodo..."
-    />
-  </div>
-
   <div
     className="actions"
     style={{
