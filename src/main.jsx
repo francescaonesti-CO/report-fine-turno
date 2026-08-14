@@ -1061,11 +1061,42 @@ const periodAggregate = useMemo(() => {
     totaleReport: periodReports.length,
     totaleInterventi: 0,
     totaleViolazioni: 0,
+    totaleAtti: 0,
     totaleOperatori: 0,
     totaleVeicoli: 0,
+    kmTotali: 0,
+    totaleVeicoliControllati: 0,
+    totalePersoneControllate: 0,
+
     interventiPerTipo: {},
     reportPerReparto: {},
-    eventiRilievo: []
+
+    violazioni: {
+      preavvisiCds: 0,
+      vdcCds: 0,
+      regPolizia: 0,
+      regEdilizio: 0,
+      regBenessereAnimali: 0,
+      annonaria: 0,
+      altreNorme: 0
+    },
+
+    atti: {
+      relazioni: 0,
+      annotazioni: 0,
+      sequestriAmministrativi: 0,
+      fermiAmministrativi: 0,
+      sequestriPenali: 0,
+      cnr: 0,
+      altriAttiNumero: 0
+    },
+
+    controlliPostoControllo: {
+      veicoli: 0,
+      persone: 0,
+      verbali: 0,
+      fermiSequestri: 0
+    }
   };
 
   periodReports.forEach(r => {
@@ -1091,75 +1122,75 @@ const periodAggregate = useMemo(() => {
     const operatori = payload.operatori || [];
     const veicoli = payload.veicoli || [];
     const interventi = payload.interventi || [];
+    const counters = payload.counters || {};
 
     aggregate.totaleOperatori += operatori.length;
     aggregate.totaleVeicoli += veicoli.length;
     aggregate.totaleInterventi += interventi.length;
+    aggregate.kmTotali += getKmTotali(payload);
 
-   interventi.forEach(i => {
-  const tipo = getTipoInterventoReport(i);
+    aggregate.totaleVeicoliControllati +=
+      n(counters.totaleVeicoliControllati);
 
-  aggregate.interventiPerTipo[tipo] =
-    (aggregate.interventiPerTipo[tipo] || 0) + 1;
-});
-    const counters = payload.counters || {};
+    aggregate.totalePersoneControllate +=
+      n(counters.totalePersoneControllate);
 
-    aggregate.totaleViolazioni +=
-      Number(counters.violazioni || 0) ||
-      Number(counters.totaleViolazioni || 0) ||
-      0;
+    interventi.forEach(i => {
+      const tipo = getTipoInterventoReport(i);
 
-    if (payload.eventiRilievo) {
-      aggregate.eventiRilievo.push({
-        data:
-          r.service_date ||
-          payload.data ||
-          '',
-        reparto,
-        testo: payload.eventiRilievo
-      });
-    }
+      aggregate.interventiPerTipo[tipo] =
+        (aggregate.interventiPerTipo[tipo] || 0) + 1;
 
-    if (payload.noteUdt) {
-      aggregate.eventiRilievo.push({
-        data:
-          r.service_date ||
-          payload.data ||
-          '',
-        reparto,
-        testo: payload.noteUdt
-      });
-    }
+      if (i.tipo === 'Posto di controllo') {
+        aggregate.controlliPostoControllo.veicoli +=
+          n(i.veicoliControllati);
+
+        aggregate.controlliPostoControllo.persone +=
+          n(i.personeControllate);
+
+        aggregate.controlliPostoControllo.verbali +=
+          n(i.verbaliElevati);
+
+        aggregate.controlliPostoControllo.fermiSequestri +=
+          n(i.fermiSequestri);
+      }
+    });
+
+    [
+      'preavvisiCds',
+      'vdcCds',
+      'regPolizia',
+      'regEdilizio',
+      'regBenessereAnimali',
+      'annonaria',
+      'altreNorme'
+    ].forEach(key => {
+      aggregate.violazioni[key] += n(counters[key]);
+    });
+
+    aggregate.totaleViolazioni =
+      Object.values(aggregate.violazioni)
+        .reduce((sum, value) => sum + n(value), 0);
+
+    [
+      'relazioni',
+      'annotazioni',
+      'sequestriAmministrativi',
+      'fermiAmministrativi',
+      'sequestriPenali',
+      'cnr',
+      'altriAttiNumero'
+    ].forEach(key => {
+      aggregate.atti[key] += n(counters[key]);
+    });
+
+    aggregate.totaleAtti =
+      Object.values(aggregate.atti)
+        .reduce((sum, value) => sum + n(value), 0);
   });
 
   return aggregate;
 }, [periodReports]);
-const periodAutoSintesi = useMemo(() => {
-  if (!periodStart || !periodEnd) {
-    return 'Selezionare un periodo per generare la sintesi operativa.';
-  }
-
-  if (!periodReports.length) {
-    return 'Nel periodo selezionato non risultano report operatori acquisiti.';
-  }
-
-  const reparto = periodReparto || 'tutti i reparti';
-  const topIntervento = Object.entries(periodAggregate.interventiPerTipo)
-    .sort((a, b) => b[1] - a[1])[0];
-
-  const tipoPrevalente = topIntervento
-    ? `${topIntervento[0]} (${topIntervento[1]})`
-    : 'nessuna tipologia prevalente';
-
-  const eventi = periodAggregate.eventiRilievo.length;
-
-return `Nel periodo in esame, dal ${periodStart} al ${periodEnd}, l'attività operativa riferita a ${reparto} evidenzia ${periodAggregate.totaleReport} report acquisiti e ${periodAggregate.totaleInterventi} interventi complessivi. La tipologia di intervento prevalente risulta ${tipoPrevalente}. Sono state rilevate ${periodAggregate.totaleViolazioni} violazioni e risultano impiegati ${periodAggregate.totaleOperatori} operatori. ${
-  eventi > 0
-    ? `Si segnalano ${eventi} eventi o annotazioni meritevoli di attenzione operativa.`
-    : 'Non emergono eventi rilevanti nel periodo selezionato.'
-}`;
-  
-}, [periodStart, periodEnd, periodReparto, periodReports, periodAggregate]);
   
 const getMacroTurno = (turno) => {
   const value = String(turno || '')
@@ -1254,50 +1285,83 @@ const generatePeriodPdf = () => {
 
   const C = {
     blue: [12, 47, 97],
-    lightBlue: [235, 243, 255],
     border: [214, 224, 236],
     text: [30, 40, 55],
     muted: [80, 90, 105],
     orange: [234, 126, 0],
     red: [190, 30, 45],
     green: [22, 145, 90],
-    soft: [248, 250, 252],
+    soft: [248, 250, 252]
   };
 
-  const setText = (color) => doc.setTextColor(...color);
-  const setFill = (color) => doc.setFillColor(...color);
-  const setDraw = (color) => doc.setDrawColor(...color);
+  const setText = color => doc.setTextColor(...color);
+  const setFill = color => doc.setFillColor(...color);
+  const setDraw = color => doc.setDrawColor(...color);
 
-  const formatDate = (dateString) => {
+  const formatDate = dateString => {
     if (!dateString) return '-';
+
     const [year, month, day] = String(dateString).split('-');
+
     if (!year || !month || !day) return dateString;
+
     return `${day}/${month}/${year}`;
   };
 
   const formatDateTime = () => {
     const now = new Date();
-    return now.toLocaleDateString('it-IT') + ' ' + now.toLocaleTimeString('it-IT', {
-      hour: '2-digit',
-      minute: '2-digit',
-    });
+
+    return (
+      now.toLocaleDateString('it-IT') +
+      ' ' +
+      now.toLocaleTimeString('it-IT', {
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+    );
   };
 
-  const sintesiFinale = periodSintesiManuale?.trim()
-    ? periodSintesiManuale
-    : periodAutoSintesi;
+  const periodo =
+    `${formatDate(periodStart)} - ${formatDate(periodEnd)}`;
 
-  const periodo = `${formatDate(periodStart)} - ${formatDate(periodEnd)}`;
-  const reparto = periodReparto || 'Tutti i reparti';
+  const reparto =
+    periodReparto || 'Tutti i reparti';
 
-  const totaleInterventi = periodAggregate.totaleInterventi || 0;
-  const interventiEntries = Object.entries(periodAggregate.interventiPerTipo || {})
-    .sort((a, b) => b[1] - a[1]);
+  const interventiEntries =
+    Object.entries(periodAggregate.interventiPerTipo || {})
+      .sort((a, b) => b[1] - a[1]);
 
-  const repartiEntries = Object.entries(periodAggregate.reportPerReparto || {})
-    .sort((a, b) => b[1] - a[1]);
+  const repartiEntries =
+    Object.entries(periodAggregate.reportPerReparto || {})
+      .sort((a, b) => b[1] - a[1]);
 
-  const eventi = periodAggregate.eventiRilievo || [];
+  const violazioniEntries = [
+    ['Preavvisi CdS', periodAggregate.violazioni.preavvisiCds],
+    ['VdC CdS', periodAggregate.violazioni.vdcCds],
+    ['Regolamento Polizia', periodAggregate.violazioni.regPolizia],
+    ['Regolamento Edilizio', periodAggregate.violazioni.regEdilizio],
+    ['Reg. Benessere Animali', periodAggregate.violazioni.regBenessereAnimali],
+    ['Annonaria / commercio', periodAggregate.violazioni.annonaria],
+    ['Altre norme', periodAggregate.violazioni.altreNorme]
+  ];
+
+  const attiEntries = [
+    ['Relazioni', periodAggregate.atti.relazioni],
+    ['Annotazioni', periodAggregate.atti.annotazioni],
+    ['Fermi amministrativi', periodAggregate.atti.fermiAmministrativi],
+    ['Sequestri amministrativi', periodAggregate.atti.sequestriAmministrativi],
+    ['Sequestri penali', periodAggregate.atti.sequestriPenali],
+    ['C.N.R.', periodAggregate.atti.cnr],
+    ['Altri atti', periodAggregate.atti.altriAttiNumero]
+  ];
+
+  const controlliEntries = [
+  ['Posti di controllo effettuati', periodAggregate.interventiPerTipo['Posto di controllo'] || 0],
+  ['Veicoli controllati', periodAggregate.controlliPostoControllo.veicoli],
+  ['Persone controllate', periodAggregate.controlliPostoControllo.persone],
+  ['Verbali elevati', periodAggregate.controlliPostoControllo.verbali],
+  ['Fermi/sequestri', periodAggregate.controlliPostoControllo.fermiSequestri]
+];
 
   function card(x, y, w, h) {
     doc.setFillColor(255, 255, 255);
@@ -1311,7 +1375,7 @@ const generatePeriodPdf = () => {
     doc.rect(x, y - 7, 2, 8, 'F');
 
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(11);
+    doc.setFontSize(10);
     setText(C.blue);
     doc.text(title.toUpperCase(), x + 5, y);
   }
@@ -1319,6 +1383,7 @@ const generatePeriodPdf = () => {
   function drawHeader() {
     try {
       const img = document.getElementById('pdfLogo');
+
       if (img && img.complete) {
         doc.addImage(img, 'PNG', 14, 8, 18, 18);
       }
@@ -1334,11 +1399,16 @@ const generatePeriodPdf = () => {
     doc.text('COMUNE DI MONZA', 42, 15);
 
     doc.setFontSize(9);
-    doc.text('Settore Polizia Locale, Protezione Civile', 42, 22);
+    doc.text(
+      'Settore Polizia Locale, Protezione Civile',
+      42,
+      22
+    );
 
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(8);
     setText(C.text);
+
     doc.text('Via Marsala 13 - 20900 Monza', 145, 14);
     doc.text('Tel. 039 28161', 145, 21);
 
@@ -1348,271 +1418,294 @@ const generatePeriodPdf = () => {
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(13);
     doc.setTextColor(255, 255, 255);
-    doc.text('REPORT AGGREGATO PER PERIODO', 105, 42, { align: 'center' });
 
-    card(14, 48, 88, 16);
-    card(108, 48, 88, 16);
+    doc.text(
+      'REPORT AGGREGATO PER PERIODO',
+      105,
+      42,
+      { align: 'center' }
+    );
 
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(9);
+    card(14, 49, 88, 16);
+    card(108, 49, 88, 16);
+
+    doc.setFontSize(8);
     setText(C.blue);
-    doc.text('Periodo:', 24, 58);
-    doc.text('Reparto:', 119, 58);
+    doc.setFont('helvetica', 'bold');
+
+    doc.text('Periodo:', 20, 59);
+    doc.text('Reparto:', 114, 59);
 
     doc.setFont('helvetica', 'normal');
     setText(C.text);
-    doc.text(periodo, 42, 58);
-    doc.text(reparto, 137, 58);
+
+    doc.text(periodo, 38, 59);
+    doc.text(reparto, 132, 59);
   }
 
-  function drawKpi(x, y, w, label, value, color) {
-    card(x, y, w, 30);
-
-    doc.setFillColor(color[0], color[1], color[2], 0.12);
-    doc.circle(x + 13, y + 13, 6, 'F');
+  function drawKpi(x, y, w, label, value) {
+    card(x, y, w, 25);
 
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(20);
-    doc.setTextColor(...color);
-    doc.text(String(value), x + w - 13, y + 16, { align: 'right' });
+    doc.setFontSize(17);
+    setText(C.blue);
 
-    doc.setFontSize(8);
-    doc.text(label.toUpperCase(), x + w - 13, y + 24, { align: 'right' });
+    doc.text(
+      String(value ?? 0),
+      x + w / 2,
+      y + 12,
+      { align: 'center' }
+    );
+
+    doc.setFontSize(6.8);
+    setText(C.muted);
+
+    doc.text(
+      label.toUpperCase(),
+      x + w / 2,
+      y + 19,
+      { align: 'center' }
+    );
   }
 
-  function drawFooter(page, total) {
+  function drawListBox(title, entries, x, y, w, h) {
+    card(x, y, w, h);
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8.5);
+    setText(C.blue);
+
+    doc.text(title.toUpperCase(), x + 6, y + 9);
+
+    let yy = y + 17;
+
+    entries.forEach(([label, value]) => {
+      if (yy > y + h - 5) return;
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(7);
+      setText(C.text);
+
+      doc.text(
+        String(label),
+        x + 6,
+        yy,
+        { maxWidth: w - 24 }
+      );
+
+      doc.setFont('helvetica', 'bold');
+      setText(C.blue);
+
+      doc.text(
+        String(value ?? 0),
+        x + w - 6,
+        yy,
+        { align: 'right' }
+      );
+
+      yy += 7;
+    });
+  }
+
+  function drawFooter() {
     setDraw(C.blue);
     doc.setLineWidth(0.4);
     doc.line(14, 282, 196, 282);
 
-    doc.setFont('helvetica', 'bold');
+    doc.setFont('helvetica', 'normal');
     doc.setFontSize(7);
     setText(C.blue);
-    doc.text(`Pagina ${page} di ${total}`, 190, 290, { align: 'right' });
-  }
 
-  // =========================
-  // PAGINA 1
-  // =========================
+    doc.text(
+      `Generato il ${formatDateTime()}`,
+      14,
+      289
+    );
+
+    doc.text(
+      'Polizia Locale - Comune di Monza',
+      105,
+      289,
+      { align: 'center' }
+    );
+
+    doc.text(
+      'Pag. 1 di 1',
+      196,
+      289,
+      { align: 'right' }
+    );
+  }
 
   drawHeader();
 
-  sectionTitle('Sintesi operativa', 14, 78);
+  sectionTitle('Sintesi numerica', 14, 77);
 
-  card(14, 82, 182, 32);
-  setDraw([150, 185, 230]);
-  setFill([246, 250, 255]);
-  doc.roundedRect(14, 82, 182, 32, 2, 2, 'FD');
+  drawKpi(
+    14,
+    83,
+    42,
+    'Report',
+    periodAggregate.totaleReport
+  );
 
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8.5);
-  setText(C.text);
+  drawKpi(
+    61,
+    83,
+    42,
+    'Operatori',
+    periodAggregate.totaleOperatori
+  );
 
-  const sintesiLines = doc.splitTextToSize(sintesiFinale, 165);
-  doc.text(sintesiLines.slice(0, 5), 20, 91);
+  drawKpi(
+    108,
+    83,
+    42,
+    'Veicoli',
+    periodAggregate.totaleVeicoli
+  );
 
-  sectionTitle('Sintesi numerica', 14, 126);
+  drawKpi(
+    155,
+    83,
+    41,
+    'Km percorsi',
+    periodAggregate.kmTotali
+  );
 
-  drawKpi(14, 132, 42, 'Report', periodAggregate.totaleReport || 0, [0, 86, 179]);
-  drawKpi(61, 132, 42, 'Interventi', periodAggregate.totaleInterventi || 0, [234, 126, 0]);
-  drawKpi(108, 132, 42, 'Violazioni', periodAggregate.totaleViolazioni || 0, [185, 28, 28]);
-  drawKpi(155, 132, 41, 'Operatori', periodAggregate.totaleOperatori || 0, [22, 145, 90]);
+  drawKpi(
+    14,
+    113,
+    42,
+    'Interventi',
+    periodAggregate.totaleInterventi
+  );
 
-  // BOX INTERVENTI
-  card(14, 170, 88, 58);
+  drawKpi(
+    61,
+    113,
+    42,
+    'Violazioni',
+    periodAggregate.totaleViolazioni
+  );
 
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(9);
-  setText(C.blue);
-  doc.text('INTERVENTI PER TIPOLOGIA', 20, 180);
+  drawKpi(
+    108,
+    113,
+    42,
+    'Atti',
+    periodAggregate.totaleAtti
+  );
 
-  let iy = 193;
+  drawKpi(
+    155,
+    113,
+    41,
+    'Veicoli controllati',
+    periodAggregate.controlliPostoControllo.veicoli
+  );
 
-  interventiEntries.slice(0, 5).forEach(([tipo, totale], idx) => {
-    const perc = totaleInterventi
-      ? Math.round((totale / totaleInterventi) * 100)
-      : 0;
+  sectionTitle(
+    'Distribuzione attività',
+    14,
+    151
+  );
 
-    const colors = [
-      [102, 153, 220],
-      [255, 170, 110],
-      [125, 190, 150],
-      [150, 130, 210],
-      [230, 160, 80],
-    ];
+  drawListBox(
+    'Interventi per tipologia',
+    interventiEntries.slice(0, 10),
+    14,
+    157,
+    88,
+    84
+  );
 
-    setFill(colors[idx] || C.blue);
-    doc.rect(21, iy - 3, 3, 3, 'F');
+  drawListBox(
+    'Report per reparto',
+    repartiEntries.slice(0, 10),
+    108,
+    157,
+    88,
+    84
+  );
 
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(7.5);
-    setText(C.text);
-    doc.text(String(tipo), 27, iy, { maxWidth: 45 });
-
-    setDraw([170, 180, 195]);
-    doc.setLineDashPattern([1, 1], 0);
-    doc.line(60, iy - 1, 83, iy - 1);
-    doc.setLineDashPattern([], 0);
-
-    doc.setFont('helvetica', 'bold');
-    setText(C.blue);
-    doc.text(`${totale} (${perc}%)`, 96, iy, { align: 'right' });
-
-    iy += 8;
-  });
-
-  // BOX REPARTI
-  card(108, 170, 88, 58);
-
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(9);
-  setText(C.blue);
-  doc.text('REPORT PER REPARTO', 114, 180);
-
-  let ry = 196;
-  const maxReparto = Math.max(1, ...repartiEntries.map(([, v]) => v));
-
-  repartiEntries.slice(0, 4).forEach(([rep, totale]) => {
-    const barW = Math.max(8, (totale / maxReparto) * 50);
-
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(7.5);
-    setText(C.text);
-    doc.text(rep, 114, ry, { maxWidth: 24 });
-
-    setFill([205, 225, 248]);
-doc.rect(145, ry - 5, barW, 5, 'F');
-
-doc.setFont('helvetica', 'bold');
-doc.setFontSize(7.5);
-setText(C.blue);
-doc.text(String(totale), 190, ry - 1, { align: 'right' });
-
-    ry += 11;
-  });
-
-  drawFooter(1, 2);
-
-  // =========================
-  // PAGINA 2
-  // =========================
+  drawFooter();
 
   doc.addPage();
 
-  sectionTitle('Eventi e annotazioni rilevanti', 14, 26);
+  sectionTitle(
+    'Violazioni, atti e controlli',
+    14,
+    26
+  );
 
-  let y = 42;
+  drawListBox(
+    'Violazioni contestate',
+    violazioniEntries,
+    14,
+    32,
+    56,
+    80
+  );
 
-  eventi.slice(0, 6).forEach((e) => {
-  const eventTextLines = doc.splitTextToSize(String(e.testo || '-'), 82);
-  const cardH = Math.max(24, 17 + eventTextLines.length * 4);
+  drawListBox(
+    'Atti redatti',
+    attiEntries,
+    77,
+    32,
+    56,
+    80
+  );
 
-  card(14, y, 112, cardH);
+  drawListBox(
+    'Attività di controllo',
+    controlliEntries,
+    140,
+    32,
+    56,
+    80
+  );
 
-  setFill([225, 70, 70]);
-  doc.rect(30, y + 4, 1.2, cardH - 8, 'F');
-
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(9);
-  setText(C.red);
-  doc.text(formatDate(e.data), 36, y + 9);
-
-  doc.setFontSize(8);
-  setText(C.blue);
-  doc.text(e.reparto || '-', 36, y + 14);
-
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(7.5);
-  setText(C.text);
-  doc.text(eventTextLines, 36, y + 19);
-
-  y += cardH + 5;
-});
-
-  // VALUTAZIONE OPERATIVA
-  card(134, 26, 62, 44);
-
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(9);
-  setText(C.blue);
-  doc.text('VALUTAZIONE OPERATIVA', 165, 36, { align: 'center' });
-
-  setFill([225, 245, 235]);
-  doc.circle(165, 49, 8, 'F');
-
-  doc.setFontSize(11);
-  setText(C.green);
-  doc.text('ORDINARIO', 165, 63, { align: 'center' });
+  setDraw(C.blue);
+  doc.setLineWidth(0.4);
+  doc.line(14, 282, 196, 282);
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(7);
-  setText(C.muted);
+  setText(C.blue);
+
   doc.text(
-    doc.splitTextToSize(
-      'Attività operativa svolta in condizioni di regolarità, senza criticità rilevanti.',
-      48
-    ),
-    141,
-    75
+    `Generato il ${formatDateTime()}`,
+    14,
+    289
   );
 
-  // LEGENDA
-  card(134, 88, 62, 58);
+  doc.text(
+    'Polizia Locale - Comune di Monza',
+    105,
+    289,
+    { align: 'center' }
+  );
 
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(8);
-  setText(C.blue);
-  doc.text('LEGENDA VALUTAZIONE', 165, 98, { align: 'center' });
+  doc.text(
+    'Pag. 2 di 2',
+    196,
+    289,
+    { align: 'right' }
+  );
 
-  const legenda = [
-    ['ORDINARIO', 'Attività regolare', C.green],
-    ['MODERATO', 'Criticità sotto controllo', [245, 170, 20]],
-    ['CRITICO', 'Criticità rilevanti', C.orange],
-    ['ALTA PRESSIONE', 'Situazione critica', C.red],
-  ];
+  doc.setPage(1);
 
-  let ly = 108;
+  doc.text(
+    'Pag. 1 di 2',
+    196,
+    289,
+    { align: 'right' }
+  );
 
-  legenda.forEach(([label, descr, color]) => {
-    setFill(color);
-    doc.circle(142, ly - 1, 2, 'F');
-
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(6.8);
-    setText(color);
-    doc.text(label, 148, ly);
-
-    doc.setFont('helvetica', 'normal');
-    setText(C.text);
-    doc.text(descr, 148, ly + 3.5, { maxWidth: 38 });
-
-ly += 9;
-  });
-
- // FOOTER DETTAGLIATO PAGINA 2
-setDraw(C.blue);
-doc.setLineWidth(0.4);
-doc.line(14, 254, 196, 254);
-
-doc.setFont('helvetica', 'bold');
-doc.setFontSize(8);
-setText(C.blue);
-
-doc.text('Data generazione:', 25, 264);
-doc.text('Sistema di reportistica', 83, 264);
-doc.text('Ufficiale responsabile', 143, 264);
-
-doc.setFont('helvetica', 'normal');
-doc.setFontSize(8);
-setText(C.text);
-
-doc.text(formatDateTime(), 25, 270);
-doc.text('Polizia Locale - Monza', 83, 270);
-doc.text(official?.ufficiale || 'Comandante Polizia Locale', 143, 270);
-
-  drawFooter(2, 2);
-
-  doc.save(`Report_aggregato_${periodStart || 'inizio'}_${periodEnd || 'fine'}.pdf`);
+  doc.save(
+    `Report_aggregato_${periodStart}_${periodEnd}.pdf`
+  );
 };
   const operatorSummary = useMemo(() => {
   const rows = [];
@@ -1796,52 +1889,55 @@ doc.text(official?.ufficiale || 'Comandante Polizia Locale', 143, 270);
     </Field>
   </div>
 
-  <div
-    className="grid four"
-    style={{
-      marginTop: 24,
-      padding: 22,
-      border: '1px solid #d6e1ef',
-      borderRadius: 14,
-      background: '#ffffff'
-    }}
-  >
-    <div className="miniStat">
+<div
+  className="grid four"
+  style={{
+    marginTop: 24,
+    padding: 22,
+    border: '1px solid #d6e1ef',
+    borderRadius: 14,
+    background: '#ffffff'
+  }}
+>
+  {[
+    ['Report acquisiti', periodAggregate.totaleReport],
+    ['Operatori impiegati', periodAggregate.totaleOperatori],
+    ['Veicoli impiegati', periodAggregate.totaleVeicoli],
+    ['Km percorsi', `${periodAggregate.kmTotali} km`],
+    ['Interventi totali', periodAggregate.totaleInterventi],
+    ['Violazioni totali', periodAggregate.totaleViolazioni],
+    ['Atti redatti', periodAggregate.totaleAtti],
+    ['Veicoli controllati', periodAggregate.totaleVeicoliControllati],
+['Persone controllate', periodAggregate.totalePersoneControllate]
+  ].map(([label, value]) => (
+    <div
+      key={label}
+      className="miniStat"
+      style={{
+        padding: 14,
+        border: '1px solid #e1e8f0',
+        borderRadius: 12,
+        background: '#f8fbff'
+      }}
+    >
       <div style={{ fontSize: 24, fontWeight: 800, lineHeight: 1 }}>
-        {periodAggregate.totaleReport}
+        {value}
       </div>
-      <div style={{ fontSize: 12, opacity: 0.7, marginTop: 6, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-        Report
-      </div>
-    </div>
 
-    <div className="miniStat">
-      <div style={{ fontSize: 24, fontWeight: 800, lineHeight: 1 }}>
-        {periodAggregate.totaleInterventi}
-      </div>
-      <div style={{ fontSize: 12, opacity: 0.7, marginTop: 6, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-        Interventi
-      </div>
-    </div>
-
-    <div className="miniStat">
-      <div style={{ fontSize: 24, fontWeight: 800, lineHeight: 1 }}>
-        {periodAggregate.totaleViolazioni}
-      </div>
-      <div style={{ fontSize: 12, opacity: 0.7, marginTop: 6, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-        Violazioni
+      <div
+        style={{
+          fontSize: 12,
+          opacity: 0.7,
+          marginTop: 6,
+          textTransform: 'uppercase',
+          letterSpacing: 0.5
+        }}
+      >
+        {label}
       </div>
     </div>
-
-    <div className="miniStat">
-      <div style={{ fontSize: 24, fontWeight: 800, lineHeight: 1 }}>
-        {periodAggregate.totaleOperatori}
-      </div>
-      <div style={{ fontSize: 12, opacity: 0.7, marginTop: 6, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-        Operatori
-      </div>
-    </div>
-  </div>
+  ))}
+</div>
 
   <div
     className="grid two"
@@ -1885,44 +1981,69 @@ doc.text(official?.ufficiale || 'Comandante Polizia Locale', 143, 270);
     </div>
   </div>
 
-  <hr style={{ margin: '28px 0', border: 0, borderTop: '1px solid #d6e1ef' }} />
+<hr style={{ margin: '28px 0', border: 0, borderTop: '1px solid #d6e1ef' }} />
 
+<div
+  className="grid three"
+  style={{
+    alignItems: 'start'
+  }}
+>
   <div>
-    <h3>Eventi e annotazioni rilevanti</h3>
+    <h3>Violazioni contestate</h3>
 
-    {periodAggregate.eventiRilievo.length === 0 ? (
-      <p className="muted">Nessun evento rilevante nel periodo selezionato</p>
-    ) : (
-      periodAggregate.eventiRilievo.map((e, idx) => (
-        <div key={idx} className="rowCard" style={{ marginBottom: 10 }}>
-          <div style={{ fontSize: 12, opacity: 0.7 }}>
-            {e.data} — {e.reparto}
-          </div>
-          <div style={{ marginTop: 4 }}>
-            {e.testo}
-          </div>
-        </div>
-      ))
-    )}
+    {[
+      ['Preavvisi CdS', periodAggregate.violazioni.preavvisiCds],
+      ['VdC CdS', periodAggregate.violazioni.vdcCds],
+      ['Regolamento Polizia', periodAggregate.violazioni.regPolizia],
+      ['Regolamento Edilizio', periodAggregate.violazioni.regEdilizio],
+      ['Reg. Benessere Animali', periodAggregate.violazioni.regBenessereAnimali],
+      ['Annonaria / commercio', periodAggregate.violazioni.annonaria],
+      ['Altre norme', periodAggregate.violazioni.altreNorme]
+    ].map(([label, value]) => (
+      <div key={label} className="rowBetween" style={{ marginBottom: 8 }}>
+        <span>{label}</span>
+        <b style={{ marginLeft: 6 }}>({value})</b>
+      </div>
+    ))}
   </div>
 
-  <hr style={{ margin: '28px 0', border: 0, borderTop: '1px solid #d6e1ef' }} />
-
   <div>
-    <h3>Sintesi operativa del periodo</h3>
+    <h3>Atti redatti</h3>
 
-    <p className="muted" style={{ marginBottom: 10 }}>
-      Testo generato automaticamente dal sistema. L'ufficiale può modificarlo,
-      integrarlo o sostituirlo prima della generazione del PDF aggregato.
-    </p>
-
-    <Textarea
-      value={periodSintesiManuale || periodAutoSintesi}
-      onChange={v => setPeriodSintesiManuale(v)}
-      placeholder="Sintesi operativa del periodo..."
-    />
+    {[
+      ['Relazioni', periodAggregate.atti.relazioni],
+      ['Annotazioni', periodAggregate.atti.annotazioni],
+      ['Fermi amministrativi', periodAggregate.atti.fermiAmministrativi],
+      ['Sequestri amministrativi', periodAggregate.atti.sequestriAmministrativi],
+      ['Sequestri penali', periodAggregate.atti.sequestriPenali],
+      ['C.N.R.', periodAggregate.atti.cnr],
+      ['Altri atti', periodAggregate.atti.altriAttiNumero]
+    ].map(([label, value]) => (
+      <div key={label} className="rowBetween" style={{ marginBottom: 8 }}>
+        <span>{label}</span>
+        <b style={{ marginLeft: 6 }}>({value})</b>
+      </div>
+    ))}
   </div>
 
+  <div>
+    <h3>Attività di controllo</h3>
+
+    {[
+  ['Posti di controllo effettuati', periodAggregate.interventiPerTipo['Posto di controllo'] || 0],
+  ['Veicoli controllati', periodAggregate.controlliPostoControllo.veicoli],
+  ['Persone controllate', periodAggregate.controlliPostoControllo.persone],
+  ['Verbali elevati', periodAggregate.controlliPostoControllo.verbali],
+  ['Fermi/sequestri', periodAggregate.controlliPostoControllo.fermiSequestri]
+].map(([label, value]) => (
+      <div key={label} className="rowBetween" style={{ marginBottom: 8 }}>
+        <span>{label}</span>
+        <b style={{ marginLeft: 6 }}>({value})</b>
+      </div>
+    ))}
+  </div>
+</div>
   <div
     className="actions"
     style={{
