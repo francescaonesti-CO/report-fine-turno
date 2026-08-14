@@ -3002,18 +3002,58 @@ function buildServicePdf_old(report) {
   y = section(doc, 'Note per UDT / Ufficiale di coordinamento', y, title, subtitle);
   y = paragraph(doc, report.noteUdt || '-', y, title, subtitle);
 
-  y = section(doc, 'Dichiarazione e firme', y, title, subtitle);
-  y = paragraph(doc, 'Gli operatori dichiarano che quanto riportato nel presente report corrisponde fedelmente alle attività effettivamente svolte e riscontrate durante il turno di servizio, consapevoli delle proprie responsabilità amministrative e penali anche in considerazione dell’art. 328 C.P.', y, title, subtitle);
-  y = ensureSpace(doc, y, 24, title, subtitle);
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8.5);
-  const names = operatorNames(report);
-  const signRows = names.length ? names : ['Operatore 1', 'Operatore 2', 'Operatore 3'];
-  signRows.slice(0, 6).forEach((name, idx) => {
-    const yy = y + idx * 9;
-    doc.text(name, 16, yy);
-    doc.line(82, yy + 1, 190, yy + 1);
-  });
+ const dichiarazioneText =
+  'Gli operatori dichiarano che quanto riportato nel presente report corrisponde fedelmente alle attività effettivamente svolte e riscontrate durante il turno di servizio, consapevoli delle proprie responsabilità amministrative e penali anche in considerazione dell’art. 328 C.P.';
+
+const names = operatorNames(report);
+const signRows = names.length
+  ? names
+  : ['Operatore 1', 'Operatore 2', 'Operatore 3'];
+
+const dichiarazioneLines = doc.splitTextToSize(dichiarazioneText, 178);
+
+const dichiarazioneHeight =
+  13 + // titolo sezione
+  (dichiarazioneLines.length * 5) +
+  8 +
+  (signRows.slice(0, 6).length * 9) +
+  6;
+
+y = ensureSpace(
+  doc,
+  y,
+  dichiarazioneHeight,
+  title,
+  subtitle
+);
+
+y = section(
+  doc,
+  'Dichiarazione e firme',
+  y,
+  title,
+  subtitle
+);
+
+y = paragraph(
+  doc,
+  dichiarazioneText,
+  y,
+  title,
+  subtitle
+);
+
+doc.setFont('helvetica', 'normal');
+doc.setFontSize(8.5);
+
+signRows.slice(0, 6).forEach((name, idx) => {
+  const yy = y + idx * 9;
+
+  doc.text(name, 16, yy);
+  doc.line(82, yy + 1, 190, yy + 1);
+});
+
+y += signRows.slice(0, 6).length * 9;
 
   addFooter(doc);
   return doc;
