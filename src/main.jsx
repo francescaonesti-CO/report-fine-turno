@@ -2879,7 +2879,37 @@ function serviceSummaryBox(doc, report, y, pdfTitle = '', subtitle = '') {
   doc.setTextColor(0, 0, 0);
   return y + 35;
 }
+function getServiceInterventionHeight(doc, i) {
+  const scuole = i.tipo === 'Servizio scuole'
+    ? (i.scuole || [])
+        .filter(s => s.nome || s.momento || s.orario || s.criticita)
+        .map(
+          (s, pos) =>
+            `Scuola ${pos + 1}: ${s.nome || '-'} (${s.momento || '-'} ${s.orario || '-'}) Criticità: ${s.criticita || '-'}`
+        )
+        .join('\n')
+    : '';
 
+  const dettagli = extraDetails(i)
+    .replace(/\n/g, ' ')
+    .trim();
+
+  const body =
+    `Descrizione: ${i.descrizione || '-'}` +
+    `${dettagli ? '\n' + dettagli : ''}` +
+    `${scuole ? '\n' + scuole : ''}`;
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8.2);
+
+  const lines = doc.splitTextToSize(body, 176);
+
+  const headerH = 13;
+  const bodyH = Math.max(14, lines.length * 4.4 + 7);
+  const totalH = headerH + bodyH + 4;
+
+  return totalH;
+}
 function serviceInterventionCard(doc, i, idx, y, pdfTitle = '', subtitle = '') {
   const critic = isInterventoCritico(i);
 
@@ -3047,10 +3077,39 @@ function buildServicePdf_old(report) {
   const anomalieVeicoli = (report.veicoli || []).filter(v => v.anomaliaVeicolo).map(v => `${v.sigla || 'Veicolo'}: ${v.anomaliaVeicolo}`).join('\n');
   y = kvGrid(doc, [{ label: 'Totale km percorsi', value: getKmTotali(report) }, { label: 'Anomalie / danni veicolo', value: anomalieVeicoli || '-' }], y, 1, title, subtitle) + 2;
 
-  y = section(doc, 'Interventi effettuati', y, title, subtitle);
-  (report.interventi || []).forEach((i, idx) => {
-    y = serviceInterventionCard(doc, i, idx, y, title, subtitle);
-  });
+ const interventi = report.interventi || [];
+
+if (interventi.length > 0) {
+  const firstInterventionHeight =
+    getServiceInterventionHeight(doc, interventi[0]);
+
+  y = ensureSpace(
+    doc,
+    y,
+    13 + firstInterventionHeight,
+    title,
+    subtitle
+  );
+}
+
+y = section(
+  doc,
+  'Interventi effettuati',
+  y,
+  title,
+  subtitle
+);
+
+interventi.forEach((i, idx) => {
+  y = serviceInterventionCard(
+    doc,
+    i,
+    idx,
+    y,
+    title,
+    subtitle
+  );
+});
 
   y = section(doc, 'Atti redatti', y, title, subtitle);
   const c = report.counters || emptyCounters();
