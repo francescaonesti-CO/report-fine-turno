@@ -2860,7 +2860,7 @@ function serviceSummaryBox(doc, report, y, pdfTitle = '', subtitle = '') {
     ['Interventi', interventi],
     ['Violazioni / provv.', violazioni],
     ['Atti redatti', atti],
-    ['Criticità', criticita],
+    ['Eventi rilevanti', criticita],
   ];
   items.forEach((item, idx) => {
     const x = 20 + idx * 44;
