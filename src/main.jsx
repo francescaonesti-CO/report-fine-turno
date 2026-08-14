@@ -2339,8 +2339,40 @@ function buildServicePrintHtml(report) {
   const atti = ['relazioni','annotazioni','sequestriAmministrativi','fermiAmministrativi','sequestriPenali','cnr','altriAttiNumero'].reduce((s,k)=>s+n(c[k]),0);
   const eventi = interventions.filter(isInterventoCritico).length;
   const subtitle = `${formatDateIT(report.data)} | ${turnoLabel(report)} | ${report.orarioTipo || '-'}`;
-  const vehiclesUsed = (report.veicoli||[]).filter(v=>v.sigla||v.kmInizio||v.kmFine).length || '-';
-  const vehicleBody = `<div class="small-row"><span>Veicoli impiegati</span><strong>${esc(vehiclesUsed)}</strong></div><div class="small-row"><span>Totale km percorsi</span><strong>${esc(getKmTotali(report))} km</strong></div>`;
+ const veicoliUtilizzati = (report.veicoli || [])
+  .filter(v => v.sigla || v.kmInizio || v.kmFine);
+
+const vehicleBody = veicoliUtilizzati.length
+  ? `
+    <div class="small-list">
+      ${veicoliUtilizzati.map(v => `
+        <div style="padding-bottom:2mm; margin-bottom:2mm; border-bottom:1px solid #e5e7eb;">
+          <div class="small-row">
+            <span>Veicolo</span>
+            <strong>${esc(v.sigla || '-')}</strong>
+          </div>
+          <div class="small-row">
+            <span>Km iniziali</span>
+            <strong>${esc(v.kmInizio || '-')}</strong>
+          </div>
+          <div class="small-row">
+            <span>Km finali</span>
+            <strong>${esc(v.kmFine || '-')}</strong>
+          </div>
+          <div class="small-row">
+            <span>Km percorsi</span>
+            <strong>${esc(km(v))} km</strong>
+          </div>
+        </div>
+      `).join('')}
+
+      <div class="small-row">
+        <span><strong>Totale km percorsi</strong></span>
+        <strong>${esc(getKmTotali(report))} km</strong>
+      </div>
+    </div>
+  `
+  : '<p>Nessun veicolo indicato.</p>';
   const carburanteBody = (report.veicoli||[]).some(v=>v.carburante==='Sì') ? (report.veicoli||[]).map(v=>`<div class="small-row"><span>${esc(v.sigla||'Veicolo')}</span><strong>${esc(v.importoCarburante||'-')}</strong></div>`).join('') : '<p>Nessun rifornimento indicato.</p>';
   const anomalie = (report.veicoli||[]).map(v=>v.anomaliaVeicolo).filter(Boolean).join('; ') || 'Nessuna anomalia segnalata.';
   const operators = operatorNames(report).join('<br>') || '-';
