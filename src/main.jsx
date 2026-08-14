@@ -427,8 +427,20 @@ return <main><img id="pdfLogo" src="/POLIZIA.png" alt="Logo Polizia Locale" styl
   function generatePdf() {
   const doc = buildServicePdf_old(report);
 
+  const compilatore = report.operatori?.[0];
+
+  const nomeCompilatore = compilatore
+    ? `${compilatore.nome || ''}`.trim()
+    : 'operatore';
+
+  const safeNomeCompilatore = nomeCompilatore
+    .replace(/\s+/g, '_')
+    .replace(/[^\wÀ-ÿ-]/g, '');
+
+  const dataFile = formatDateIT(report.data).replaceAll('/', '-');
+
   doc.save(
-    `Report_servizio_${sanitizeFileName(report.data)}_${sanitizeFileName(turnoLabel(report))}.pdf`
+    `Report_servizio_${dataFile}_${safeNomeCompilatore}.pdf`
   );
 }
   function exportJson() {
@@ -2941,7 +2953,7 @@ function buildVerbaliPdf(report) {
 
 function buildServicePdf_old(report) {
   const title = 'REPORT DI SERVIZIO';
-  const subtitle = `${report.data} | Turno ${turnoLabel(report)} | ${report.orarioTipo}`;
+  const subtitle = `${formatDateIT(report.data)} | Turno ${turnoLabel(report)} | ${report.orarioTipo}`;
   const doc = makePdf(title, subtitle);
   let y = 54;
 
@@ -2949,7 +2961,7 @@ function buildServicePdf_old(report) {
 
   y = section(doc, 'Dati generali del turno', y, title, subtitle);
   y = kvGrid(doc, [
-    { label: 'Data servizio', value: report.data },
+    { label: 'Data servizio', value: formatDateIT(report.data) },
     { label: 'Turno', value: turnoLabel(report) },
     { label: 'Tipologia orario', value: report.orarioTipo },
     { label: 'Reparto / servizio', value: repartoLabel(report) },
