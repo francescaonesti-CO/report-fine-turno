@@ -1191,32 +1191,6 @@ const periodAggregate = useMemo(() => {
 
   return aggregate;
 }, [periodReports]);
-const periodAutoSintesi = useMemo(() => {
-  if (!periodStart || !periodEnd) {
-    return 'Selezionare un periodo per generare la sintesi operativa.';
-  }
-
-  if (!periodReports.length) {
-    return 'Nel periodo selezionato non risultano report operatori acquisiti.';
-  }
-
-  const reparto = periodReparto || 'tutti i reparti';
-  const topIntervento = Object.entries(periodAggregate.interventiPerTipo)
-    .sort((a, b) => b[1] - a[1])[0];
-
-  const tipoPrevalente = topIntervento
-    ? `${topIntervento[0]} (${topIntervento[1]})`
-    : 'nessuna tipologia prevalente';
-
-  const eventi = periodAggregate.eventiRilievo.length;
-
-return `Nel periodo in esame, dal ${periodStart} al ${periodEnd}, l'attività operativa riferita a ${reparto} evidenzia ${periodAggregate.totaleReport} report acquisiti e ${periodAggregate.totaleInterventi} interventi complessivi. La tipologia di intervento prevalente risulta ${tipoPrevalente}. Sono state rilevate ${periodAggregate.totaleViolazioni} violazioni e risultano impiegati ${periodAggregate.totaleOperatori} operatori. ${
-  eventi > 0
-    ? `Si segnalano ${eventi} eventi o annotazioni meritevoli di attenzione operativa.`
-    : 'Non emergono eventi rilevanti nel periodo selezionato.'
-}`;
-  
-}, [periodStart, periodEnd, periodReparto, periodReports, periodAggregate]);
   
 const getMacroTurno = (turno) => {
   const value = String(turno || '')
