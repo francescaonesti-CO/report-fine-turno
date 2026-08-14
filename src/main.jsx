@@ -2905,8 +2905,7 @@ function serviceInterventionCard(doc, i, idx, y, pdfTitle = '', subtitle = '') {
   y += 13;
   const scuole = i.tipo === 'Servizio scuole' ? (i.scuole || []).filter(s => s.nome || s.momento || s.orario || s.criticita).map((s, pos) => `Scuola ${pos + 1}: ${s.nome || '-'} (${s.momento || '-'} ${s.orario || '-'}) Criticità: ${s.criticita || '-'}`).join('\n') : '';
   const dettagli = extraDetails(i).replace(/\n/g, ' ').trim();
-  const body = `Descrizione: ${i.descrizione || '-'}\nEsito: ${i.esito || '-'}${dettagli ? '\n' + dettagli : ''}${scuole ? '\n' + scuole : ''}\nNote: ${i.note || '-'}`;
-  const lines = doc.splitTextToSize(body, 176);
+  const body = `Descrizione: ${i.descrizione || '-'}${dettagli ? '\n' + dettagli : ''}${scuole ? '\n' + scuole : ''}`;  const lines = doc.splitTextToSize(body, 176);
   const h = Math.max(14, lines.length * 4.4 + 7);
   y = ensureSpace(doc, startY, 13 + h, pdfTitle, subtitle) + 13;
   doc.setTextColor(15, 23, 42);
