@@ -1356,13 +1356,12 @@ const generatePeriodPdf = () => {
   ];
 
   const controlliEntries = [
-    ['Veicoli controllati', periodAggregate.controlliPostoControllo.veicoli],
-    ['Persone controllate', periodAggregate.controlliPostoControllo.persone]
-    ['Veicoli da posti di controllo', periodAggregate.controlliPostoControllo.veicoli],
-    ['Persone da posti di controllo', periodAggregate.controlliPostoControllo.persone],
-    ['Verbali da posti di controllo', periodAggregate.controlliPostoControllo.verbali],
-    ['Fermi/sequestri da posti di controllo', periodAggregate.controlliPostoControllo.fermiSequestri]
-  ];
+  ['Posti di controllo effettuati', periodAggregate.interventiPerTipo['Posto di controllo'] || 0],
+  ['Veicoli controllati', periodAggregate.controlliPostoControllo.veicoli],
+  ['Persone controllate', periodAggregate.controlliPostoControllo.persone],
+  ['Verbali elevati', periodAggregate.controlliPostoControllo.verbali],
+  ['Fermi/sequestri', periodAggregate.controlliPostoControllo.fermiSequestri]
+];
 
   function card(x, y, w, h) {
     doc.setFillColor(255, 255, 255);
@@ -1665,30 +1664,6 @@ const generatePeriodPdf = () => {
     32,
     56,
     80
-  );
-
-  drawKpi(
-    14,
-    126,
-    56,
-    'Persone controllate',
-    periodAggregate.totalePersoneControllate
-  );
-
-  drawKpi(
-    77,
-    126,
-    56,
-    'Veicoli PDC',
-    periodAggregate.controlliPostoControllo.veicoli
-  );
-
-  drawKpi(
-    140,
-    126,
-    56,
-    'Persone PDC',
-    periodAggregate.controlliPostoControllo.persone
   );
 
   setDraw(C.blue);
