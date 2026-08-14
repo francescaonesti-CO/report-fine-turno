@@ -133,7 +133,8 @@ const emptyCounters = () => ({
   fermiAmministrativi: 0, sequestriPenali: 0, cnr: 0, altriAttiNumero: 0, altriAttiDescrizione: '',
   preavvisiCds: 0, vdcCds: 0, regPolizia: 0, regEdilizio: 0, regBenessereAnimali: 0,
   annonaria: 0, altreNorme: 0, altreNormeDescrizione: '', fermi: 0, sequestri: 0,
-  totaleVeicoliControllati: 0, totalePersoneControllate: 0
+totaleVeicoliControllati: 0,
+totalePersoneControllate: 0
 });
 
 const LABELS = {
@@ -146,21 +147,7 @@ const LABELS = {
 
 function today() { return new Date().toISOString().slice(0, 10); }
 function n(value) { return Number(value || 0); }
-function km(v) {
-  const inizio = Number(v.kmInizio);
-  const fine = Number(v.kmFine);
-
-  if (!Number.isFinite(inizio) || !Number.isFinite(fine)) return 0;
-  if (inizio <= 0 || fine <= 0) return 0;
-  if (fine < inizio) return 0;
-
-  const percorsi = fine - inizio;
-
-  // filtro valori palesemente errati
-  if (percorsi > 500) return 0;
-
-  return percorsi;
-}
+function km(v) { return Math.max(0, n(v.kmFine) - n(v.kmInizio)); }
 function turnoLabel(report) { return report.turno === 'Altro orario' ? `${report.altroTurnoInizio || '?'}-${report.altroTurnoFine || '?'}` : report.turno; }
 function repartoLabel(report) { return report.reparto === 'Altri servizi' ? `${report.reparto}: ${report.altroServizio || '-'}` : report.reparto; }
 function sanitizeFileName(s) { return String(s || 'report').replace(/[^a-z0-9._-]+/gi, '-').replace(/-+/g, '-'); }
@@ -450,7 +437,7 @@ return <main><img id="pdfLogo" src="/POLIZIA.png" alt="Logo Polizia Locale" styl
     a.click();
     URL.revokeObjectURL(url);
   }
- async function saveToDatabase() {
+async function saveToDatabase() {
   if (dbSaving) return;
 
   try {
@@ -524,7 +511,7 @@ return <main><img id="pdfLogo" src="/POLIZIA.png" alt="Logo Polizia Locale" styl
       }
     }
 
-    alert(savedReportId ? 'Report aggiornato correttamente nel database.' : 'Report salvato correttamente nel database.');
+    alert(currentReportId === savedReportId ? 'Report aggiornato correttamente nel database.' : 'Report salvato correttamente nel database.');
 
   } catch (err) {
     console.error('Errore imprevisto salvataggio:', err);
@@ -682,7 +669,7 @@ Cordialmente,`
       <button onClick={() => addArray('documentiRitirati', emptyDocumentoRitirato())}>+ Aggiungi documento ritirato</button>
     </section>
 
-    <section className="card">
+   <section className="card">
   <h2>8. Riepilogo controlli</h2>
 
   <p className="muted">
@@ -1071,128 +1058,79 @@ return (reports || []).filter(r => {
 
 const periodAggregate = useMemo(() => {
   const aggregate = {
-  totaleReport: periodReports.length,
-  totaleInterventi: 0,
-  totaleViolazioni: 0,
-  totaleAtti: 0,
-  totaleOperatori: 0,
-  totaleVeicoli: 0,
-  kmTotali: 0,
-  totaleVeicoliControllati: 0,
-  totalePersoneControllate: 0,
-  interventiPerTipo: {},
-  reportPerReparto: {},
-  violazioni: {
-    preavvisiCds: 0,
-    vdcCds: 0,
-    regPolizia: 0,
-    regEdilizio: 0,
-    regBenessereAnimali: 0,
-    annonaria: 0,
-    altreNorme: 0
-  },
-  atti: {
-    relazioni: 0,
-    annotazioni: 0,
-    sequestriAmministrativi: 0,
-    fermiAmministrativi: 0,
-    sequestriPenali: 0,
-    cnr: 0,
-    altriAttiNumero: 0
-  },
-  controlliPostoControllo: {
-    veicoli: 0,
-    persone: 0,
-    verbali: 0,
-    fermiSequestri: 0
-  },
-  eventiRilievo: []
-};
-periodReports.forEach(r => {
-  let payload = r;
+    totaleReport: periodReports.length,
+    totaleInterventi: 0,
+    totaleViolazioni: 0,
+    totaleOperatori: 0,
+    totaleVeicoli: 0,
+    interventiPerTipo: {},
+    reportPerReparto: {},
+    eventiRilievo: []
+  };
 
-  try {
-    if (typeof r.notes === 'string') {
-      payload = JSON.parse(r.notes);
+  periodReports.forEach(r => {
+    let payload = r;
+
+    try {
+      if (typeof r.notes === 'string') {
+        payload = JSON.parse(r.notes);
+      }
+    } catch {
+      payload = r;
     }
-  } catch {
-    payload = r;
-  }
 
-  const reparto =
-    payload.reparto ||
-    r.reparto ||
-    r.department ||
-    'Non indicato';
+    const reparto =
+      payload.reparto ||
+      r.reparto ||
+      r.department ||
+      'Non indicato';
 
-  aggregate.reportPerReparto[reparto] =
-    (aggregate.reportPerReparto[reparto] || 0) + 1;
+    aggregate.reportPerReparto[reparto] =
+      (aggregate.reportPerReparto[reparto] || 0) + 1;
 
-  const operatori = payload.operatori || [];
-  const veicoli = payload.veicoli || [];
-  const interventi = payload.interventi || [];
-  const counters = payload.counters || {};
+    const operatori = payload.operatori || [];
+    const veicoli = payload.veicoli || [];
+    const interventi = payload.interventi || [];
 
-  aggregate.totaleOperatori += operatori.length;
-  aggregate.totaleVeicoli += veicoli.length;
-  aggregate.totaleInterventi += interventi.length;
-  aggregate.kmTotali += getKmTotali(payload);
+    aggregate.totaleOperatori += operatori.length;
+    aggregate.totaleVeicoli += veicoli.length;
+    aggregate.totaleInterventi += interventi.length;
 
-  aggregate.totaleVeicoliControllati += n(counters.totaleVeicoliControllati);
-  aggregate.totalePersoneControllate += n(counters.totalePersoneControllate);
+   interventi.forEach(i => {
+  const tipo = getTipoInterventoReport(i);
 
-  interventi.forEach(i => {
-    const tipo = getTipoInterventoReport(i);
+  aggregate.interventiPerTipo[tipo] =
+    (aggregate.interventiPerTipo[tipo] || 0) + 1;
+});
+    const counters = payload.counters || {};
 
-    aggregate.interventiPerTipo[tipo] =
-      (aggregate.interventiPerTipo[tipo] || 0) + 1;
+    aggregate.totaleViolazioni +=
+      Number(counters.violazioni || 0) ||
+      Number(counters.totaleViolazioni || 0) ||
+      0;
 
-    if (i.tipo === 'Posto di controllo') {
-      aggregate.controlliPostoControllo.veicoli += n(i.veicoliControllati);
-      aggregate.controlliPostoControllo.persone += n(i.personeControllate);
-      aggregate.controlliPostoControllo.verbali += n(i.verbaliElevati);
-      aggregate.controlliPostoControllo.fermiSequestri += n(i.fermiSequestri);
+    if (payload.eventiRilievo) {
+      aggregate.eventiRilievo.push({
+        data:
+          r.service_date ||
+          payload.data ||
+          '',
+        reparto,
+        testo: payload.eventiRilievo
+      });
+    }
+
+    if (payload.noteUdt) {
+      aggregate.eventiRilievo.push({
+        data:
+          r.service_date ||
+          payload.data ||
+          '',
+        reparto,
+        testo: payload.noteUdt
+      });
     }
   });
-
-  ['preavvisiCds','vdcCds','regPolizia','regEdilizio','regBenessereAnimali','annonaria','altreNorme']
-    .forEach(key => {
-      aggregate.violazioni[key] += n(counters[key]);
-    });
-
-  aggregate.totaleViolazioni = Object.values(aggregate.violazioni)
-    .reduce((sum, value) => sum + n(value), 0);
-
-  ['relazioni','annotazioni','sequestriAmministrativi','fermiAmministrativi','sequestriPenali','cnr','altriAttiNumero']
-    .forEach(key => {
-      aggregate.atti[key] += n(counters[key]);
-    });
-
-  aggregate.totaleAtti = Object.values(aggregate.atti)
-    .reduce((sum, value) => sum + n(value), 0);
-
-  if (payload.eventiRilievo) {
-    aggregate.eventiRilievo.push({
-      data:
-        r.service_date ||
-        payload.data ||
-        '',
-      reparto,
-      testo: payload.eventiRilievo
-    });
-  }
-
-  if (payload.noteUdt) {
-    aggregate.eventiRilievo.push({
-      data:
-        r.service_date ||
-        payload.data ||
-        '',
-      reparto,
-      testo: payload.noteUdt
-    });
-  }
-});
 
   return aggregate;
 }, [periodReports]);
@@ -1491,7 +1429,10 @@ const generatePeriodPdf = () => {
   let iy = 193;
 
   interventiEntries.slice(0, 5).forEach(([tipo, totale], idx) => {
-   
+    const perc = totaleInterventi
+      ? Math.round((totale / totaleInterventi) * 100)
+      : 0;
+
     const colors = [
       [102, 153, 220],
       [255, 170, 110],
@@ -1515,7 +1456,7 @@ const generatePeriodPdf = () => {
 
     doc.setFont('helvetica', 'bold');
     setText(C.blue);
-    doc.text(String(totale), 96, iy, { align: 'right' });
+    doc.text(`${totale} (${perc}%)`, 96, iy, { align: 'right' });
 
     iy += 8;
   });
@@ -1855,7 +1796,7 @@ doc.text(official?.ufficiale || 'Comandante Polizia Locale', 143, 270);
     </Field>
   </div>
 
-   <div
+  <div
     className="grid four"
     style={{
       marginTop: 24,
@@ -1865,41 +1806,41 @@ doc.text(official?.ufficiale || 'Comandante Polizia Locale', 143, 270);
       background: '#ffffff'
     }}
   >
-    {[
-      ['Report acquisiti', periodAggregate.totaleReport],
-      ['Operatori impiegati', periodAggregate.totaleOperatori],
-      ['Veicoli impiegati', periodAggregate.totaleVeicoli],
-      ['Km percorsi', `${periodAggregate.kmTotali} km`],
-      ['Interventi totali', periodAggregate.totaleInterventi],
-      ['Violazioni totali', periodAggregate.totaleViolazioni],
-      ['Atti redatti', periodAggregate.totaleAtti],
-      ['Veicoli controllati', periodAggregate.totaleVeicoliControllati || periodAggregate.controlliPostoControllo.veicoli],
-['Persone controllate', periodAggregate.totalePersoneControllate || periodAggregate.controlliPostoControllo.persone]
-    ].map(([label, value]) => (
-      <div
-        key={label}
-        className="miniStat"
-        style={{
-          padding: 14,
-          border: '1px solid #e1e8f0',
-          borderRadius: 12,
-          background: '#f8fbff'
-        }}
-      >
-        <div style={{ fontSize: 24, fontWeight: 800, lineHeight: 1 }}>
-          {value}
-        </div>
-        <div style={{
-          fontSize: 12,
-          opacity: 0.7,
-          marginTop: 6,
-          textTransform: 'uppercase',
-          letterSpacing: 0.5
-        }}>
-          {label}
-        </div>
+    <div className="miniStat">
+      <div style={{ fontSize: 24, fontWeight: 800, lineHeight: 1 }}>
+        {periodAggregate.totaleReport}
       </div>
-    ))}
+      <div style={{ fontSize: 12, opacity: 0.7, marginTop: 6, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+        Report
+      </div>
+    </div>
+
+    <div className="miniStat">
+      <div style={{ fontSize: 24, fontWeight: 800, lineHeight: 1 }}>
+        {periodAggregate.totaleInterventi}
+      </div>
+      <div style={{ fontSize: 12, opacity: 0.7, marginTop: 6, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+        Interventi
+      </div>
+    </div>
+
+    <div className="miniStat">
+      <div style={{ fontSize: 24, fontWeight: 800, lineHeight: 1 }}>
+        {periodAggregate.totaleViolazioni}
+      </div>
+      <div style={{ fontSize: 12, opacity: 0.7, marginTop: 6, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+        Violazioni
+      </div>
+    </div>
+
+    <div className="miniStat">
+      <div style={{ fontSize: 24, fontWeight: 800, lineHeight: 1 }}>
+        {periodAggregate.totaleOperatori}
+      </div>
+      <div style={{ fontSize: 12, opacity: 0.7, marginTop: 6, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+        Operatori
+      </div>
+    </div>
   </div>
 
   <div
@@ -1943,69 +1884,43 @@ doc.text(official?.ufficiale || 'Comandante Polizia Locale', 143, 270);
       )}
     </div>
   </div>
+
   <hr style={{ margin: '28px 0', border: 0, borderTop: '1px solid #d6e1ef' }} />
 
-  <div
-    className="grid three"
-    style={{
-      alignItems: 'start'
-    }}
-  >
-    <div>
-      <h3>Violazioni contestate</h3>
+  <div>
+    <h3>Eventi e annotazioni rilevanti</h3>
 
-      {[
-        ['Preavvisi CdS', periodAggregate.violazioni.preavvisiCds],
-        ['VdC CdS', periodAggregate.violazioni.vdcCds],
-        ['Regolamento Polizia', periodAggregate.violazioni.regPolizia],
-        ['Regolamento Edilizio', periodAggregate.violazioni.regEdilizio],
-        ['Reg. Benessere Animali', periodAggregate.violazioni.regBenessereAnimali],
-        ['Annonaria / commercio', periodAggregate.violazioni.annonaria],
-        ['Altre norme', periodAggregate.violazioni.altreNorme]
-      ].map(([label, value]) => (
-        <div key={label} className="rowBetween" style={{ marginBottom: 8 }}>
-          <span>{label}</span>
-          <b style={{ marginLeft: 6 }}>({value})</b>
+    {periodAggregate.eventiRilievo.length === 0 ? (
+      <p className="muted">Nessun evento rilevante nel periodo selezionato</p>
+    ) : (
+      periodAggregate.eventiRilievo.map((e, idx) => (
+        <div key={idx} className="rowCard" style={{ marginBottom: 10 }}>
+          <div style={{ fontSize: 12, opacity: 0.7 }}>
+            {e.data} — {e.reparto}
+          </div>
+          <div style={{ marginTop: 4 }}>
+            {e.testo}
+          </div>
         </div>
-      ))}
-    </div>
+      ))
+    )}
+  </div>
 
-    <div>
-      <h3>Atti redatti</h3>
+  <hr style={{ margin: '28px 0', border: 0, borderTop: '1px solid #d6e1ef' }} />
 
-      {[
-        ['Relazioni', periodAggregate.atti.relazioni],
-        ['Annotazioni', periodAggregate.atti.annotazioni],
-        ['Fermi amministrativi', periodAggregate.atti.fermiAmministrativi],
-        ['Sequestri amministrativi', periodAggregate.atti.sequestriAmministrativi],
-        ['Sequestri penali', periodAggregate.atti.sequestriPenali],
-        ['C.N.R.', periodAggregate.atti.cnr],
-        ['Altri atti', periodAggregate.atti.altriAttiNumero]
-      ].map(([label, value]) => (
-        <div key={label} className="rowBetween" style={{ marginBottom: 8 }}>
-          <span>{label}</span>
-          <b style={{ marginLeft: 6 }}>({value})</b>
-        </div>
-      ))}
-    </div>
+  <div>
+    <h3>Sintesi operativa del periodo</h3>
 
-    <div>
-      <h3>Attività di controllo</h3>
+    <p className="muted" style={{ marginBottom: 10 }}>
+      Testo generato automaticamente dal sistema. L'ufficiale può modificarlo,
+      integrarlo o sostituirlo prima della generazione del PDF aggregato.
+    </p>
 
-      {[
-        ['Veicoli controllati', periodAggregate.totaleVeicoliControllati],
-        ['Persone controllate', periodAggregate.totalePersoneControllate],
-        ['Veicoli da posti di controllo', periodAggregate.controlliPostoControllo.veicoli],
-        ['Persone da posti di controllo', periodAggregate.controlliPostoControllo.persone],
-        ['Verbali da posti di controllo', periodAggregate.controlliPostoControllo.verbali],
-        ['Fermi/sequestri da posti di controllo', periodAggregate.controlliPostoControllo.fermiSequestri]
-      ].map(([label, value]) => (
-        <div key={label} className="rowBetween" style={{ marginBottom: 8 }}>
-          <span>{label}</span>
-          <b style={{ marginLeft: 6 }}>({value})</b>
-        </div>
-      ))}
-    </div>
+    <Textarea
+      value={periodSintesiManuale || periodAutoSintesi}
+      onChange={v => setPeriodSintesiManuale(v)}
+      placeholder="Sintesi operativa del periodo..."
+    />
   </div>
 
   <div
@@ -2424,8 +2339,40 @@ function buildServicePrintHtml(report) {
   const atti = ['relazioni','annotazioni','sequestriAmministrativi','fermiAmministrativi','sequestriPenali','cnr','altriAttiNumero'].reduce((s,k)=>s+n(c[k]),0);
   const eventi = interventions.filter(isInterventoCritico).length;
   const subtitle = `${formatDateIT(report.data)} | ${turnoLabel(report)} | ${report.orarioTipo || '-'}`;
-  const vehiclesUsed = (report.veicoli||[]).filter(v=>v.sigla||v.kmInizio||v.kmFine).length || '-';
-  const vehicleBody = `<div class="small-row"><span>Veicoli impiegati</span><strong>${esc(vehiclesUsed)}</strong></div><div class="small-row"><span>Totale km percorsi</span><strong>${esc(getKmTotali(report))} km</strong></div>`;
+ const veicoliUtilizzati = (report.veicoli || [])
+  .filter(v => v.sigla || v.kmInizio || v.kmFine);
+
+const vehicleBody = veicoliUtilizzati.length
+  ? `
+    <div class="small-list">
+      ${veicoliUtilizzati.map(v => `
+        <div style="padding-bottom:2mm; margin-bottom:2mm; border-bottom:1px solid #e5e7eb;">
+          <div class="small-row">
+            <span>Veicolo</span>
+            <strong>${esc(v.sigla || '-')}</strong>
+          </div>
+          <div class="small-row">
+            <span>Km iniziali</span>
+            <strong>${esc(v.kmInizio || '-')}</strong>
+          </div>
+          <div class="small-row">
+            <span>Km finali</span>
+            <strong>${esc(v.kmFine || '-')}</strong>
+          </div>
+          <div class="small-row">
+            <span>Km percorsi</span>
+            <strong>${esc(km(v))} km</strong>
+          </div>
+        </div>
+      `).join('')}
+
+      <div class="small-row">
+        <span><strong>Totale km percorsi</strong></span>
+        <strong>${esc(getKmTotali(report))} km</strong>
+      </div>
+    </div>
+  `
+  : '<p>Nessun veicolo indicato.</p>';
   const carburanteBody = (report.veicoli||[]).some(v=>v.carburante==='Sì') ? (report.veicoli||[]).map(v=>`<div class="small-row"><span>${esc(v.sigla||'Veicolo')}</span><strong>${esc(v.importoCarburante||'-')}</strong></div>`).join('') : '<p>Nessun rifornimento indicato.</p>';
   const anomalie = (report.veicoli||[]).map(v=>v.anomaliaVeicolo).filter(Boolean).join('; ') || 'Nessuna anomalia segnalata.';
   const operators = operatorNames(report).join('<br>') || '-';
@@ -2516,12 +2463,7 @@ const attiBody = `<div class="small-list">${[['Relazioni',c.relazioni],['Annotaz
   </div>
 `;
   const page1 = `<section class="page">${headerHtml('REPORT DI SERVIZIO', subtitle)}<div class="kpis">${kpiBox('car','Interventi',interventions.length)}${kpiBox('doc','Violazioni',getTotaleViolazioni(report))}${kpiBox('clip','Atti redatti',atti)}${kpiBox('warn','Eventi',eventi)}</div><div class="grid-3">${panel('Veicoli','car',vehicleBody)}${panel('Carburante','fuel',carburanteBody)}${panel('Anomalie veicolo','warn',`<p>${esc(anomalie)}</p>`)}</div><div class="grid-2">${panel('Note di servizio','clipboard',`<p>${esc(report.noteUdt || '-')}</p>`)}${panel('Operatori','users',`<p><strong>Reparto:</strong> ${esc(repartoLabel(report))}</p><p>${operators}</p>`)}</div>${footerHtml(1)}</section>`;
-const page2 = `<section class="page">${headerHtml('REPORT DI SERVIZIO - DETTAGLIO', subtitle)}
-<div class="detail-grid">${panel('Interventi effettuati','car',interventiHtml)}${panel('Violazioni contestate','table',violazioniTable + altreNormeText,'tight-panel')}</div>
-<div class="detail-grid-2">${panel('Atti redatti','clip',attiBody)}${panel('Osservazioni','clipboard',`<p>${esc(report.osservazioni || report.noteUdt || 'Nessuna osservazione particolare da segnalare.')}</p>`)}</div>
-<div class="detail-grid-2 compact-row">${panel('Riepilogo controlli','check',controlliBody)}${panel('Documenti ritirati','doc',docsBody)}</div>
-${panel('Operatori','user',`<p class="compact"><strong>${operators}</strong></p>${dichiarazioneFinale}`)}
-${footerHtml(2)}</section>`;
+const page2 = `<section class="page">${headerHtml('REPORT DI SERVIZIO - DETTAGLIO', subtitle)}<div class="detail-grid">${panel('Interventi effettuati','car',interventiHtml)}${panel('Violazioni contestate','table',violazioniTable + altreNormeText,'tight-panel')}</div><div class="detail-grid-2">${panel('Atti redatti','clip',attiBody)}${panel('Osservazioni','clipboard',`<p>${esc(report.osservazioni || report.noteUdt || 'Nessuna osservazione particolare da segnalare.')}</p>`)}</div><div class="detail-grid-2 compact-row">${panel('Riepilogo controlli','check',controlliBody)}${panel('Documenti ritirati','doc',docsBody)}</div>${panel('Operatori','user',`<p class="compact"><strong>${operators}</strong></p>${dichiarazioneFinale}`)}${footerHtml(2)}</section>`;
   
 const compilatore = report.operatori?.[0];
 
@@ -3182,9 +3124,10 @@ function aggregateReports(reports) {
     aggregate.kmTotali += getKmTotali(r);
     aggregate.byReparto[repartoLabel(r)] = n(aggregate.byReparto[repartoLabel(r)]) + 1;
     (r.interventi || []).forEach(i => {
-      const tipoAggregato = i.tipo === 'Codice della strada' && i.cdsDettaglio
-  ? `Codice della strada - ${i.cdsDettaglio}`
-  : getTipoInterventoReport(i);
+      const tipoAggregato =
+  i.tipo === 'Codice della strada' && i.cdsDettaglio
+    ? `Codice della strada - ${i.cdsDettaglio}`
+    : getTipoInterventoReport(i);
       aggregate.byTipo[tipoAggregato] = n(aggregate.byTipo[tipoAggregato]) + 1;
       const origine = i.origine === 'Altro' ? `Altro: ${i.origineAltro || '-'}` : (i.origine || 'Non indicata');
       aggregate.byOrigine[origine] = n(aggregate.byOrigine[origine]) + 1;
