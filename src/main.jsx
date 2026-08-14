@@ -425,7 +425,11 @@ return <main><img id="pdfLogo" src="/POLIZIA.png" alt="Logo Polizia Locale" styl
   const text = useMemo(() => reportText(report), [report, totalKm, totaleViolazioni]);
 
   function generatePdf() {
-    printServiceReport(report);
+  const doc = buildServicePdf_old(report);
+
+  doc.save(
+    `Report_servizio_${sanitizeFileName(report.data)}_${sanitizeFileName(turnoLabel(report))}.pdf`
+  );
 }
   function exportJson() {
     const payload = { ...report, schemaVersion: 3, exportedAt: new Date().toISOString() };
