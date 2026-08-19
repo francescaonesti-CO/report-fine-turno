@@ -3159,7 +3159,45 @@ function simpleTable(doc, headers, rows, y, widths, pdfTitle = '', subtitle = ''
   return y + 4;
 }
 
-function paragraph(doc, text, y, pdfTitle = '', subtitle = '', maxWidth = 178) {
+function paragraph(doc, text, y, pdfTitle = '', subtitle = '', maxWidth = 182, justify = false) {
+  const lines = doc.splitTextToSize(String(text || '-'), maxWidth);
+
+  y = ensureSpace(
+    doc,
+    y,
+    lines.length * 5 + 8,
+    pdfTitle,
+    subtitle
+  );
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8.5);
+
+  if (justify) {
+    lines.forEach((line, idx) => {
+      const isLastLine = idx === lines.length - 1;
+
+      doc.text(
+        line,
+        14,
+        y + 5 + idx * 5,
+        {
+          maxWidth,
+          align: isLastLine ? 'left' : 'justify'
+        }
+      );
+    });
+  } else {
+    doc.text(
+      lines,
+      14,
+      y + 5,
+      { maxWidth }
+    );
+  }
+
+  return y + lines.length * 5 + 8;
+}
   const lines = doc.splitTextToSize(String(text || '-'), maxWidth);
   y = ensureSpace(doc, y, lines.length * 5 + 8, pdfTitle, subtitle);
   doc.setFont('helvetica', 'normal');
@@ -3457,7 +3495,15 @@ interventi.forEach((i, idx) => {
   y = simpleTable(doc, ['Tipo documento', 'Quantità', 'Note'], docRows.length ? docRows : [['Nessun documento ritirato', '-', '-']], y, [70, 28, 88], title, subtitle);
 
   y = section(doc, 'Note per UDT / Ufficiale di coordinamento', y, title, subtitle);
-  y = paragraph(doc, report.noteUdt || '-', y, title, subtitle);
+  y = paragraph(
+  doc,
+  report.noteUdt || '-',
+  y,
+  title,
+  subtitle,
+  182,
+  true
+);
 
  const dichiarazioneText =
   'Gli operatori dichiarano che quanto riportato nel presente report corrisponde fedelmente alle attività effettivamente svolte e riscontrate durante il turno di servizio, consapevoli delle proprie responsabilità amministrative e penali anche in considerazione dell’art. 328 C.P.';
@@ -3497,7 +3543,9 @@ y = paragraph(
   dichiarazioneText,
   y,
   title,
-  subtitle
+  subtitle,
+  182,
+  true
 );
 
 doc.setFont('helvetica', 'normal');
