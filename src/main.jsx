@@ -3192,9 +3192,6 @@ function paragraph(doc, text, y, pdfTitle = '', subtitle = '', maxWidth = 182, j
   return y + lines.length * lineHeight + 7;
 }
 
-  return y + lines.length * 5 + 8;
-}
-
 function serviceSummaryBox(doc, report, y, pdfTitle = '', subtitle = '') {
   y = ensureSpace(doc, y, 30, pdfTitle, subtitle);
   const interventi = (report.interventi || []).length;
