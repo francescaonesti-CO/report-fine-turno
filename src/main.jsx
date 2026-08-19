@@ -3160,12 +3160,17 @@ function simpleTable(doc, headers, rows, y, widths, pdfTitle = '', subtitle = ''
 }
 
 function paragraph(doc, text, y, pdfTitle = '', subtitle = '', maxWidth = 182, justify = false) {
-  const lines = doc.splitTextToSize(String(text || '-'), maxWidth);
+  const lines = doc.splitTextToSize(
+    String(text || '-'),
+    maxWidth
+  );
+
+  const lineHeight = 4.2;
 
   y = ensureSpace(
     doc,
     y,
-    lines.length * 5 + 8,
+    lines.length * lineHeight + 7,
     pdfTitle,
     subtitle
   );
@@ -3173,28 +3178,19 @@ function paragraph(doc, text, y, pdfTitle = '', subtitle = '', maxWidth = 182, j
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8.5);
 
-  if (justify) {
-    lines.forEach((line, idx) => {
-      const isLastLine = idx === lines.length - 1;
+  doc.text(
+    lines,
+    14,
+    y + 4.5,
+    {
+      maxWidth,
+      align: justify ? 'justify' : 'left',
+      lineHeightFactor: 1.15
+    }
+  );
 
-      doc.text(
-        line,
-        14,
-        y + 5 + idx * 5,
-        {
-          maxWidth,
-          align: isLastLine ? 'left' : 'justify'
-        }
-      );
-    });
-  } else {
-    doc.text(
-      lines,
-      14,
-      y + 5,
-      { maxWidth }
-    );
-  }
+  return y + lines.length * lineHeight + 7;
+}
 
   return y + lines.length * 5 + 8;
 }
