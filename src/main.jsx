@@ -3735,6 +3735,15 @@ function extraDetails(i) {
 `;
   if (i.tipo === 'Viabilità') return `   Motivo: ${i.motivoViabilita || '-'}; strade interessate: ${i.strade || '-'}
 `;
+  if (i.tipo === 'Controllo autobus') {
+  return `   Controllo autobus: autobus controllati ${i.autobusControllati || '0'}; veicolo idoneo ${i.autobusVeicoloIdoneo || '-'}
+`;
+}
+
+if (i.tipo === 'Verifica veicolo in stato di abbandono') {
+  return `   Verifica veicolo: verifica effettuata ${i.abbandonoVerificato || '-'}; esito ${i.abbandonoEsito || '-'}
+`;
+}
   return '';
 }
 function reportText(report) {
