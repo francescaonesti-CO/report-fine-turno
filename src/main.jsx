@@ -425,7 +425,23 @@ return <main><img id="pdfLogo" src="/POLIZIA.png" alt="Logo Polizia Locale" styl
   const text = useMemo(() => reportText(report), [report, totalKm, totaleViolazioni]);
 
   function generatePdf() {
-    printServiceReport(report);
+  const doc = buildServicePdf_old(report);
+
+  const compilatore = report.operatori?.[0];
+
+  const nomeCompilatore = compilatore
+    ? `${compilatore.nome || ''}`.trim()
+    : 'operatore';
+
+  const safeNomeCompilatore = nomeCompilatore
+    .replace(/\s+/g, '_')
+    .replace(/[^\wÀ-ÿ-]/g, '');
+
+  const dataFile = formatDateIT(report.data).replaceAll('/', '-');
+
+  doc.save(
+    `Report_servizio_${dataFile}_${safeNomeCompilatore}.pdf`
+  );
 }
   function exportJson() {
     const payload = { ...report, schemaVersion: 3, exportedAt: new Date().toISOString() };
@@ -541,7 +557,16 @@ Cordialmente,`
       <h2>Flusso operativo</h2>
       <p>Il report viene <strong>salvato automaticamente su questo dispositivo</strong> mentre viene compilato. L'operatore può inserirlo durante il turno, chiudere l'app e ritrovarlo alla riapertura.</p>
       <p className="muted">Ultimo salvataggio automatico: <strong>{lastSaved || 'in corso'}</strong></p>
-      <div className="actions"><button className="ghost" onClick={resetReport}>Nuovo turno / cancella bozza</button></div>
+<div className="actions">
+  <button
+    className="ghost"
+    onClick={resetReport}
+  >
+    Nuovo turno / cancella bozza
+  </button>
+
+
+</div>
       <p>Al termine del turno l'operatore verifica i dati inseriti e procede con l'invio del report. Il report viene acquisito nel sistema e sarà disponibile nella Dashboard ufficiale per la verifica, l'integrazione e la predisposizione del report finale per il Comandante.</p>
     </section>
 
@@ -2794,43 +2819,125 @@ function kvGrid(doc, items, y, columns = 2, pdfTitle = '', subtitle = '') {
 function simpleTable(doc, headers, rows, y, widths, pdfTitle = '', subtitle = '') {
   const headerH = 8;
   const lineH = 5;
-  y = ensureSpace(doc, y, headerH + 8, pdfTitle, subtitle);
-  let x = 12;
-  doc.setFillColor(235, 239, 244);
-  doc.rect(12, y, 186, headerH, 'F');
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(7.8);
-  headers.forEach((h, i) => { doc.text(h, x + 2, y + 5.2, { maxWidth: widths[i] - 4 }); x += widths[i]; });
-  y += headerH;
+
+  function drawTableHeader(currentY) {
+    let x = 12;
+
+    doc.setFillColor(235, 239, 244);
+    doc.rect(12, currentY, 186, headerH, 'F');
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(7.8);
+
+    headers.forEach((h, i) => {
+      doc.text(
+        h,
+        x + 2,
+        currentY + 5.2,
+        { maxWidth: widths[i] - 4 }
+      );
+
+      x += widths[i];
+    });
+
+    return currentY + headerH;
+  }
+
+  y = ensureSpace(
+    doc,
+    y,
+    headerH + 8,
+    pdfTitle,
+    subtitle
+  );
+
+  y = drawTableHeader(y);
+
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(7.6);
+
   rows.forEach(row => {
-    const cellLines = row.map((cell, i) => doc.splitTextToSize(String(cell || '-'), widths[i] - 4));
-    const h = Math.max(7, Math.max(...cellLines.map(lines => lines.length)) * lineH + 2);
-    y = ensureSpace(doc, y, h + 2, pdfTitle, subtitle);
+    const cellLines = row.map((cell, i) =>
+      doc.splitTextToSize(
+        String(cell || '-'),
+        widths[i] - 4
+      )
+    );
+
+    const h = Math.max(
+      7,
+      Math.max(...cellLines.map(lines => lines.length)) * lineH + 2
+    );
+
+    if (y + h + 2 > 276) {
+      doc.addPage();
+      addHeader(doc, pdfTitle, subtitle);
+
+      y = 54;
+
+      y = drawTableHeader(y);
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(7.6);
+    }
+
     doc.setDrawColor(232, 235, 238);
     doc.rect(12, y, 186, h);
+
     let xx = 12;
+
     cellLines.forEach((lines, i) => {
-      doc.text(lines, xx + 2, y + 5, { maxWidth: widths[i] - 4 });
+      doc.text(
+        lines,
+        xx + 2,
+        y + 5,
+        { maxWidth: widths[i] - 4 }
+      );
+
       xx += widths[i];
-      if (i < widths.length - 1) doc.line(xx, y, xx, y + h);
+
+      if (i < widths.length - 1) {
+        doc.line(xx, y, xx, y + h);
+      }
     });
+
     y += h;
   });
+
   return y + 4;
 }
 
-function paragraph(doc, text, y, pdfTitle = '', subtitle = '', maxWidth = 178) {
-  const lines = doc.splitTextToSize(String(text || '-'), maxWidth);
-  y = ensureSpace(doc, y, lines.length * 5 + 8, pdfTitle, subtitle);
+function paragraph(doc, text, y, pdfTitle = '', subtitle = '', maxWidth = 182) {
+  const lines = doc.splitTextToSize(
+    String(text || '-'),
+    maxWidth
+  );
+
+  const lineHeight = 4.1;
+
+  y = ensureSpace(
+    doc,
+    y,
+    lines.length * lineHeight + 7,
+    pdfTitle,
+    subtitle
+  );
+
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8.5);
-  doc.text(lines, 16, y + 5);
-  return y + lines.length * 5 + 8;
+
+  doc.text(
+    lines,
+    14,
+    y + 4.5,
+    {
+      maxWidth,
+      lineHeightFactor: 1.08
+    }
+  );
+
+  return y + lines.length * lineHeight + 7;
 }
-
-
 function serviceSummaryBox(doc, report, y, pdfTitle = '', subtitle = '') {
   y = ensureSpace(doc, y, 30, pdfTitle, subtitle);
   const interventi = (report.interventi || []).length;
@@ -2844,7 +2951,7 @@ function serviceSummaryBox(doc, report, y, pdfTitle = '', subtitle = '') {
     ['Interventi', interventi],
     ['Violazioni / provv.', violazioni],
     ['Atti redatti', atti],
-    ['Criticità', criticita],
+    ['Eventi rilevanti', criticita],
   ];
   items.forEach((item, idx) => {
     const x = 20 + idx * 44;
@@ -2863,43 +2970,148 @@ function serviceSummaryBox(doc, report, y, pdfTitle = '', subtitle = '') {
   doc.setTextColor(0, 0, 0);
   return y + 35;
 }
+function getServiceInterventionHeight(doc, i) {
+  const scuole = i.tipo === 'Servizio scuole'
+    ? (i.scuole || [])
+        .filter(s => s.nome || s.momento || s.orario || s.criticita)
+        .map(
+          (s, pos) =>
+            `Scuola ${pos + 1}: ${s.nome || '-'} (${s.momento || '-'} ${s.orario || '-'})`
+        )
+        .join('\n')
+    : '';
 
+  const dettagli = extraDetails(i)
+    .replace(/\n/g, ' ')
+    .trim();
+
+  const body =
+    `Descrizione: ${i.descrizione || '-'}` +
+    `${dettagli ? '\n' + dettagli : ''}` +
+    `${scuole ? '\n' + scuole : ''}`;
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8.2);
+
+  const lines = doc.splitTextToSize(body, 176);
+
+  const headerH = 13;
+  const bodyH = Math.max(14, lines.length * 4.4 + 7);
+  const totalH = headerH + bodyH + 4;
+
+  return totalH;
+}
 function serviceInterventionCard(doc, i, idx, y, pdfTitle = '', subtitle = '') {
   const critic = isInterventoCritico(i);
-  y = ensureSpace(doc, y, 30, pdfTitle, subtitle);
+
+  const origine = i.origine === 'Altro'
+    ? `Altro: ${i.origineAltro || '-'}`
+    : (i.origine || '-');
+
+  const scuole = i.tipo === 'Servizio scuole'
+    ? (i.scuole || [])
+        .filter(s => s.nome || s.momento || s.orario || s.criticita)
+        .map(
+          (s, pos) =>
+            `Scuola ${pos + 1}: ${s.nome || '-'} (${s.momento || '-'} ${s.orario || '-'})`
+        )
+        .join('\n')
+    : '';
+
+  const dettagli = extraDetails(i)
+    .replace(/\n/g, ' ')
+    .trim();
+
+  const body =
+    `Descrizione: ${i.descrizione || '-'}` +
+    `${dettagli ? '\n' + dettagli : ''}` +
+    `${scuole ? '\n' + scuole : ''}`;
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8.2);
+
+  const lines = doc.splitTextToSize(body, 176);
+
+  const headerH = 13;
+  const bodyH = Math.max(14, lines.length * 4.4 + 7);
+  const totalH = headerH + bodyH + 4;
+
+  // Prima controlliamo se tutto l'intervento entra nella pagina
+  y = ensureSpace(
+    doc,
+    y,
+    totalH,
+    pdfTitle,
+    subtitle
+  );
+
+  // Intestazione intervento
   doc.setFillColor(255, 255, 255);
   doc.setDrawColor(214, 222, 232);
   doc.roundedRect(12, y, 186, 0.1, 1, 1, 'S');
-  const startY = y;
-  doc.setFillColor(critic ? 254 : 245, critic ? 242 : 248, critic ? 242 : 252);
+
+  doc.setFillColor(
+    critic ? 254 : 245,
+    critic ? 242 : 248,
+    critic ? 242 : 252
+  );
+
   doc.roundedRect(12, y, 186, 10, 1.4, 1.4, 'F');
+
   doc.setFillColor(12, 47, 97);
   doc.roundedRect(15, y + 2.1, 18, 5.8, 1.2, 1.2, 'F');
+
   doc.setTextColor(255, 255, 255);
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(7.5);
-  doc.text(`${i.oraInizio || '--'}-${i.oraFine || '--'}`, 24, y + 6.1, { align: 'center' });
+
+  doc.text(
+    `${i.oraInizio || '--'}-${i.oraFine || '--'}`,
+    24,
+    y + 6.1,
+    { align: 'center' }
+  );
+
   doc.setTextColor(12, 47, 97);
-  doc.setFontSize(9.2);
-  doc.text(`${idx + 1}. ${i.tipo || 'Intervento'}`, 38, y + 6.3);
+
+const interventionTitle =
+  `${idx + 1}. ${i.tipo || 'Intervento'}`;
+
+doc.setFontSize(
+  interventionTitle.length > 32 ? 7.6 : 9.2
+);
+
+doc.text(
+  interventionTitle,
+  38,
+  y + 6.3
+);
+
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(65, 75, 90);
-  const origine = i.origine === 'Altro' ? `Altro: ${i.origineAltro || '-'}` : (i.origine || '-');
-  doc.text(`Origine: ${origine} | Luogo: ${i.luogo || '-'}`, 98, y + 6.3, { maxWidth: 96 });
-  y += 13;
-  const scuole = i.tipo === 'Servizio scuole' ? (i.scuole || []).filter(s => s.nome || s.momento || s.orario || s.criticita).map((s, pos) => `Scuola ${pos + 1}: ${s.nome || '-'} (${s.momento || '-'} ${s.orario || '-'}) Criticità: ${s.criticita || '-'}`).join('\n') : '';
-  const dettagli = extraDetails(i).replace(/\n/g, ' ').trim();
-  const body = `Descrizione: ${i.descrizione || '-'}\nEsito: ${i.esito || '-'}${dettagli ? '\n' + dettagli : ''}${scuole ? '\n' + scuole : ''}\nNote: ${i.note || '-'}`;
-  const lines = doc.splitTextToSize(body, 176);
-  const h = Math.max(14, lines.length * 4.4 + 7);
-  y = ensureSpace(doc, startY, 13 + h, pdfTitle, subtitle) + 13;
+
+  doc.text(
+    `Origine: ${origine} | Luogo: ${i.luogo || '-'}`,
+    98,
+    y + 6.3,
+    { maxWidth: 96 }
+  );
+
+  y += headerH;
+
+  // Corpo intervento
   doc.setTextColor(15, 23, 42);
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8.2);
-  doc.text(lines, 18, y + 3.5);
-  return y + h + 4;
-}
 
+  doc.text(
+    lines,
+    18,
+    y + 3.5
+  );
+
+  return y + bodyH + 4;
+}
 function buildVerbaliPdf(report) {
   const title = 'DISTINTA VIOLAZIONI DEL TURNO';
   const subtitle = `${report.data} | Turno ${turnoLabel(report)} | ${repartoLabel(report)}`;
@@ -2937,7 +3149,7 @@ function buildVerbaliPdf(report) {
 
 function buildServicePdf_old(report) {
   const title = 'REPORT DI SERVIZIO';
-  const subtitle = `${report.data} | Turno ${turnoLabel(report)} | ${report.orarioTipo}`;
+  const subtitle = `${formatDateIT(report.data)} | Turno ${turnoLabel(report)} | ${report.orarioTipo}`;
   const doc = makePdf(title, subtitle);
   let y = 54;
 
@@ -2945,7 +3157,7 @@ function buildServicePdf_old(report) {
 
   y = section(doc, 'Dati generali del turno', y, title, subtitle);
   y = kvGrid(doc, [
-    { label: 'Data servizio', value: report.data },
+    { label: 'Data servizio', value: formatDateIT(report.data) },
     { label: 'Turno', value: turnoLabel(report) },
     { label: 'Tipologia orario', value: report.orarioTipo },
     { label: 'Reparto / servizio', value: repartoLabel(report) },
@@ -2962,10 +3174,39 @@ function buildServicePdf_old(report) {
   const anomalieVeicoli = (report.veicoli || []).filter(v => v.anomaliaVeicolo).map(v => `${v.sigla || 'Veicolo'}: ${v.anomaliaVeicolo}`).join('\n');
   y = kvGrid(doc, [{ label: 'Totale km percorsi', value: getKmTotali(report) }, { label: 'Anomalie / danni veicolo', value: anomalieVeicoli || '-' }], y, 1, title, subtitle) + 2;
 
-  y = section(doc, 'Interventi effettuati', y, title, subtitle);
-  (report.interventi || []).forEach((i, idx) => {
-    y = serviceInterventionCard(doc, i, idx, y, title, subtitle);
-  });
+ const interventi = report.interventi || [];
+
+if (interventi.length > 0) {
+  const firstInterventionHeight =
+    getServiceInterventionHeight(doc, interventi[0]);
+
+  y = ensureSpace(
+    doc,
+    y,
+    13 + firstInterventionHeight,
+    title,
+    subtitle
+  );
+}
+
+y = section(
+  doc,
+  'Interventi effettuati',
+  y,
+  title,
+  subtitle
+);
+
+interventi.forEach((i, idx) => {
+  y = serviceInterventionCard(
+    doc,
+    i,
+    idx,
+    y,
+    title,
+    subtitle
+  );
+});
 
   y = section(doc, 'Atti redatti', y, title, subtitle);
   const c = report.counters || emptyCounters();
@@ -2984,21 +3225,159 @@ function buildServicePdf_old(report) {
   const docRows = (report.documentiRitirati || []).filter(d => d.tipo || d.quantita || d.note).map(d => [d.tipo || '-', d.quantita || '-', d.note || '-']);
   y = simpleTable(doc, ['Tipo documento', 'Quantità', 'Note'], docRows.length ? docRows : [['Nessun documento ritirato', '-', '-']], y, [70, 28, 88], title, subtitle);
 
-  y = section(doc, 'Note per UDT / Ufficiale di coordinamento', y, title, subtitle);
-  y = paragraph(doc, report.noteUdt || '-', y, title, subtitle);
+  y = section(
+  doc,
+  'Note per UDT / Ufficiale di coordinamento',
+  y,
+  title,
+  subtitle
+);
 
-  y = section(doc, 'Dichiarazione e firme', y, title, subtitle);
-  y = paragraph(doc, 'Gli operatori dichiarano che quanto riportato nel presente report corrisponde fedelmente alle attività effettivamente svolte e riscontrate durante il turno di servizio, consapevoli delle proprie responsabilità amministrative e penali anche in considerazione dell’art. 328 C.P.', y, title, subtitle);
-  y = ensureSpace(doc, y, 24, title, subtitle);
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8.5);
-  const names = operatorNames(report);
-  const signRows = names.length ? names : ['Operatore 1', 'Operatore 2', 'Operatore 3'];
-  signRows.slice(0, 6).forEach((name, idx) => {
-    const yy = y + idx * 9;
-    doc.text(name, 16, yy);
-    doc.line(82, yy + 1, 190, yy + 1);
-  });
+const noteUdtText = report.noteUdt || '-';
+
+doc.setFont('helvetica', 'normal');
+doc.setFontSize(9);
+
+const noteUdtLines = doc.splitTextToSize(
+  noteUdtText,
+  174
+);
+
+const noteUdtHeight =
+  Math.max(18, noteUdtLines.length * 4.2 + 10);
+
+y = ensureSpace(
+  doc,
+  y,
+  noteUdtHeight + 4,
+  title,
+  subtitle
+);
+
+doc.setFillColor(249, 250, 252);
+doc.setDrawColor(220, 225, 232);
+
+doc.roundedRect(
+  12,
+  y,
+  186,
+  noteUdtHeight,
+  1.5,
+  1.5,
+  'FD'
+);
+
+doc.setTextColor(25, 35, 48);
+
+doc.text(
+  noteUdtLines,
+  18,
+  y + 7,
+  {
+    maxWidth: 174,
+    lineHeightFactor: 1.12
+  }
+);
+
+y += noteUdtHeight + 5;
+
+const dichiarazioneText =
+  'Gli operatori dichiarano che quanto riportato nel presente report corrisponde fedelmente alle attività effettivamente svolte e riscontrate durante il turno di servizio, consapevoli delle proprie responsabilità amministrative e penali anche in considerazione dell’art. 328 C.P.';
+
+const names = operatorNames(report);
+
+const signRows = names.length
+  ? names
+  : ['Operatore 1', 'Operatore 2', 'Operatore 3'];
+
+doc.setFont('helvetica', 'normal');
+doc.setFontSize(9);
+
+const dichiarazioneLines = doc.splitTextToSize(
+  dichiarazioneText,
+  174
+);
+
+const firmeHeight =
+  signRows.slice(0, 6).length * 10;
+
+const dichiarazioneBoxHeight =
+  Math.max(
+    24,
+    dichiarazioneLines.length * 4.2 +
+    firmeHeight +
+    18
+  );
+
+y = ensureSpace(
+  doc,
+  y,
+  13 + dichiarazioneBoxHeight + 5,
+  title,
+  subtitle
+);
+
+y = section(
+  doc,
+  'Dichiarazione e firme',
+  y,
+  title,
+  subtitle
+);
+
+doc.setFillColor(249, 250, 252);
+doc.setDrawColor(220, 225, 232);
+
+doc.roundedRect(
+  12,
+  y,
+  186,
+  dichiarazioneBoxHeight,
+  1.5,
+  1.5,
+  'FD'
+);
+
+doc.setTextColor(25, 35, 48);
+doc.setFont('helvetica', 'normal');
+doc.setFontSize(9);
+
+doc.text(
+  dichiarazioneLines,
+  18,
+  y + 7,
+  {
+    maxWidth: 174,
+    lineHeightFactor: 1.12
+  }
+);
+
+const firmeStartY =
+  y +
+  7 +
+  dichiarazioneLines.length * 4.2 +
+  8;
+
+doc.setFontSize(8.5);
+
+signRows.slice(0, 6).forEach((name, idx) => {
+  const yy = firmeStartY + idx * 10;
+
+  doc.text(
+    name,
+    18,
+    yy
+  );
+
+  doc.line(
+    82,
+    yy + 1,
+    190,
+    yy + 1
+  );
+});
+
+y += dichiarazioneBoxHeight + 5;
 
   addFooter(doc);
   return doc;
@@ -3223,6 +3602,15 @@ function extraDetails(i) {
 `;
   if (i.tipo === 'Viabilità') return `   Motivo: ${i.motivoViabilita || '-'}; strade interessate: ${i.strade || '-'}
 `;
+  if (i.tipo === 'Controllo autobus') {
+  return `   Controllo autobus: autobus controllati ${i.autobusControllati || '0'}; veicolo idoneo ${i.autobusVeicoloIdoneo || '-'}
+`;
+}
+
+if (i.tipo === 'Verifica veicolo in stato di abbandono') {
+  return `   Verifica veicolo: verifica effettuata ${i.abbandonoVerificato || '-'}; esito ${i.abbandonoEsito || '-'}
+`;
+}
   return '';
 }
 function reportText(report) {
