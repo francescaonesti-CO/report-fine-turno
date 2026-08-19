@@ -3304,13 +3304,19 @@ function serviceInterventionCard(doc, i, idx, y, pdfTitle = '', subtitle = '') {
   );
 
   doc.setTextColor(12, 47, 97);
-  doc.setFontSize(9.2);
 
-  doc.text(
-    `${idx + 1}. ${i.tipo || 'Intervento'}`,
-    38,
-    y + 6.3
-  );
+const interventionTitle =
+  `${idx + 1}. ${i.tipo || 'Intervento'}`;
+
+doc.setFontSize(
+  interventionTitle.length > 32 ? 7.6 : 9.2
+);
+
+doc.text(
+  interventionTitle,
+  38,
+  y + 6.3
+);
 
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(65, 75, 90);
