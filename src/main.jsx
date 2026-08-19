@@ -3159,13 +3159,13 @@ function simpleTable(doc, headers, rows, y, widths, pdfTitle = '', subtitle = ''
   return y + 4;
 }
 
-function paragraph(doc, text, y, pdfTitle = '', subtitle = '', maxWidth = 182, justify = false) {
+function paragraph(doc, text, y, pdfTitle = '', subtitle = '', maxWidth = 182) {
   const lines = doc.splitTextToSize(
     String(text || '-'),
     maxWidth
   );
 
-  const lineHeight = 4.2;
+  const lineHeight = 4.1;
 
   y = ensureSpace(
     doc,
@@ -3184,14 +3184,12 @@ function paragraph(doc, text, y, pdfTitle = '', subtitle = '', maxWidth = 182, j
     y + 4.5,
     {
       maxWidth,
-      align: justify ? 'justify' : 'left',
-      lineHeightFactor: 1.15
+      lineHeightFactor: 1.08
     }
   );
 
   return y + lines.length * lineHeight + 7;
 }
-
 function serviceSummaryBox(doc, report, y, pdfTitle = '', subtitle = '') {
   y = ensureSpace(doc, y, 30, pdfTitle, subtitle);
   const interventi = (report.interventi || []).length;
@@ -3486,8 +3484,7 @@ interventi.forEach((i, idx) => {
   y,
   title,
   subtitle,
-  182,
-  true
+  182
 );
 
  const dichiarazioneText =
@@ -3529,8 +3526,7 @@ y = paragraph(
   y,
   title,
   subtitle,
-  182,
-  true
+  182
 );
 
 doc.setFont('helvetica', 'normal');
