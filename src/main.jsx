@@ -3198,14 +3198,6 @@ function paragraph(doc, text, y, pdfTitle = '', subtitle = '', maxWidth = 182, j
 
   return y + lines.length * 5 + 8;
 }
-  const lines = doc.splitTextToSize(String(text || '-'), maxWidth);
-  y = ensureSpace(doc, y, lines.length * 5 + 8, pdfTitle, subtitle);
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8.5);
-  doc.text(lines, 16, y + 5);
-  return y + lines.length * 5 + 8;
-}
-
 
 function serviceSummaryBox(doc, report, y, pdfTitle = '', subtitle = '') {
   y = ensureSpace(doc, y, 30, pdfTitle, subtitle);
