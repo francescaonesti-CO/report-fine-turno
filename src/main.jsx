@@ -3477,15 +3477,61 @@ interventi.forEach((i, idx) => {
   const docRows = (report.documentiRitirati || []).filter(d => d.tipo || d.quantita || d.note).map(d => [d.tipo || '-', d.quantita || '-', d.note || '-']);
   y = simpleTable(doc, ['Tipo documento', 'Quantità', 'Note'], docRows.length ? docRows : [['Nessun documento ritirato', '-', '-']], y, [70, 28, 88], title, subtitle);
 
-  y = section(doc, 'Note per UDT / Ufficiale di coordinamento', y, title, subtitle);
-  y = paragraph(
+  y = section(
   doc,
-  report.noteUdt || '-',
+  'Note per UDT / Ufficiale di coordinamento',
   y,
   title,
-  subtitle,
-  182
+  subtitle
 );
+
+const noteUdtText = report.noteUdt || '-';
+
+doc.setFont('helvetica', 'normal');
+doc.setFontSize(9);
+
+const noteUdtLines = doc.splitTextToSize(
+  noteUdtText,
+  174
+);
+
+const noteUdtHeight =
+  Math.max(18, noteUdtLines.length * 4.2 + 10);
+
+y = ensureSpace(
+  doc,
+  y,
+  noteUdtHeight + 4,
+  title,
+  subtitle
+);
+
+doc.setFillColor(249, 250, 252);
+doc.setDrawColor(220, 225, 232);
+
+doc.roundedRect(
+  12,
+  y,
+  186,
+  noteUdtHeight,
+  1.5,
+  1.5,
+  'FD'
+);
+
+doc.setTextColor(25, 35, 48);
+
+doc.text(
+  noteUdtLines,
+  18,
+  y + 7,
+  {
+    maxWidth: 174,
+    lineHeightFactor: 1.12
+  }
+);
+
+y += noteUdtHeight + 5;
 
  const dichiarazioneText =
   'Gli operatori dichiarano che quanto riportato nel presente report corrisponde fedelmente alle attività effettivamente svolte e riscontrate durante il turno di servizio, consapevoli delle proprie responsabilità amministrative e penali anche in considerazione dell’art. 328 C.P.';
