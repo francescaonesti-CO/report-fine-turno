@@ -2810,30 +2810,91 @@ function kvGrid(doc, items, y, columns = 2, pdfTitle = '', subtitle = '') {
 function simpleTable(doc, headers, rows, y, widths, pdfTitle = '', subtitle = '') {
   const headerH = 8;
   const lineH = 5;
-  y = ensureSpace(doc, y, headerH + 8, pdfTitle, subtitle);
-  let x = 12;
-  doc.setFillColor(235, 239, 244);
-  doc.rect(12, y, 186, headerH, 'F');
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(7.8);
-  headers.forEach((h, i) => { doc.text(h, x + 2, y + 5.2, { maxWidth: widths[i] - 4 }); x += widths[i]; });
-  y += headerH;
+
+  function drawTableHeader(currentY) {
+    let x = 12;
+
+    doc.setFillColor(235, 239, 244);
+    doc.rect(12, currentY, 186, headerH, 'F');
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(7.8);
+
+    headers.forEach((h, i) => {
+      doc.text(
+        h,
+        x + 2,
+        currentY + 5.2,
+        { maxWidth: widths[i] - 4 }
+      );
+
+      x += widths[i];
+    });
+
+    return currentY + headerH;
+  }
+
+  y = ensureSpace(
+    doc,
+    y,
+    headerH + 8,
+    pdfTitle,
+    subtitle
+  );
+
+  y = drawTableHeader(y);
+
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(7.6);
+
   rows.forEach(row => {
-    const cellLines = row.map((cell, i) => doc.splitTextToSize(String(cell || '-'), widths[i] - 4));
-    const h = Math.max(7, Math.max(...cellLines.map(lines => lines.length)) * lineH + 2);
-    y = ensureSpace(doc, y, h + 2, pdfTitle, subtitle);
+    const cellLines = row.map((cell, i) =>
+      doc.splitTextToSize(
+        String(cell || '-'),
+        widths[i] - 4
+      )
+    );
+
+    const h = Math.max(
+      7,
+      Math.max(...cellLines.map(lines => lines.length)) * lineH + 2
+    );
+
+    if (y + h + 2 > 276) {
+      doc.addPage();
+      addHeader(doc, pdfTitle, subtitle);
+
+      y = 54;
+
+      y = drawTableHeader(y);
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(7.6);
+    }
+
     doc.setDrawColor(232, 235, 238);
     doc.rect(12, y, 186, h);
+
     let xx = 12;
+
     cellLines.forEach((lines, i) => {
-      doc.text(lines, xx + 2, y + 5, { maxWidth: widths[i] - 4 });
+      doc.text(
+        lines,
+        xx + 2,
+        y + 5,
+        { maxWidth: widths[i] - 4 }
+      );
+
       xx += widths[i];
-      if (i < widths.length - 1) doc.line(xx, y, xx, y + h);
+
+      if (i < widths.length - 1) {
+        doc.line(xx, y, xx, y + h);
+      }
     });
+
     y += h;
   });
+
   return y + 4;
 }
 
