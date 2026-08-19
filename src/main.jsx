@@ -3207,7 +3207,7 @@ function getServiceInterventionHeight(doc, i) {
         .filter(s => s.nome || s.momento || s.orario || s.criticita)
         .map(
           (s, pos) =>
-            `Scuola ${pos + 1}: ${s.nome || '-'} (${s.momento || '-'} ${s.orario || '-'}) Criticità: ${s.criticita || '-'}`
+            `Scuola ${pos + 1}: ${s.nome || '-'} (${s.momento || '-'} ${s.orario || '-'})
         )
         .join('\n')
     : '';
@@ -3244,7 +3244,7 @@ function serviceInterventionCard(doc, i, idx, y, pdfTitle = '', subtitle = '') {
         .filter(s => s.nome || s.momento || s.orario || s.criticita)
         .map(
           (s, pos) =>
-            `Scuola ${pos + 1}: ${s.nome || '-'} (${s.momento || '-'} ${s.orario || '-'}) Criticità: ${s.criticita || '-'}`
+            `Scuola ${pos + 1}: ${s.nome || '-'} (${s.momento || '-'} ${s.orario || '-'})
         )
         .join('\n')
     : '';
