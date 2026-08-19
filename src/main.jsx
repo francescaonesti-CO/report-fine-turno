@@ -3533,27 +3533,38 @@ doc.text(
 
 y += noteUdtHeight + 5;
 
- const dichiarazioneText =
+const dichiarazioneText =
   'Gli operatori dichiarano che quanto riportato nel presente report corrisponde fedelmente alle attività effettivamente svolte e riscontrate durante il turno di servizio, consapevoli delle proprie responsabilità amministrative e penali anche in considerazione dell’art. 328 C.P.';
 
 const names = operatorNames(report);
+
 const signRows = names.length
   ? names
   : ['Operatore 1', 'Operatore 2', 'Operatore 3'];
 
-const dichiarazioneLines = doc.splitTextToSize(dichiarazioneText, 178);
+doc.setFont('helvetica', 'normal');
+doc.setFontSize(9);
 
-const dichiarazioneHeight =
-  13 + // titolo sezione
-  (dichiarazioneLines.length * 5) +
-  8 +
-  (signRows.slice(0, 6).length * 9) +
-  6;
+const dichiarazioneLines = doc.splitTextToSize(
+  dichiarazioneText,
+  174
+);
+
+const firmeHeight =
+  signRows.slice(0, 6).length * 10;
+
+const dichiarazioneBoxHeight =
+  Math.max(
+    24,
+    dichiarazioneLines.length * 4.2 +
+    firmeHeight +
+    18
+  );
 
 y = ensureSpace(
   doc,
   y,
-  dichiarazioneHeight,
+  13 + dichiarazioneBoxHeight + 5,
   title,
   subtitle
 );
@@ -3566,26 +3577,59 @@ y = section(
   subtitle
 );
 
-y = paragraph(
-  doc,
-  dichiarazioneText,
+doc.setFillColor(249, 250, 252);
+doc.setDrawColor(220, 225, 232);
+
+doc.roundedRect(
+  12,
   y,
-  title,
-  subtitle,
-  182
+  186,
+  dichiarazioneBoxHeight,
+  1.5,
+  1.5,
+  'FD'
 );
 
+doc.setTextColor(25, 35, 48);
 doc.setFont('helvetica', 'normal');
+doc.setFontSize(9);
+
+doc.text(
+  dichiarazioneLines,
+  18,
+  y + 7,
+  {
+    maxWidth: 174,
+    lineHeightFactor: 1.12
+  }
+);
+
+const firmeStartY =
+  y +
+  7 +
+  dichiarazioneLines.length * 4.2 +
+  8;
+
 doc.setFontSize(8.5);
 
 signRows.slice(0, 6).forEach((name, idx) => {
-  const yy = y + idx * 9;
+  const yy = firmeStartY + idx * 10;
 
-  doc.text(name, 16, yy);
-  doc.line(82, yy + 1, 190, yy + 1);
+  doc.text(
+    name,
+    18,
+    yy
+  );
+
+  doc.line(
+    82,
+    yy + 1,
+    190,
+    yy + 1
+  );
 });
 
-y += signRows.slice(0, 6).length * 9;
+y += dichiarazioneBoxHeight + 5;
 
   addFooter(doc);
   return doc;
