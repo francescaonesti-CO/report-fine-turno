@@ -3220,7 +3220,37 @@ interventi.forEach((i, idx) => {
     ['Preavvisi CdS', c.preavvisiCds], ['VdC CdS', c.vdcCds], ['Regolamento Polizia', c.regPolizia], ['Regolamento Edilizio', c.regEdilizio],
     ['Regolamento Benessere Animali', c.regBenessereAnimali], ['Annonaria / commercio', c.annonaria], [`Altre norme ${c.altreNormeDescrizione || ''}`, c.altreNorme], ['TOTALE', getTotaleViolazioni(report)]
   ], y, [150, 36], title, subtitle);
+y = section(
+  doc,
+  'Riepilogo controlli',
+  y,
+  title,
+  subtitle
+);
 
+y = simpleTable(
+  doc,
+  ['Tipologia', 'N.'],
+  [
+    [
+      'Veicoli controllati',
+      n(c.totaleVeicoliControllati)
+    ],
+    [
+      'Persone controllate',
+      n(c.totalePersoneControllate)
+    ],
+    [
+      'TOTALE CONTROLLI',
+      n(c.totaleVeicoliControllati) +
+      n(c.totalePersoneControllate)
+    ]
+  ],
+  y,
+  [150, 36],
+  title,
+  subtitle
+);
   y = section(doc, 'Documenti ritirati', y, title, subtitle);
   const docRows = (report.documentiRitirati || []).filter(d => d.tipo || d.quantita || d.note).map(d => [d.tipo || '-', d.quantita || '-', d.note || '-']);
   y = simpleTable(doc, ['Tipo documento', 'Quantità', 'Note'], docRows.length ? docRows : [['Nessun documento ritirato', '-', '-']], y, [70, 28, 88], title, subtitle);
